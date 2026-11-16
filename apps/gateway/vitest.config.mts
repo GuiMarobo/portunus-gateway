@@ -1,10 +1,4 @@
-import swc from 'unplugin-swc';
-import { defineConfig } from 'vitest/config';
+import { defineProject, mergeConfig } from 'vitest/config';
+import shared from '../../vitest.shared.mts';
 
-export default defineConfig({
-  plugins: [swc.vite()],
-  test: {
-    include: ['src/**/*.spec.ts'],
-    environment: 'node',
-  },
-});
+export default mergeConfig(shared, defineProject({ test: { name: 'gateway' } }));

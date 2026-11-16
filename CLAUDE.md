@@ -101,7 +101,7 @@ pnpm --filter @portunus/consumers dev       # consumidores e worker
 pnpm typecheck                                 # tsc --noEmit em todos os pacotes
 pnpm lint                                      # ESLint
 pnpm format                                    # Prettier --write
-pnpm test                                      # unitários (Vitest)
+pnpm test                                      # unitários (Vitest: *.spec.ts de todos os pacotes, sem Docker nem build)
 pnpm test:int                                  # integração (Vitest + Testcontainers, exige Docker)
 pnpm build                                     # build de produção de todos os apps
 
