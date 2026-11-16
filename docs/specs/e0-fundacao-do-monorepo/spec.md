@@ -119,7 +119,7 @@ Ao final, a demo é: clonar, `pnpm install`, subir o Compose `core`, `pnpm dev`,
 
 ### Workspace e runtime
 
-- **Node 22 LTS**, fixado em `.nvmrc` e em `engines` de todos os pacotes; `engine-strict` ligado no `.npmrc` para a instalação falhar com a versão errada.
+- **Node 22 LTS**, fixado em `.nvmrc` e em `engines` de todos os pacotes; `engineStrict: true` no `pnpm-workspace.yaml` para a instalação falhar com a versão errada (a partir do pnpm 10, as configurações do pnpm ficam no `pnpm-workspace.yaml`, não no `.npmrc`).
 - **pnpm fixado via `packageManager`** e ativado pelo Corepack. Workspace com `apps/*` e `libs/*`. Dependências internas usam o protocolo `workspace:*`.
 - Todos os pacotes são `private: true`; nenhum é publicado no npm.
 - `.gitattributes` com `eol=lf` e `.editorconfig`, porque o desenvolvimento acontece no Windows e o CI em Linux.
