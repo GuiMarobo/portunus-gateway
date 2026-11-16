@@ -24,17 +24,6 @@ Portunus é o deus romano das **chaves, portas e portos**, representado segurand
 - **Portas:** o ponto único de entrada que decide quem passa (auth, rate limit, orçamento).
 - **Portos:** o lugar de onde as requisições partem para destinos diferentes (roteamento e fallback entre provedores).
 
-## Alternativas consideradas
-
-| Alternativa | Por que foi descartada |
-|---|---|
-| Manter `llm-gateway` | Genérico demais; colide com centenas de repositórios. |
-| Janus (deus romano das passagens, com duas faces) | A metáfora é boa, mas o nome já é muito usado em projetos de infraestrutura. |
-| Catraca, Pedágio | São nomes em português; a preferência foi por um nome em inglês ou de origem clássica. |
-| Hufu (o "tally do tigre" chinês, um token de autenticação) | É original, mas a metáfora cobre só a autenticação. |
-| Cursus (o *cursus publicus*, correio romano com troca de cavalos) | Destaca bem a resiliência, mas não o controle de acesso nem o custo. |
-| Escopo `@portunus-gateway/*` | Fica redundante: `@portunus-gateway/gateway`. |
-
 ## Consequências
 
 - **Disponibilidade, verificada em 2026-11-16:** nenhum repositório se chama `portunus-gateway` no GitHub, e `@portunus/gateway` está livre no npm. Existe o `Lixiuxiu559/portunus`, um roteador de LLM pequeno (5 estrelas); o sufixo "-gateway" diferencia os dois.
