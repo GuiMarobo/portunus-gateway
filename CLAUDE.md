@@ -89,7 +89,7 @@ apps/gateway/src/modules/<modulo>/
 
 ## 2. Comandos
 
-> O repositório está na fase de documentação. Estes são os scripts-alvo, que devem ser criados assim que o monorepo for montado (Fase 1). **Mantenha esta seção em sincronia com o `package.json` raiz.**
+> Já existem na raiz: `dev`, `build`, `typecheck` e `test`. Os demais comandos são alvos, criados nos tickets seguintes. **Mantenha esta seção em sincronia com o `package.json` raiz.**
 
 ```bash
 pnpm install                                   # instalar dependências
