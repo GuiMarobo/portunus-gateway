@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 01
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/10 — NestJS e Fastify](../../../estudos/10-nestjs-e-fastify.md), [estudos/09](../../../estudos/09-monorepo-pnpm-e-typescript.md) §2.3–2.5
 
