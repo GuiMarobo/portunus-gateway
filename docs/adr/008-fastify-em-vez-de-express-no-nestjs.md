@@ -27,6 +27,12 @@ Ponto de partida desta decisão: é uma escolha por desempenho e pelo modelo de 
 - O logger embutido do Fastify fica desligado; o logging é feito pelo pino (ticket de logs estruturados), para não haver duas linhas por requisição.
 - Qualquer middleware de terceiros precisa ser verificado para compatibilidade com o Fastify antes de entrar.
 
+## Versão do Nest e módulo CommonJS
+
+- `@nestjs/core`, `@nestjs/common`, `@nestjs/platform-fastify` e `@nestjs/cli` ficam fixados na **11.2.8** (linha 11 em CommonJS), e o TypeScript na **5.9.3** (a versão que o CLI do Nest 11 usa).
+- O motivo: a linha 12 do Nest é só ESM (`"type": "module"`). Com ela, `require()` não carrega os pacotes a partir do CommonJS, e `nest build` falha com TS1479. Migrar para ESM muda o módulo do projeto inteiro e exige ADR próprio.
+- Quando revisar: ao migrar o projeto para ESM, ou quando a linha 11 sair de suporte. Nesse caso, subir a major do Nest e do TypeScript juntos e rodar o ticket de build de novo.
+
 ## Medição prevista (E3)
 
 A decisão será confirmada ou revertida no E3, com k6 apontando para o provedor mock: latência e throughput do gateway com `FastifyAdapter` contra o mesmo gateway com o adapter Express, medindo o overhead adicionado pelo gateway. O resultado será registrado neste ADR, e o status passa a "Aceito" ou a decisão é revista.
