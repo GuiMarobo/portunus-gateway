@@ -13,7 +13,7 @@ describe('GET /health', () => {
     await app.close();
   });
 
-  it('responds 200 with status ok and needs no authentication', async () => {
+  it('responds 200 with status ok', async () => {
     const response = await app.inject({ method: 'GET', url: '/health' });
 
     expect(response.statusCode).toBe(200);
@@ -24,5 +24,6 @@ describe('GET /health', () => {
     const response = await app.inject({ method: 'GET', url: '/v1/health' });
 
     expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({ statusCode: 404, error: 'Not Found' });
   });
 });
