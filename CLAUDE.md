@@ -210,3 +210,17 @@ Se algum passo não puder rodar (Docker parado, rota ainda inexistente), diga ex
 - mudar contrato de API, de evento ou de configuração;
 - desviar do ARQUITETURA.md, de um ADR ou de um invariante acima;
 - qualquer decisão de arquitetura. Como o objetivo é aprender, apresente as opções com trade-offs e deixe eu decidir.
+
+---
+
+## 6. Workflow
+
+Convenções lidas pelas skills `tdd`, `review-ticket`, `review-pr` e `implement-epic` (chaves em inglês, valores livres).
+
+- Specs: docs/specs/<feature>/spec.md
+- Tickets: docs/specs/<feature>/tickets/<NN>-<slug>.md
+- Reviews: .scratch/<feature>/reviews/
+- ADRs: docs/adr/
+- Glossary: CONTEXT.md
+- Language: pt-BR
+- Pause after each ticket: yes
