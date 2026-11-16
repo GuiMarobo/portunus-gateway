@@ -6,7 +6,7 @@ Tickets do épico [E0 — Fundação do monorepo](../spec.md). Cada ticket é um
 
 | # | Ticket | Bloqueado por | Status |
 |---|---|---|---|
-| 01 | [Raiz do workspace com Node e pnpm fixados](./01-raiz-do-workspace.md) | — | ready-for-agent |
+| 01 | [Raiz do workspace com Node e pnpm fixados](./01-raiz-do-workspace.md) | — | done |
 | 02 | [Gateway responde `GET /health`](./02-gateway-responde-health.md) | 01 | ready-for-agent |
 | 03 | [Testes unitários pelo seam do app](./03-testes-unitarios-pelo-seam-do-app.md) | 02 | ready-for-agent |
 | 04 | [Lint e formatação com a regra de camadas](./04-lint-e-formatacao.md) | 02 | ready-for-agent |

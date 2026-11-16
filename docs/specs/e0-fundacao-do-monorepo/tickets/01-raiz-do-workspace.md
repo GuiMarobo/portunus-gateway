@@ -10,14 +10,14 @@
 
 ## Critérios de aceite
 
-- [ ] Node 22 LTS fixado em `.nvmrc` e em `engines` do `package.json` raiz.
-- [ ] Versão exata do pnpm fixada no campo `packageManager`, ativável via Corepack.
-- [ ] `engine-strict` ligado: com outra versão major de Node, `pnpm install` falha com erro de engine (verificado localmente e descrito no PR).
-- [ ] Workspace declarado com `apps/*` e `libs/*`; `package.json` raiz `private: true`.
-- [ ] `pnpm install` num clone limpo termina sem erro e o lockfile é commitado.
-- [ ] Finais de linha normalizados em LF (`.gitattributes`) e `.editorconfig` com indentação e charset do projeto.
-- [ ] `.gitignore` continua ignorando `.env*`, mas não o `.env.example` que virá no ticket 07.
-- [ ] Nenhuma dependência instalada ainda.
+- [x] Node 22 LTS fixado em `.nvmrc` e em `engines` do `package.json` raiz.
+- [x] Versão exata do pnpm fixada no campo `packageManager`, ativável via Corepack.
+- [x] `engine-strict` ligado: com outra versão major de Node, `pnpm install` falha com erro de engine (verificado localmente e descrito no PR).
+- [x] Workspace declarado com `apps/*` e `libs/*`; `package.json` raiz `private: true`.
+- [x] `pnpm install` num clone limpo termina sem erro e o lockfile é commitado.
+- [x] Finais de linha normalizados em LF (`.gitattributes`) e `.editorconfig` com indentação e charset do projeto.
+- [x] `.gitignore` continua ignorando `.env*`, mas não o `.env.example` que virá no ticket 07.
+- [x] Nenhuma dependência instalada ainda.
 
 ## Pontos de atenção
 
