@@ -84,13 +84,13 @@ Se o cliente fecha a conexão, o gateway deve **abortar a chamada ao provedor** 
 
 ## 5. Ferramentas similares (formas de enviar dados em tempo real)
 
-| Técnica | Direção | Diferença principal | Quando usar |
-|---|---|---|---|
-| **SSE** | Servidor → cliente | HTTP comum, texto, reconexão automática no `EventSource` do navegador | Streams de LLM, notificações, feeds |
-| **WebSocket** | Bidirecional | Protocolo próprio após um *upgrade*; binário ou texto; mais complexo para proxies e balanceadores | Chat em tempo real, jogos, colaboração |
-| **Long polling** | Servidor → cliente (simulado) | Cliente faz requisição, servidor segura até ter dado, cliente refaz | Ambientes legados sem SSE/WS |
-| **HTTP/2 streaming / gRPC streaming** | Uni ou bidirecional | Binário (protobuf), multiplexado | Comunicação entre serviços |
-| **WebTransport** | Bidirecional | Sobre HTTP/3 (QUIC); ainda pouco adotado | Casos de baixa latência no navegador |
+| Técnica                               | Direção                       | Diferença principal                                                                               | Quando usar                            |
+| ------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **SSE**                               | Servidor → cliente            | HTTP comum, texto, reconexão automática no `EventSource` do navegador                             | Streams de LLM, notificações, feeds    |
+| **WebSocket**                         | Bidirecional                  | Protocolo próprio após um _upgrade_; binário ou texto; mais complexo para proxies e balanceadores | Chat em tempo real, jogos, colaboração |
+| **Long polling**                      | Servidor → cliente (simulado) | Cliente faz requisição, servidor segura até ter dado, cliente refaz                               | Ambientes legados sem SSE/WS           |
+| **HTTP/2 streaming / gRPC streaming** | Uni ou bidirecional           | Binário (protobuf), multiplexado                                                                  | Comunicação entre serviços             |
+| **WebTransport**                      | Bidirecional                  | Sobre HTTP/3 (QUIC); ainda pouco adotado                                                          | Casos de baixa latência no navegador   |
 
 A indústria de LLM padronizou SSE porque ele funciona sobre HTTP comum (passa por proxies e CDNs) e o fluxo é naturalmente unidirecional.
 
@@ -113,6 +113,6 @@ A indústria de LLM padronizou SSE porque ele funciona sobre HTTP comum (passa p
 ## 8. Para aprofundar
 
 - WHATWG — especificação de Server-Sent Events: https://html.spec.whatwg.org/multipage/server-sent-events.html
-- MDN — *Using server-sent events*: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+- MDN — _Using server-sent events_: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
 - OpenAI — streaming: https://platform.openai.com/docs/api-reference/chat-streaming
-- Node.js — *Backpressuring in Streams*: https://nodejs.org/en/learn/modules/backpressuring-in-streams
+- Node.js — _Backpressuring in Streams_: https://nodejs.org/en/learn/modules/backpressuring-in-streams

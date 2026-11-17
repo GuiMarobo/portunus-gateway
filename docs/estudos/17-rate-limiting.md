@@ -23,7 +23,7 @@ Um contador por minuto do relógio: `rl:{tenant}:2026-11-13T10:05`. `INCR` + `EX
 
 ### 2.2 Log de janela deslizante (sliding window log)
 
-Guarda o **timestamp de cada requisição** num *sorted set*. A cada chamada: remove os mais antigos que 60 s, conta os restantes e decide.
+Guarda o **timestamp de cada requisição** num _sorted set_. A cada chamada: remove os mais antigos que 60 s, conta os restantes e decide.
 
 - **Complexidade:** O(log n) por operação; espaço O(limite) por cliente.
 - **Prós:** exato.
@@ -49,17 +49,17 @@ Cada cliente tem um balde de capacidade **C** que recebe **r** fichas por segund
 
 ### 2.5 Leaky bucket (balde furado)
 
-Requisições entram numa fila que "vaza" a uma taxa constante. Suaviza o tráfego, mas atrasa em vez de recusar. É usado pelo `limit_req` do NGINX. Uma variante sem fila é o **GCRA** (*Generic Cell Rate Algorithm*), equivalente matemático do token bucket com um único timestamp.
+Requisições entram numa fila que "vaza" a uma taxa constante. Suaviza o tráfego, mas atrasa em vez de recusar. É usado pelo `limit_req` do NGINX. Uma variante sem fila é o **GCRA** (_Generic Cell Rate Algorithm_), equivalente matemático do token bucket com um único timestamp.
 
 ### 2.6 Resumo
 
-| Algoritmo | Tempo | Espaço/cliente | Precisão | Rajadas |
-|---|---|---|---|---|
-| Janela fixa | O(1) | O(1) | Baixa na borda | Até 2× na virada |
-| Sliding log | O(log n) | O(limite) | Exata | Não |
-| Sliding counter | O(1) | O(1) | Boa (aproximada) | Suavizadas |
-| Token bucket | O(1) | O(1) | Boa | Controladas (capacidade C) |
-| Leaky bucket | O(1) | O(fila) | Boa | Enfileiradas |
+| Algoritmo       | Tempo    | Espaço/cliente | Precisão         | Rajadas                    |
+| --------------- | -------- | -------------- | ---------------- | -------------------------- |
+| Janela fixa     | O(1)     | O(1)           | Baixa na borda   | Até 2× na virada           |
+| Sliding log     | O(log n) | O(limite)      | Exata            | Não                        |
+| Sliding counter | O(1)     | O(1)           | Boa (aproximada) | Suavizadas                 |
+| Token bucket    | O(1)     | O(1)           | Boa              | Controladas (capacidade C) |
+| Leaky bucket    | O(1)     | O(fila)        | Boa              | Enfileiradas               |
 
 ### 2.7 Limitar tokens, não só requisições
 
@@ -91,15 +91,15 @@ Uma requisição de 10 tokens e outra de 100 mil não pesam igual. Para tokens/m
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Onde atua | Diferença |
-|---|---|---|
-| **NGINX `limit_req`** | Proxy reverso | Leaky bucket por IP/chave; sem noção de tokens de LLM |
-| **Envoy / Istio** | Service mesh | Rate limit local e global (com um serviço de rate limit) |
-| **Kong, AWS API Gateway** | API gateway | Plugins prontos; limites por consumidor |
-| **Cloudflare** | Edge | Bloqueia antes de chegar à sua infraestrutura |
-| **`@nestjs/throttler`** | Biblioteca Nest | Simples, por rota; armazenamento plugável |
-| **`rate-limiter-flexible`** | Biblioteca Node | Vários algoritmos e backends (Redis, memória, Postgres) |
-| **redis-cell** | Módulo do Redis | GCRA nativo num comando |
+| Ferramenta                  | Onde atua       | Diferença                                                |
+| --------------------------- | --------------- | -------------------------------------------------------- |
+| **NGINX `limit_req`**       | Proxy reverso   | Leaky bucket por IP/chave; sem noção de tokens de LLM    |
+| **Envoy / Istio**           | Service mesh    | Rate limit local e global (com um serviço de rate limit) |
+| **Kong, AWS API Gateway**   | API gateway     | Plugins prontos; limites por consumidor                  |
+| **Cloudflare**              | Edge            | Bloqueia antes de chegar à sua infraestrutura            |
+| **`@nestjs/throttler`**     | Biblioteca Nest | Simples, por rota; armazenamento plugável                |
+| **`rate-limiter-flexible`** | Biblioteca Node | Vários algoritmos e backends (Redis, memória, Postgres)  |
+| **redis-cell**              | Módulo do Redis | GCRA nativo num comando                                  |
 
 O projeto implementa à mão (com Strategy para trocar de algoritmo) porque o objetivo é aprender e porque precisa limitar **tokens**, algo que as soluções genéricas não fazem.
 
@@ -118,7 +118,7 @@ O projeto implementa à mão (com Strategy para trocar de algoritmo) porque o ob
 
 ## 8. Para aprofundar
 
-- Cloudflare — *How we built rate limiting capable of scaling to millions of domains*: https://blog.cloudflare.com/counting-things-a-lot-of-different-things/
-- Stripe — *Scaling your API with rate limiters*: https://stripe.com/blog/rate-limiters
-- OpenAI — *Rate limits* (headers e conceitos de RPM/TPM): https://platform.openai.com/docs/guides/rate-limits
-- IETF — *RateLimit header fields for HTTP* (rascunho): https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/
+- Cloudflare — _How we built rate limiting capable of scaling to millions of domains_: https://blog.cloudflare.com/counting-things-a-lot-of-different-things/
+- Stripe — _Scaling your API with rate limiters_: https://stripe.com/blog/rate-limiters
+- OpenAI — _Rate limits_ (headers e conceitos de RPM/TPM): https://platform.openai.com/docs/guides/rate-limits
+- IETF — _RateLimit header fields for HTTP_ (rascunho): https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/

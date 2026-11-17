@@ -7,36 +7,36 @@
 
 ## 1. O problema
 
-Um LLM (*Large Language Model*) é um serviço remoto, caro, lento (comparado a uma API comum) e não determinístico. Para usá-lo bem, é preciso entender o que se envia, o que volta e o que cada parâmetro muda. Sem isso, um gateway não consegue decidir o que pode ser cacheado, como calcular custo ou quando é seguro repetir uma chamada.
+Um LLM (_Large Language Model_) é um serviço remoto, caro, lento (comparado a uma API comum) e não determinístico. Para usá-lo bem, é preciso entender o que se envia, o que volta e o que cada parâmetro muda. Sem isso, um gateway não consegue decidir o que pode ser cacheado, como calcular custo ou quando é seguro repetir uma chamada.
 
 ## 2. Como funciona
 
 ### 2.1 O que o modelo faz
 
-Um LLM é uma rede neural (arquitetura *Transformer*) treinada para uma tarefa só: **dado um texto, prever o próximo token**. Gerar uma resposta é repetir essa previsão em loop:
+Um LLM é uma rede neural (arquitetura _Transformer_) treinada para uma tarefa só: **dado um texto, prever o próximo token**. Gerar uma resposta é repetir essa previsão em loop:
 
-1. O texto de entrada (o *prompt*) é quebrado em tokens (ver [02](./02-tokens-e-tokenizacao.md)).
+1. O texto de entrada (o _prompt_) é quebrado em tokens (ver [02](./02-tokens-e-tokenizacao.md)).
 2. O modelo calcula uma distribuição de probabilidade para o próximo token.
-3. Um token é **sorteado** dessa distribuição (*sampling*).
+3. Um token é **sorteado** dessa distribuição (_sampling_).
 4. O token entra no final do contexto e o processo recomeça, até um token de parada ou o limite de tokens.
 
 Consequências práticas:
 
-- **Custo proporcional a tokens.** Os tokens de entrada são processados uma vez, em paralelo (fase de *prefill*). Os de saída são gerados um a um (fase de *decode*). Por isso a saída custa mais caro que a entrada.
-- **Latência tem duas partes:** o *TTFT* (*time to first token*) e a velocidade de geração (tokens/segundo). É por isso que streaming existe ([04](./04-streaming-e-sse.md)).
+- **Custo proporcional a tokens.** Os tokens de entrada são processados uma vez, em paralelo (fase de _prefill_). Os de saída são gerados um a um (fase de _decode_). Por isso a saída custa mais caro que a entrada.
+- **Latência tem duas partes:** o _TTFT_ (_time to first token_) e a velocidade de geração (tokens/segundo). É por isso que streaming existe ([04](./04-streaming-e-sse.md)).
 - **Janela de contexto:** o modelo só "enxerga" um número máximo de tokens (entrada + saída). O modelo não tem memória: o histórico da conversa é **reenviado inteiro** em cada chamada.
 - **Não determinismo:** com sampling, a mesma pergunta pode gerar respostas diferentes.
 
 ### 2.2 Parâmetros de sampling
 
-| Parâmetro | O que faz | Impacto no gateway |
-|---|---|---|
-| `temperature` | Achata (alto) ou concentra (baixo) a distribuição. `0` ≈ sempre o token mais provável | Temperatura alta = respostas variadas = cache semântico desligado por padrão |
-| `top_p` | Sorteia só entre os tokens que somam p% da probabilidade (*nucleus sampling*) | Entra na chave de cache |
-| `max_tokens` / `max_completion_tokens` | Teto de tokens de saída | Base para estimar custo e o limite de tokens/min |
-| `stop` | Sequências que encerram a geração | Entra na chave de cache |
-| `seed` | Tenta tornar o sampling reprodutível (melhor esforço, sem garantia) | Útil em evals |
-| `n` | Quantas respostas gerar | Multiplica o custo de saída |
+| Parâmetro                              | O que faz                                                                             | Impacto no gateway                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `temperature`                          | Achata (alto) ou concentra (baixo) a distribuição. `0` ≈ sempre o token mais provável | Temperatura alta = respostas variadas = cache semântico desligado por padrão |
+| `top_p`                                | Sorteia só entre os tokens que somam p% da probabilidade (_nucleus sampling_)         | Entra na chave de cache                                                      |
+| `max_tokens` / `max_completion_tokens` | Teto de tokens de saída                                                               | Base para estimar custo e o limite de tokens/min                             |
+| `stop`                                 | Sequências que encerram a geração                                                     | Entra na chave de cache                                                      |
+| `seed`                                 | Tenta tornar o sampling reprodutível (melhor esforço, sem garantia)                   | Útil em evals                                                                |
+| `n`                                    | Quantas respostas gerar                                                               | Multiplica o custo de saída                                                  |
 
 ### 2.3 A API de Chat Completions (formato OpenAI)
 
@@ -88,7 +88,14 @@ Papéis (`role`) das mensagens:
 **Erros** seguem um envelope próprio, que os SDKs sabem interpretar:
 
 ```json
-{ "error": { "message": "Rate limit exceeded", "type": "rate_limit_error", "param": null, "code": "rate_limit_exceeded" } }
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "param": null,
+    "code": "rate_limit_exceeded"
+  }
+}
 ```
 
 Por isso o invariante 10 do projeto: o gateway **sempre** devolve erros nesse formato, senão o SDK do cliente quebra ou mostra mensagens estranhas.
@@ -105,7 +112,7 @@ Para o gateway, isso importa porque respostas com tools dependem de estado exter
 
 ### 2.6 Outros formatos que você vai encontrar
 
-- **Anthropic Messages API:** o `system` é um campo separado, e não uma mensagem; `max_tokens` é obrigatório; o conteúdo vem em *blocos* (`text`, `tool_use`); `stop_reason` usa outros valores (`end_turn`, `max_tokens`, `tool_use`); o uso aparece como `input_tokens`/`output_tokens`; o streaming tem eventos nomeados (`message_start`, `content_block_delta`, `message_stop`...). O `AnthropicAdapter` (E7) traduz tudo isso para o formato OpenAI e de volta.
+- **Anthropic Messages API:** o `system` é um campo separado, e não uma mensagem; `max_tokens` é obrigatório; o conteúdo vem em _blocos_ (`text`, `tool_use`); `stop_reason` usa outros valores (`end_turn`, `max_tokens`, `tool_use`); o uso aparece como `input_tokens`/`output_tokens`; o streaming tem eventos nomeados (`message_start`, `content_block_delta`, `message_stop`...). O `AnthropicAdapter` (E7) traduz tudo isso para o formato OpenAI e de volta.
 - **OpenAI Responses API:** a API mais nova da OpenAI, com estado e ferramentas nativas. O Chat Completions continua sendo o "idioma comum" entre provedores, e é ele que o gateway fala.
 
 ## 3. Analogia
@@ -123,14 +130,14 @@ O LLM é o "produto" que o gateway entrega. Cada decisão do gateway depende do 
 
 ## 5. Ferramentas similares (provedores e formas de servir modelos)
 
-| Opção | O que é | Diferença principal |
-|---|---|---|
-| **OpenAI** | Provedor proprietário, criador do formato de fato | Referência de compatibilidade |
-| **Anthropic (Claude)** | Provedor proprietário | API própria (Messages); não oferece modelo de embeddings (recomenda Voyage AI) |
-| **Google (Gemini)** | Provedor proprietário | API própria, com camada compatível com OpenAI |
-| **Mistral, Cohere** | Provedores com modelos próprios | APIs próprias, parte delas compatível |
-| **Groq, Together, Fireworks** | Hospedam modelos abertos (Llama, Qwen...) | Geralmente compatíveis com OpenAI; foco em velocidade e preço |
-| **Ollama, vLLM, llama.cpp** | Rodar modelos abertos na sua máquina ou servidor | Sem custo por token; você paga com hardware e operação. vLLM e Ollama expõem endpoints compatíveis com OpenAI |
+| Opção                         | O que é                                           | Diferença principal                                                                                           |
+| ----------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **OpenAI**                    | Provedor proprietário, criador do formato de fato | Referência de compatibilidade                                                                                 |
+| **Anthropic (Claude)**        | Provedor proprietário                             | API própria (Messages); não oferece modelo de embeddings (recomenda Voyage AI)                                |
+| **Google (Gemini)**           | Provedor proprietário                             | API própria, com camada compatível com OpenAI                                                                 |
+| **Mistral, Cohere**           | Provedores com modelos próprios                   | APIs próprias, parte delas compatível                                                                         |
+| **Groq, Together, Fireworks** | Hospedam modelos abertos (Llama, Qwen...)         | Geralmente compatíveis com OpenAI; foco em velocidade e preço                                                 |
+| **Ollama, vLLM, llama.cpp**   | Rodar modelos abertos na sua máquina ou servidor  | Sem custo por token; você paga com hardware e operação. vLLM e Ollama expõem endpoints compatíveis com OpenAI |
 
 ## 6. Armadilhas
 
@@ -150,5 +157,5 @@ O LLM é o "produto" que o gateway entrega. Cada decisão do gateway depende do 
 
 - OpenAI — API reference de Chat: https://platform.openai.com/docs/api-reference/chat
 - Anthropic — Messages API: https://docs.anthropic.com/en/api/messages
-- Jay Alammar — *The Illustrated Transformer*: https://jalammar.github.io/illustrated-transformer/
-- Andrej Karpathy — *Intro to Large Language Models* (vídeo, YouTube)
+- Jay Alammar — _The Illustrated Transformer_: https://jalammar.github.io/illustrated-transformer/
+- Andrej Karpathy — _Intro to Large Language Models_ (vídeo, YouTube)

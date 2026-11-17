@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 02
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/31 — Testes, Vitest e Testcontainers](../../../estudos/31-testes-vitest-e-testcontainers.md)
 
@@ -12,12 +12,12 @@
 
 ## Critérios de aceite
 
-- [ ] Vitest configurado na raiz com o plugin SWC emitindo metadados de decorators.
-- [ ] `pnpm test` inclui `*.spec.ts` e exclui `*.int-spec.ts` (o `test:int` chega no ticket 12).
-- [ ] Teste do `/health` pelo seam: status `200` e corpo `{"status":"ok"}`.
-- [ ] Cada teste constrói e fecha a própria instância da aplicação; nenhum teste depende de porta, rede ou ordem de execução.
-- [ ] `pnpm test` roda sem nenhum build prévio.
-- [ ] Seção de comandos do CLAUDE.md atualizada.
+- [x] Vitest configurado na raiz com o plugin SWC emitindo metadados de decorators.
+- [x] `pnpm test` inclui `*.spec.ts` e exclui `*.int-spec.ts` (o `test:int` chega no ticket 12).
+- [x] Teste do `/health` pelo seam: status `200` e corpo `{"status":"ok"}`.
+- [x] Cada teste constrói e fecha a própria instância da aplicação; nenhum teste depende de porta, rede ou ordem de execução.
+- [x] `pnpm test` roda sem nenhum build prévio.
+- [x] Seção de comandos do CLAUDE.md atualizada.
 
 ## Pontos de atenção
 

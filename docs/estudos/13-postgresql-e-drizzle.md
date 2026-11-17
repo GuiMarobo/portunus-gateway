@@ -17,17 +17,17 @@ O gateway precisa de uma **fonte da verdade** durável para o que não pode ser 
   - **Atomicidade:** uma transação acontece inteira ou não acontece.
   - **Consistência:** constraints (`NOT NULL`, `UNIQUE`, `FOREIGN KEY`, `CHECK`) nunca são violadas.
   - **Isolamento:** transações concorrentes não se atrapalham (no nível configurado).
-  - **Durabilidade:** confirmado é gravado (WAL, o *write-ahead log*).
+  - **Durabilidade:** confirmado é gravado (WAL, o _write-ahead log_).
 - **MVCC (Multi-Version Concurrency Control):** cada atualização cria uma nova versão da linha. Leitores não bloqueiam escritores, e vice-versa. O efeito colateral é o `VACUUM`, que limpa as versões antigas.
 - **Níveis de isolamento:** `READ COMMITTED` (padrão), `REPEATABLE READ`, `SERIALIZABLE`. Saber qual está em uso é essencial para raciocinar sobre race conditions.
 - **Índices:**
 
-| Índice | Estrutura | Bom para | Busca |
-|---|---|---|---|
-| **B-tree** (padrão) | Árvore balanceada | Igualdade e intervalos (`=`, `<`, `BETWEEN`, `ORDER BY`) | O(log n) |
-| **Hash** | Tabela hash | Só igualdade | O(1) médio |
-| **GIN** | Índice invertido | Arrays, JSONB, full-text | Depende |
-| **HNSW / IVFFlat** (pgvector) | Grafo / clusters | Vizinhos vetoriais | ~O(log n) (aprox.) |
+| Índice                        | Estrutura         | Bom para                                                 | Busca              |
+| ----------------------------- | ----------------- | -------------------------------------------------------- | ------------------ |
+| **B-tree** (padrão)           | Árvore balanceada | Igualdade e intervalos (`=`, `<`, `BETWEEN`, `ORDER BY`) | O(log n)           |
+| **Hash**                      | Tabela hash       | Só igualdade                                             | O(1) médio         |
+| **GIN**                       | Índice invertido  | Arrays, JSONB, full-text                                 | Depende            |
+| **HNSW / IVFFlat** (pgvector) | Grafo / clusters  | Vizinhos vetoriais                                       | ~O(log n) (aprox.) |
 
 - **Extensões:** o Postgres é extensível (`vector`, `pg_trgm`, `pgcrypto`...).
 
@@ -41,18 +41,18 @@ O gateway precisa de uma **fonte da verdade** durável para o que não pode ser 
 
 ### 2.3 Pool de conexões
 
-Abrir uma conexão no Postgres é caro (um processo por conexão no servidor). A aplicação mantém um **pool** (ex.: 10–20 conexões) reutilizadas. Com muitas instâncias, um *pooler* externo (PgBouncer) evita esgotar o limite de conexões do banco.
+Abrir uma conexão no Postgres é caro (um processo por conexão no servidor). A aplicação mantém um **pool** (ex.: 10–20 conexões) reutilizadas. Com muitas instâncias, um _pooler_ externo (PgBouncer) evita esgotar o limite de conexões do banco.
 
 ### 2.4 Drizzle ORM
 
 Drizzle é um ORM TypeScript "SQL-first": o schema é escrito em TS e as consultas parecem SQL, totalmente tipadas.
 
 ```ts
-export const tenants = pgTable("tenants", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  monthlyBudgetMicroUsd: bigint("monthly_budget_micro_usd", { mode: "bigint" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+export const tenants = pgTable('tenants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  monthlyBudgetMicroUsd: bigint('monthly_budget_micro_usd', { mode: 'bigint' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 const tenant = await db.select().from(tenants).where(eq(tenants.id, tenantId));
@@ -67,7 +67,7 @@ const tenant = await db.select().from(tenants).where(eq(tenants.id, tenantId));
 Uma migration é um passo de evolução do schema, versionado no git. Regras de ouro:
 
 - Nunca editar uma migration já aplicada; criar uma nova.
-- Pensar em **compatibilidade**: durante um deploy, código antigo e novo convivem com o mesmo banco (padrão *expand and contract*: adicionar a coluna nova → migrar o código → remover a antiga).
+- Pensar em **compatibilidade**: durante um deploy, código antigo e novo convivem com o mesmo banco (padrão _expand and contract_: adicionar a coluna nova → migrar o código → remover a antiga).
 
 ## 3. Analogia
 
@@ -84,23 +84,23 @@ O Postgres é o **cartório**. Lento comparado a um bloco de notas, mas o que es
 
 ### Bancos
 
-| Banco | Diferença principal | Quando escolher |
-|---|---|---|
-| **MySQL / MariaDB** | Relacional popular; menos recursos avançados (extensões, tipos) | Ecossistemas que já usam |
-| **SQLite** | Banco embutido num arquivo | Apps locais, testes, edge |
-| **MongoDB** | Documentos JSON, schema flexível | Dados sem relações fortes; transações mais limitadas historicamente |
-| **CockroachDB, YugabyteDB** | SQL distribuído, compatível com Postgres | Escala geográfica |
+| Banco                       | Diferença principal                                             | Quando escolher                                                     |
+| --------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **MySQL / MariaDB**         | Relacional popular; menos recursos avançados (extensões, tipos) | Ecossistemas que já usam                                            |
+| **SQLite**                  | Banco embutido num arquivo                                      | Apps locais, testes, edge                                           |
+| **MongoDB**                 | Documentos JSON, schema flexível                                | Dados sem relações fortes; transações mais limitadas historicamente |
+| **CockroachDB, YugabyteDB** | SQL distribuído, compatível com Postgres                        | Escala geográfica                                                   |
 
 ### ORMs / query builders (TypeScript)
 
-| Ferramenta | Diferença principal |
-|---|---|
-| **Prisma** | Schema numa DSL própria, client gerado; muito produtivo, mais "mágico" e mais distante do SQL |
-| **TypeORM** | Decorators em classes, Active Record ou Data Mapper; histórico de bugs e tipagem mais fraca |
-| **MikroORM** | Unit of Work e Identity Map (estilo Hibernate) |
-| **Kysely** | Query builder tipado, sem ORM nem migrations geradas |
-| **Knex** | Query builder veterano, tipagem limitada |
-| **SQL puro (`pg`, `postgres.js`)** | Controle total, nenhum tipo automático |
+| Ferramenta                         | Diferença principal                                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Prisma**                         | Schema numa DSL própria, client gerado; muito produtivo, mais "mágico" e mais distante do SQL |
+| **TypeORM**                        | Decorators em classes, Active Record ou Data Mapper; histórico de bugs e tipagem mais fraca   |
+| **MikroORM**                       | Unit of Work e Identity Map (estilo Hibernate)                                                |
+| **Kysely**                         | Query builder tipado, sem ORM nem migrations geradas                                          |
+| **Knex**                           | Query builder veterano, tipagem limitada                                                      |
+| **SQL puro (`pg`, `postgres.js`)** | Controle total, nenhum tipo automático                                                        |
 
 ## 6. Armadilhas
 
@@ -109,7 +109,7 @@ O Postgres é o **cartório**. Lento comparado a um bloco de notas, mas o que es
 - **Migrations que travam tabelas grandes** (`ALTER TABLE` com reescrita, índices sem `CONCURRENTLY`).
 - **Pool esgotado** por transações longas ou conexões vazadas.
 - **Fuso horário:** sempre `timestamptz`.
-- **Isolamento entre tenants:** toda query com `tenant_id` (invariante 3). *Row Level Security* (RLS) do Postgres é uma defesa extra possível.
+- **Isolamento entre tenants:** toda query com `tenant_id` (invariante 3). _Row Level Security_ (RLS) do Postgres é uma defesa extra possível.
 
 ## 7. No Portunus
 
@@ -119,7 +119,7 @@ O Postgres é o **cartório**. Lento comparado a um bloco de notas, mas o que es
 
 ## 8. Para aprofundar
 
-- PostgreSQL — documentação (leia *Concurrency Control* e *Indexes*): https://www.postgresql.org/docs/current/
+- PostgreSQL — documentação (leia _Concurrency Control_ e _Indexes_): https://www.postgresql.org/docs/current/
 - Drizzle ORM: https://orm.drizzle.team/docs/overview
 - Use The Index, Luke! (índices explicados para devs): https://use-the-index-luke.com/
-- Livro: *Designing Data-Intensive Applications* (Martin Kleppmann), caps. 3 e 7
+- Livro: _Designing Data-Intensive Applications_ (Martin Kleppmann), caps. 3 e 7

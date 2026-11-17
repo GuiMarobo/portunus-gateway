@@ -23,18 +23,18 @@ Cada **combinação única de labels** é uma série separada, guardada separada
 
 ### 2.2 Tipos de métrica
 
-| Tipo | Comportamento | Exemplos do projeto |
-|---|---|---|
-| **Counter** | Só sobe (zera no restart) | `gateway_requests_total`, `gateway_tokens_total`, `gateway_cost_usd_total` |
-| **Gauge** | Sobe e desce | `gateway_circuit_state`, `gateway_queue_depth` |
-| **Histogram** | Conta observações em **buckets** de valor | `gateway_request_duration_seconds` |
-| **Summary** | Calcula quantis no cliente | Pouco usado; não agrega entre instâncias |
+| Tipo          | Comportamento                             | Exemplos do projeto                                                        |
+| ------------- | ----------------------------------------- | -------------------------------------------------------------------------- |
+| **Counter**   | Só sobe (zera no restart)                 | `gateway_requests_total`, `gateway_tokens_total`, `gateway_cost_usd_total` |
+| **Gauge**     | Sobe e desce                              | `gateway_circuit_state`, `gateway_queue_depth`                             |
+| **Histogram** | Conta observações em **buckets** de valor | `gateway_request_duration_seconds`                                         |
+| **Summary**   | Calcula quantis no cliente                | Pouco usado; não agrega entre instâncias                                   |
 
 **Por que histogram para latência?** Média esconde a cauda: 99 requisições de 10 ms e 1 de 10 s têm média de ~110 ms, o que não descreve ninguém. Percentis (p50, p95, p99) mostram a experiência real. O histogram guarda contagens por faixa (`le="0.1"`, `le="0.5"`, `le="1"`...) e o percentil é **estimado** depois. Como os buckets são somáveis, dá para agregar entre instâncias, coisa que o summary não permite.
 
 ### 2.3 Modelo pull
 
-O Prometheus **busca** (*scrape*) as métricas: a cada N segundos faz `GET /metrics` em cada alvo. Vantagens: o Prometheus sabe quando um alvo está fora (o scrape falha) e controla a própria carga. No projeto, o fluxo é app → OTLP → Collector, e o Prometheus raspa o Collector (ou o Collector envia via *remote write*).
+O Prometheus **busca** (_scrape_) as métricas: a cada N segundos faz `GET /metrics` em cada alvo. Vantagens: o Prometheus sabe quando um alvo está fora (o scrape falha) e controla a própria carga. No projeto, o fluxo é app → OTLP → Collector, e o Prometheus raspa o Collector (ou o Collector envia via _remote write_).
 
 ### 2.4 PromQL: o essencial
 
@@ -86,15 +86,15 @@ Métricas são o **painel do carro**: velocímetro (gauge), hodômetro (counter,
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença principal |
-|---|---|
-| **Prometheus** | Pull, PromQL, padrão de fato em cloud native. **A escolha do projeto** |
+| Ferramenta                        | Diferença principal                                                              |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| **Prometheus**                    | Pull, PromQL, padrão de fato em cloud native. **A escolha do projeto**           |
 | **Grafana Mimir, Thanos, Cortex** | Prometheus escalável e de longo prazo (multi-instância, armazenamento em objeto) |
-| **VictoriaMetrics** | Compatível com Prometheus, mais eficiente em memória e disco |
-| **InfluxDB** | Banco de séries temporais, push, linguagem própria |
-| **Datadog, New Relic** | SaaS; cobram por série customizada, então cardinalidade vira custo direto |
-| **StatsD + Graphite** | Geração anterior: push via UDP, agregação no servidor |
-| **OpenTelemetry Metrics** | A API/SDK de métricas; exporta para qualquer um dos acima |
+| **VictoriaMetrics**               | Compatível com Prometheus, mais eficiente em memória e disco                     |
+| **InfluxDB**                      | Banco de séries temporais, push, linguagem própria                               |
+| **Datadog, New Relic**            | SaaS; cobram por série customizada, então cardinalidade vira custo direto        |
+| **StatsD + Graphite**             | Geração anterior: push via UDP, agregação no servidor                            |
+| **OpenTelemetry Metrics**         | A API/SDK de métricas; exporta para qualquer um dos acima                        |
 
 ## 6. Armadilhas
 
@@ -111,7 +111,7 @@ As métricas do ARQUITETURA.md §9 (`gateway_requests_total`, `gateway_request_d
 
 ## 8. Para aprofundar
 
-- Prometheus — *Metric types*: https://prometheus.io/docs/concepts/metric_types/
-- Prometheus — *Histograms and summaries*: https://prometheus.io/docs/practices/histograms/
-- Prometheus — *Naming* e *Instrumentation* (boas práticas): https://prometheus.io/docs/practices/naming/
-- PromLabs — *PromQL cheat sheet*: https://promlabs.com/promql-cheat-sheet/
+- Prometheus — _Metric types_: https://prometheus.io/docs/concepts/metric_types/
+- Prometheus — _Histograms and summaries_: https://prometheus.io/docs/practices/histograms/
+- Prometheus — _Naming_ e _Instrumentation_ (boas práticas): https://prometheus.io/docs/practices/naming/
+- PromLabs — _PromQL cheat sheet_: https://promlabs.com/promql-cheat-sheet/

@@ -31,7 +31,7 @@ export class LookupCacheUseCase {
 No `cache.module.ts`, o módulo diz qual implementação atende ao port:
 
 ```ts
-providers: [{ provide: EXACT_CACHE_PORT, useClass: RedisExactCacheAdapter }]
+providers: [{ provide: EXACT_CACHE_PORT, useClass: RedisExactCacheAdapter }];
 ```
 
 No teste, troca-se por um fake. É assim que a Clean Architecture ([11](./11-clean-architecture-e-padroes.md)) se conecta ao Nest: o domínio define a interface e o módulo liga ao adapter.
@@ -49,13 +49,13 @@ Middleware → Guards → Interceptors (antes) → Pipes → Handler do controll
 → Interceptors (depois) → Exception filters (se algo lançou erro)
 ```
 
-| Peça | Papel | Uso no gateway |
-|---|---|---|
-| **Middleware** | Antes de tudo, baixo nível | Gerar `request_id` |
-| **Guard** | Decide se a requisição pode seguir | Autenticação por API key |
-| **Interceptor** | Envolve o handler (antes e depois) | Métricas de duração, headers de diagnóstico |
-| **Pipe** | Transforma e valida a entrada | Pipe de validação com Zod |
-| **Exception filter** | Converte exceções em resposta | Erros no formato da OpenAI |
+| Peça                 | Papel                              | Uso no gateway                              |
+| -------------------- | ---------------------------------- | ------------------------------------------- |
+| **Middleware**       | Antes de tudo, baixo nível         | Gerar `request_id`                          |
+| **Guard**            | Decide se a requisição pode seguir | Autenticação por API key                    |
+| **Interceptor**      | Envolve o handler (antes e depois) | Métricas de duração, headers de diagnóstico |
+| **Pipe**             | Transforma e valida a entrada      | Pipe de validação com Zod                   |
+| **Exception filter** | Converte exceções em resposta      | Erros no formato da OpenAI                  |
 
 ### 2.5 Fastify por dentro
 
@@ -77,19 +77,19 @@ Middleware → Guards → Interceptors (antes) → Pipes → Handler do controll
 
 ## 5. Ferramentas similares
 
-| Framework | Diferença principal | Quando escolher |
-|---|---|---|
-| **Express** | O mais usado; simples; mais lento; middlewares em cadeia | Projetos pequenos, máxima compatibilidade |
-| **Fastify (puro)** | Rápido, schemas, plugins; sem DI nem camadas | Serviços enxutos sem precisar de framework de aplicação |
-| **Koa** | Minimalista, middlewares com async/await | Quem quer montar tudo à mão |
-| **Hono** | Ultraleve, roda em edge (Cloudflare Workers, Bun, Deno) | Edge e serverless |
-| **AdonisJS** | Full-stack "batteries included" (ORM, auth) estilo Laravel | Aplicações web completas |
-| **tRPC** | RPC tipado entre front e back TypeScript | Monorepo full-stack TS; não serve para API compatível com OpenAI |
-| **Spring Boot (Java), ASP.NET Core (C#)** | Mesma filosofia de DI e módulos do Nest em outras linguagens | Ecossistemas JVM/.NET; o Nest foi inspirado neles e no Angular |
+| Framework                                 | Diferença principal                                          | Quando escolher                                                  |
+| ----------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| **Express**                               | O mais usado; simples; mais lento; middlewares em cadeia     | Projetos pequenos, máxima compatibilidade                        |
+| **Fastify (puro)**                        | Rápido, schemas, plugins; sem DI nem camadas                 | Serviços enxutos sem precisar de framework de aplicação          |
+| **Koa**                                   | Minimalista, middlewares com async/await                     | Quem quer montar tudo à mão                                      |
+| **Hono**                                  | Ultraleve, roda em edge (Cloudflare Workers, Bun, Deno)      | Edge e serverless                                                |
+| **AdonisJS**                              | Full-stack "batteries included" (ORM, auth) estilo Laravel   | Aplicações web completas                                         |
+| **tRPC**                                  | RPC tipado entre front e back TypeScript                     | Monorepo full-stack TS; não serve para API compatível com OpenAI |
+| **Spring Boot (Java), ASP.NET Core (C#)** | Mesma filosofia de DI e módulos do Nest em outras linguagens | Ecossistemas JVM/.NET; o Nest foi inspirado neles e no Angular   |
 
 ## 6. Armadilhas
 
-- **Escopo de providers:** o padrão é *singleton*. Um provider `REQUEST`-scoped é recriado a cada requisição e "contamina" quem depende dele, com custo de performance. Prefira passar contexto explicitamente.
+- **Escopo de providers:** o padrão é _singleton_. Um provider `REQUEST`-scoped é recriado a cada requisição e "contamina" quem depende dele, com custo de performance. Prefira passar contexto explicitamente.
 - **Lógica no controller:** controller só traduz HTTP → use case. A regra de negócio fica na `application/` e no `domain/`, para ser reutilizada pelo worker assíncrono.
 - **Diferenças Express × Fastify:** muitos exemplos e bibliotecas do Nest assumem Express (`req`, `res`). Middlewares e manipulação de resposta (especialmente streaming) mudam.
 - **Decorators e metadados** exigem `emitDecoratorMetadata`; o esbuild (usado pelo Vitest) não emite, daí o plugin SWC nos testes.
@@ -103,7 +103,7 @@ Middleware → Guards → Interceptors (antes) → Pipes → Handler do controll
 
 ## 8. Para aprofundar
 
-- NestJS — documentação (comece por *Fundamentals → Custom providers* e *Request lifecycle*): https://docs.nestjs.com/
-- NestJS — *Performance (Fastify)*: https://docs.nestjs.com/techniques/performance
+- NestJS — documentação (comece por _Fundamentals → Custom providers_ e _Request lifecycle_): https://docs.nestjs.com/
+- NestJS — _Performance (Fastify)_: https://docs.nestjs.com/techniques/performance
 - Fastify — documentação: https://fastify.dev/docs/latest/
-- Martin Fowler — *Inversion of Control Containers and the Dependency Injection pattern*: https://martinfowler.com/articles/injection.html
+- Martin Fowler — _Inversion of Control Containers and the Dependency Injection pattern_: https://martinfowler.com/articles/injection.html

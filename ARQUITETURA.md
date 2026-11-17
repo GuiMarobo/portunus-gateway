@@ -1,7 +1,7 @@
 # ARQUITETURA.md — Portunus Gateway
 
 > Complementa o [`CONTEXT.md`](./CONTEXT.md) (o **quê** e o **porquê**). Este documento descreve o **como**: componentes, fluxos, dados, resiliência e observabilidade.
-> Status: **proposta inicial**. Itens marcados com *(a validar)* dependem de medição ou de decisão durante a construção. Decisões firmes viram ADRs em `docs/adr/`.
+> Status: **proposta inicial**. Itens marcados com _(a validar)_ dependem de medição ou de decisão durante a construção. Decisões firmes viram ADRs em `docs/adr/`.
 > Diagrama completo em [`arquitetura.mermaid`](./arquitetura.mermaid).
 
 ---
@@ -37,20 +37,20 @@ flowchart LR
 
 ## 3. Componentes
 
-| Componente | Responsabilidade | Tecnologia |
-|---|---|---|
-| **API de inferência** | Recebe chat/embeddings no formato OpenAI, streaming SSE, erros no formato OpenAI | NestJS (Fastify) |
-| **Auth e Tenant** | Valida API key (hash), carrega tenant e políticas | NestJS guard, Postgres, Redis (cache curto) |
-| **Rate limit e Orçamento** | Limites por tenant/chave, orçamento mensal | Redis (janela deslizante/token bucket) |
-| **Cache** | Exato (hash) e semântico (embedding) | Redis, pgvector |
-| **Router** | Resolve alias → provedores; retry, circuit breaker, fallback | Módulo próprio |
-| **Provider Adapters** | Traduz o formato OpenAI para cada provedor e de volta | OpenAI, Anthropic, Mock |
-| **Publicador de eventos** | Publica `usage events` sem bloquear a resposta; outbox para garantir entrega | RabbitMQ, Postgres |
-| **API assíncrona e Worker** | Jobs e batch, callbacks, DLQ | BullMQ (Redis) |
-| **Consumidores** | Indexer (→ Elasticsearch), Aggregator (→ custo/orçamento), Alerter | Processo separado |
-| **Admin API** | Tenants, chaves, aliases, preços, relatórios, busca de logs | NestJS |
-| **CLI de Evals** | Roda suites de qualidade e compara configurações | Pacote Node (CLI) |
-| **Telemetria** | Métricas, traces e logs | OpenTelemetry, Prometheus, Tempo, Loki, Grafana |
+| Componente                  | Responsabilidade                                                                 | Tecnologia                                      |
+| --------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **API de inferência**       | Recebe chat/embeddings no formato OpenAI, streaming SSE, erros no formato OpenAI | NestJS (Fastify)                                |
+| **Auth e Tenant**           | Valida API key (hash), carrega tenant e políticas                                | NestJS guard, Postgres, Redis (cache curto)     |
+| **Rate limit e Orçamento**  | Limites por tenant/chave, orçamento mensal                                       | Redis (janela deslizante/token bucket)          |
+| **Cache**                   | Exato (hash) e semântico (embedding)                                             | Redis, pgvector                                 |
+| **Router**                  | Resolve alias → provedores; retry, circuit breaker, fallback                     | Módulo próprio                                  |
+| **Provider Adapters**       | Traduz o formato OpenAI para cada provedor e de volta                            | OpenAI, Anthropic, Mock                         |
+| **Publicador de eventos**   | Publica `usage events` sem bloquear a resposta; outbox para garantir entrega     | RabbitMQ, Postgres                              |
+| **API assíncrona e Worker** | Jobs e batch, callbacks, DLQ                                                     | BullMQ (Redis)                                  |
+| **Consumidores**            | Indexer (→ Elasticsearch), Aggregator (→ custo/orçamento), Alerter               | Processo separado                               |
+| **Admin API**               | Tenants, chaves, aliases, preços, relatórios, busca de logs                      | NestJS                                          |
+| **CLI de Evals**            | Roda suites de qualidade e compara configurações                                 | Pacote Node (CLI)                               |
+| **Telemetria**              | Métricas, traces e logs                                                          | OpenTelemetry, Prometheus, Tempo, Loki, Grafana |
 
 ## 4. Fluxos principais
 
@@ -105,7 +105,7 @@ Passos em ordem (a ordem importa: o mais barato e o que mais protege vem primeir
 
 - O gateway repassa os chunks do provedor à medida que chegam.
 - **Fallback só é possível antes do primeiro byte.** Depois que o stream começou, uma falha encerra o stream com um evento de erro (decisão consciente: trocar de provedor no meio quebraria a resposta).
-- Tokens e custo vêm do último chunk (`usage`) do provedor; se não vierem, estima-se por contagem local *(a validar)*.
+- Tokens e custo vêm do último chunk (`usage`) do provedor; se não vierem, estima-se por contagem local _(a validar)_.
 - Cache de resposta em stream: a resposta completa é gravada ao final e, em hit, é reproduzida como stream.
 
 ### 4.3 Chamada assíncrona e batch
@@ -146,7 +146,7 @@ sequenceDiagram
    - **Indexer:** aplica redação de PII, respeita `storeContent` do tenant e indexa no Elasticsearch.
    - **Aggregator:** atualiza `UsageAggregate` no Postgres e os contadores de orçamento no Redis.
    - **Alerter:** dispara alertas (80% do orçamento, anomalias).
-4. Entrega *at-least-once*; consumidores são **idempotentes** pelo `event_id`.
+4. Entrega _at-least-once_; consumidores são **idempotentes** pelo `event_id`.
 5. Mensagens que falham repetidamente vão para a DLQ da respectiva fila.
 
 ### 4.5 Evals
@@ -159,53 +159,55 @@ sequenceDiagram
 
 ### 5.1 PostgreSQL (fonte da verdade)
 
-| Tabela | Conteúdo |
-|---|---|
-| `tenants` | nome, status, orçamento mensal, modo de orçamento, flags de PII e armazenamento de conteúdo |
-| `api_keys` | tenant, hash, prefixo visível, expiração, revogação, último uso |
-| `providers`, `model_prices` | provedores e preço por modelo (entrada/saída por 1M tokens), com vigência |
-| `model_aliases`, `alias_targets` | apelido → lista ordenada de provedor+modelo, timeout, retries |
-| `rate_limit_policies` | limites por tenant/chave |
-| `semantic_cache_entries` | tenant, hash de contexto (modelo, system prompt, parâmetros), `embedding vector`, resposta, hits |
-| `usage_aggregates` | tenant, dia, modelo → requisições, tokens, custo, hits de cache |
-| `async_jobs` | estado, requisição, resultado, tentativas, callback |
-| `outbox_events` | payload, `published_at` |
-| `processed_events` | `event_id` por consumidor (idempotência) |
+| Tabela                           | Conteúdo                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `tenants`                        | nome, status, orçamento mensal, modo de orçamento, flags de PII e armazenamento de conteúdo      |
+| `api_keys`                       | tenant, hash, prefixo visível, expiração, revogação, último uso                                  |
+| `providers`, `model_prices`      | provedores e preço por modelo (entrada/saída por 1M tokens), com vigência                        |
+| `model_aliases`, `alias_targets` | apelido → lista ordenada de provedor+modelo, timeout, retries                                    |
+| `rate_limit_policies`            | limites por tenant/chave                                                                         |
+| `semantic_cache_entries`         | tenant, hash de contexto (modelo, system prompt, parâmetros), `embedding vector`, resposta, hits |
+| `usage_aggregates`               | tenant, dia, modelo → requisições, tokens, custo, hits de cache                                  |
+| `async_jobs`                     | estado, requisição, resultado, tentativas, callback                                              |
+| `outbox_events`                  | payload, `published_at`                                                                          |
+| `processed_events`               | `event_id` por consumidor (idempotência)                                                         |
 
 ### 5.2 Redis
 
-| Chave (padrão) | Uso |
-|---|---|
-| `auth:key:{hash}` | tenant e políticas da chave, TTL curto |
-| `rl:{tenant}:{janela}` | contadores de rate limit |
-| `budget:{tenant}:{aaaamm}` | consumo corrente do mês (reconciliado pelo Aggregator) |
-| `cache:exact:{tenant}:{hash}` | resposta em cache exato, com TTL |
-| `cb:{provider}` | estado do circuit breaker |
-| Filas BullMQ | `async-chat`, `webhooks` |
+| Chave (padrão)                | Uso                                                    |
+| ----------------------------- | ------------------------------------------------------ |
+| `auth:key:{hash}`             | tenant e políticas da chave, TTL curto                 |
+| `rl:{tenant}:{janela}`        | contadores de rate limit                               |
+| `budget:{tenant}:{aaaamm}`    | consumo corrente do mês (reconciliado pelo Aggregator) |
+| `cache:exact:{tenant}:{hash}` | resposta em cache exato, com TTL                       |
+| `cb:{provider}`               | estado do circuit breaker                              |
+| Filas BullMQ                  | `async-chat`, `webhooks`                               |
 
 ### 5.3 RabbitMQ
 
-- Exchange `gateway.events` (tipo *topic*).
+- Exchange `gateway.events` (tipo _topic_).
 - Routing keys: `usage.completed`, `usage.failed`, `budget.threshold`.
-- Filas: `q.indexer`, `q.aggregator`, `q.alerter`, cada uma com *dead-letter exchange* `gateway.dlx` e fila `.dlq` correspondente.
+- Filas: `q.indexer`, `q.aggregator`, `q.alerter`, cada uma com _dead-letter exchange_ `gateway.dlx` e fila `.dlq` correspondente.
 - Mensagens persistentes, com `event_id` (UUID) e `trace_id` nos headers.
 
 ### 5.4 Elasticsearch
 
-- Índice `request-logs-*` com *index template* e mapeamento explícito (nada de *dynamic mapping* em campos críticos).
+- Índice `request-logs-*` com _index template_ e mapeamento explícito (nada de _dynamic mapping_ em campos críticos).
 - Campos: `tenant_id`, `request_id`, `trace_id`, `model`, `provider`, `attempts[]`, `status`, `latency_ms`, `tokens_in`, `tokens_out`, `cost_usd`, `cache`, `prompt`, `response`, `@timestamp`.
 - `prompt` e `response` como `text` (busca full-text); demais como `keyword`/numéricos.
-- ILM: dados completos por 30 dias *(a validar)*; depois removidos (agregados ficam no Postgres).
+- ILM: dados completos por 30 dias _(a validar)_; depois removidos (agregados ficam no Postgres).
 
 ## 6. Cache
 
 **Cache exato**
+
 - Chave = hash de `{tenant, modelo resolvido, messages normalizadas, parâmetros que afetam a saída}`.
 - Só grava respostas bem-sucedidas e completas.
 
 **Cache semântico**
+
 - Escopo: mesmo tenant, mesmo modelo resolvido, mesmo hash do system prompt e dos parâmetros.
-- Gera o embedding do prompt e busca o vizinho mais próximo; só aceita se a similaridade ≥ limiar (padrão `0.92`, ajustável por tenant/rota) *(a validar com casos de teste)*.
+- Gera o embedding do prompt e busca o vizinho mais próximo; só aceita se a similaridade ≥ limiar (padrão `0.92`, ajustável por tenant/rota) _(a validar com casos de teste)_.
 - Desligado por padrão para: `tools`/function calling, `temperature` acima do limite configurado e conversas muito longas.
 - Cada entrada guarda o número de hits e a data, para análise de qualidade e expurgo.
 - Controle por requisição: header `x-gateway-cache-control: no-cache`.
@@ -214,25 +216,25 @@ sequenceDiagram
 
 ## 7. Resiliência
 
-| Mecanismo | Comportamento |
-|---|---|
-| **Timeout** | Por rota/alias; tempo total e tempo até o primeiro byte (streaming) |
-| **Retry** | Backoff exponencial com jitter, só para erros transitórios (429, 5xx, timeout); respeita `Retry-After` |
-| **Circuit breaker** | Por provedor: fechado → aberto após N falhas consecutivas → semiaberto após X segundos para testar |
-| **Fallback** | Próximo item da lista do alias; todas as tentativas ficam em `attempts[]` |
-| **Rate limit** | Retorna `429` com `Retry-After` e `x-ratelimit-*` |
-| **Idempotência** | Eventos e jobs com `event_id`/`job_id` únicos |
+| Mecanismo           | Comportamento                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Timeout**         | Por rota/alias; tempo total e tempo até o primeiro byte (streaming)                                    |
+| **Retry**           | Backoff exponencial com jitter, só para erros transitórios (429, 5xx, timeout); respeita `Retry-After` |
+| **Circuit breaker** | Por provedor: fechado → aberto após N falhas consecutivas → semiaberto após X segundos para testar     |
+| **Fallback**        | Próximo item da lista do alias; todas as tentativas ficam em `attempts[]`                              |
+| **Rate limit**      | Retorna `429` com `Retry-After` e `x-ratelimit-*`                                                      |
+| **Idempotência**    | Eventos e jobs com `event_id`/`job_id` únicos                                                          |
 
 ## 8. Comportamento quando uma dependência cai
 
-| Dependência fora | Inferência síncrona | O que degrada |
-|---|---|---|
-| **Provedor LLM** | Continua via fallback; se todos falharem, `502/503` | Custo e latência podem subir |
-| **Redis** | Continua; cache exato desligado; rate limit e orçamento em *fail-open* com alerta *(configurável)* | Sem proteção de limites; async indisponível (`503`) |
-| **PostgreSQL** | Continua para chaves já em cache no Redis; sem cache semântico, sem outbox | Novas chaves não autenticam; eventos vão para buffer limitado em memória *(a validar)* |
-| **RabbitMQ** | Continua; eventos acumulam no outbox e são reenviados | Logs e custos atrasam |
-| **Elasticsearch** | Continua; eventos acumulam na fila do Indexer | Busca de logs indisponível |
-| **OTel Collector** | Continua; telemetria é descartada | Perda temporária de métricas e traces |
+| Dependência fora   | Inferência síncrona                                                                                | O que degrada                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Provedor LLM**   | Continua via fallback; se todos falharem, `502/503`                                                | Custo e latência podem subir                                                           |
+| **Redis**          | Continua; cache exato desligado; rate limit e orçamento em _fail-open_ com alerta _(configurável)_ | Sem proteção de limites; async indisponível (`503`)                                    |
+| **PostgreSQL**     | Continua para chaves já em cache no Redis; sem cache semântico, sem outbox                         | Novas chaves não autenticam; eventos vão para buffer limitado em memória _(a validar)_ |
+| **RabbitMQ**       | Continua; eventos acumulam no outbox e são reenviados                                              | Logs e custos atrasam                                                                  |
+| **Elasticsearch**  | Continua; eventos acumulam na fila do Indexer                                                      | Busca de logs indisponível                                                             |
+| **OTel Collector** | Continua; telemetria é descartada                                                                  | Perda temporária de métricas e traces                                                  |
 
 Cada linha dessa tabela deve virar um **teste de caos** simples (derrubar o container e verificar o comportamento) e uma demonstração para o README.
 
@@ -250,6 +252,7 @@ Um span por etapa: `auth`, `ratelimit`, `budget`, `cache.exact`, `cache.semantic
 JSON estruturado (pino) com `request_id`, `trace_id`, `tenant_id`. Logs de aplicação **não contêm prompts nem respostas**; o conteúdo existe apenas no Elasticsearch, com redação de PII.
 
 **Dashboards (Grafana)**
+
 1. Visão geral: req/s, erros, p50/p95/p99, cache hit rate.
 2. Custo: por tenant/modelo/dia, economia do cache, projeção do mês.
 3. Provedores: latência, erros, estado do circuit breaker, fallbacks.
@@ -302,6 +305,7 @@ Módulos dentro de `apps/gateway`: `auth`, `tenants`, `inference`, `ratelimit`, 
 ## 12. Infra local
 
 `docker compose up` com perfis:
+
 - **core:** gateway, consumers, PostgreSQL+pgvector, Redis, RabbitMQ, provedor mock.
 - **search:** Elasticsearch (e Kibana opcional).
 - **observability:** OTel Collector, Prometheus, Loki, Tempo, Grafana.
@@ -311,30 +315,30 @@ O Elasticsearch é o serviço mais pesado; o perfil separado permite desenvolver
 
 ## 13. Desempenho: metas e medição
 
-| Métrica | Meta inicial *(a validar)* | Como medir |
-|---|---|---|
-| Overhead do gateway (cache miss, contra o mock) | p95 < 20 ms | k6 comparando gateway vs. chamada direta ao mock |
-| Resposta de cache exato | p95 < 30 ms | k6 com prompts repetidos |
-| Resposta de cache semântico | p95 < 100 ms | k6 com paráfrases |
-| Throughput contra o mock | ≥ 500 req/s em máquina de desenvolvimento | k6, descrevendo a máquina usada |
-| Atraso do pipeline de eventos | p95 < 5 s do fim da chamada até aparecer no Elasticsearch | timestamp do evento vs. do documento |
+| Métrica                                         | Meta inicial _(a validar)_                                | Como medir                                       |
+| ----------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| Overhead do gateway (cache miss, contra o mock) | p95 < 20 ms                                               | k6 comparando gateway vs. chamada direta ao mock |
+| Resposta de cache exato                         | p95 < 30 ms                                               | k6 com prompts repetidos                         |
+| Resposta de cache semântico                     | p95 < 100 ms                                              | k6 com paráfrases                                |
+| Throughput contra o mock                        | ≥ 500 req/s em máquina de desenvolvimento                 | k6, descrevendo a máquina usada                  |
+| Atraso do pipeline de eventos                   | p95 < 5 s do fim da chamada até aparecer no Elasticsearch | timestamp do evento vs. do documento             |
 
 Os valores reais medidos, com a máquina descrita, vão para o README.
 
 ## 14. Decisões de arquitetura (ADRs a registrar)
 
-| # | Decisão | Alternativas / ponto de atenção | Status |
-|---|---|---|---|
-| 001 | API compatível com OpenAI | API própria | Proposto |
-| 002 | BullMQ para jobs e RabbitMQ para eventos | Usar só um dos dois. Justificar: jobs com retry/prioridade/DLQ vs. fan-out para vários consumidores. Revisar se a separação se sustenta | Proposto |
-| 003 | pgvector para cache semântico | Redis Stack/RediSearch, banco vetorial dedicado | Proposto |
-| 004 | Postgres como fonte da verdade de custo e orçamento; Elasticsearch só para busca | Custo calculado a partir do Elasticsearch | Proposto |
-| 005 | Padrão outbox para publicar eventos | Publicar direto e aceitar perda | Proposto |
-| 006 | Rate limit e orçamento em *fail-open* quando o Redis cai | *Fail-closed* | Proposto |
-| 007 | Fallback apenas antes do primeiro byte em streaming | Reiniciar o stream com outro provedor | Proposto |
-| 008 | Fastify em vez de Express no NestJS | Medir na Fase 1 | A validar |
-| 009 | Consumidores em processo separado do gateway | Mesmo processo | Proposto |
-| 010 | Nome do projeto: Portunus Gateway, escopo `@portunus/*` | Manter `llm-gateway`; Janus, Hufu, Cursus | Aceito |
+| #   | Decisão                                                                          | Alternativas / ponto de atenção                                                                                                         | Status    |
+| --- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 001 | API compatível com OpenAI                                                        | API própria                                                                                                                             | Proposto  |
+| 002 | BullMQ para jobs e RabbitMQ para eventos                                         | Usar só um dos dois. Justificar: jobs com retry/prioridade/DLQ vs. fan-out para vários consumidores. Revisar se a separação se sustenta | Proposto  |
+| 003 | pgvector para cache semântico                                                    | Redis Stack/RediSearch, banco vetorial dedicado                                                                                         | Proposto  |
+| 004 | Postgres como fonte da verdade de custo e orçamento; Elasticsearch só para busca | Custo calculado a partir do Elasticsearch                                                                                               | Proposto  |
+| 005 | Padrão outbox para publicar eventos                                              | Publicar direto e aceitar perda                                                                                                         | Proposto  |
+| 006 | Rate limit e orçamento em _fail-open_ quando o Redis cai                         | _Fail-closed_                                                                                                                           | Proposto  |
+| 007 | Fallback apenas antes do primeiro byte em streaming                              | Reiniciar o stream com outro provedor                                                                                                   | Proposto  |
+| 008 | Fastify em vez de Express no NestJS                                              | Medir na Fase 1                                                                                                                         | A validar |
+| 009 | Consumidores em processo separado do gateway                                     | Mesmo processo                                                                                                                          | Proposto  |
+| 010 | Nome do projeto: Portunus Gateway, escopo `@portunus/*`                          | Manter `llm-gateway`; Janus, Hufu, Cursus                                                                                               | Aceito    |
 
 ## 15. Ordem sugerida de construção
 

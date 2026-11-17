@@ -4,19 +4,19 @@
 
 **Bloqueado por:** 03, 04
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/34 — CI e GitHub Actions](../../../estudos/34-ci-github-actions.md)
 
 ## Critérios de aceite
 
-- [ ] Workflow `ci` disparado em `pull_request` e em `push` na `main`.
-- [ ] Node lido do `.nvmrc`, pnpm lido do `packageManager`, cache do store do pnpm e `pnpm install --frozen-lockfile`.
-- [ ] Job `quality` rodando `typecheck`, `lint`, `format:check`, `test` e `build`.
-- [ ] `permissions: contents: read` e `concurrency` que cancela execuções antigas do mesmo PR.
-- [ ] Actions de terceiros fixadas por SHA de commit (com a versão num comentário de YAML, que não é código TypeScript).
-- [ ] O PR deste ticket mostra o check verde.
-- [ ] `main` protegida: PR obrigatório, check `quality` obrigatório e squash merge. A configuração aplicada fica descrita no PR.
+- [x] Workflow `ci` disparado em `pull_request` e em `push` na `main`.
+- [x] Node lido do `.nvmrc`, pnpm lido do `packageManager`, cache do store do pnpm e `pnpm install --frozen-lockfile`.
+- [x] Job `quality` rodando `typecheck`, `lint`, `format:check`, `test` e `build`.
+- [x] `permissions: contents: read` e `concurrency` que cancela execuções antigas do mesmo PR.
+- [x] Actions de terceiros fixadas por SHA de commit (com a versão num comentário de YAML, que não é código TypeScript).
+- [x] O PR deste ticket mostra o check verde.
+- [x] `main` protegida: PR obrigatório, check `quality` obrigatório e squash merge. A configuração aplicada fica descrita no PR.
 
 ## Pontos de atenção
 

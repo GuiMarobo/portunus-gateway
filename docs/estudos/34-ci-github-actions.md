@@ -18,17 +18,17 @@ A verificação obrigatória do CLAUDE.md (typecheck, lint, testes unitários e 
 
 ### 2.2 Conceitos do GitHub Actions
 
-| Conceito | O que é |
-|---|---|
-| **Workflow** | Um arquivo YAML em `.github/workflows/` |
-| **Event / trigger** | O que dispara: `push`, `pull_request`, `schedule`, `workflow_dispatch` |
-| **Job** | Um conjunto de passos numa máquina (runner); jobs rodam em paralelo por padrão, ou em sequência com `needs` |
-| **Step** | Um comando (`run`) ou uma *action* reutilizável (`uses`) |
-| **Runner** | A máquina: hospedada pelo GitHub (`ubuntu-latest`) ou própria (*self-hosted*) |
-| **Action** | Um bloco reutilizável (ex.: `actions/checkout`, `actions/setup-node`, `pnpm/action-setup`) |
-| **Service containers** | Containers auxiliares para o job (alternativa ao Testcontainers) |
-| **Cache** | Reaproveitar o store do pnpm entre execuções |
-| **Secrets** | Valores sensíveis injetados como variáveis, mascarados nos logs |
+| Conceito               | O que é                                                                                                     |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Workflow**           | Um arquivo YAML em `.github/workflows/`                                                                     |
+| **Event / trigger**    | O que dispara: `push`, `pull_request`, `schedule`, `workflow_dispatch`                                      |
+| **Job**                | Um conjunto de passos numa máquina (runner); jobs rodam em paralelo por padrão, ou em sequência com `needs` |
+| **Step**               | Um comando (`run`) ou uma _action_ reutilizável (`uses`)                                                    |
+| **Runner**             | A máquina: hospedada pelo GitHub (`ubuntu-latest`) ou própria (_self-hosted_)                               |
+| **Action**             | Um bloco reutilizável (ex.: `actions/checkout`, `actions/setup-node`, `pnpm/action-setup`)                  |
+| **Service containers** | Containers auxiliares para o job (alternativa ao Testcontainers)                                            |
+| **Cache**              | Reaproveitar o store do pnpm entre execuções                                                                |
+| **Secrets**            | Valores sensíveis injetados como variáveis, mascarados nos logs                                             |
 
 ### 2.3 Um pipeline para o projeto (esboço)
 
@@ -84,15 +84,15 @@ O CI é a **linha de inspeção de qualidade de uma fábrica**: toda peça (PR),
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença |
-|---|---|
-| **GitHub Actions** | Integrado ao GitHub, marketplace enorme de actions, minutos grátis em repositórios públicos. **A escolha do projeto** |
-| **GitLab CI/CD** | Integrado ao GitLab; `.gitlab-ci.yml`; runners próprios simples |
-| **CircleCI, Travis CI** | SaaS independentes do host do código |
-| **Jenkins** | Self-hosted, extremamente flexível via plugins; alta manutenção |
-| **Buildkite** | Orquestração SaaS com agentes na sua infraestrutura |
-| **Azure Pipelines, AWS CodeBuild, Google Cloud Build** | Integrados às respectivas nuvens |
-| **Dagger** | Pipelines como código (TS/Go/Python) que rodam igual local e no CI |
+| Ferramenta                                             | Diferença                                                                                                             |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| **GitHub Actions**                                     | Integrado ao GitHub, marketplace enorme de actions, minutos grátis em repositórios públicos. **A escolha do projeto** |
+| **GitLab CI/CD**                                       | Integrado ao GitLab; `.gitlab-ci.yml`; runners próprios simples                                                       |
+| **CircleCI, Travis CI**                                | SaaS independentes do host do código                                                                                  |
+| **Jenkins**                                            | Self-hosted, extremamente flexível via plugins; alta manutenção                                                       |
+| **Buildkite**                                          | Orquestração SaaS com agentes na sua infraestrutura                                                                   |
+| **Azure Pipelines, AWS CodeBuild, Google Cloud Build** | Integrados às respectivas nuvens                                                                                      |
+| **Dagger**                                             | Pipelines como código (TS/Go/Python) que rodam igual local e no CI                                                    |
 
 ## 6. Armadilhas
 
@@ -112,7 +112,7 @@ O CI é a **linha de inspeção de qualidade de uma fábrica**: toda peça (PR),
 ## 8. Para aprofundar
 
 - GitHub Actions — documentação: https://docs.github.com/en/actions
-- GitHub — *About protected branches*: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches
-- pnpm — *Continuous Integration* (GitHub Actions): https://pnpm.io/continuous-integration
-- GitHub — *Security hardening for GitHub Actions*: https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
-- Martin Fowler — *Continuous Integration*: https://martinfowler.com/articles/continuousIntegration.html
+- GitHub — _About protected branches_: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches
+- pnpm — _Continuous Integration_ (GitHub Actions): https://pnpm.io/continuous-integration
+- GitHub — _Security hardening for GitHub Actions_: https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
+- Martin Fowler — _Continuous Integration_: https://martinfowler.com/articles/continuousIntegration.html

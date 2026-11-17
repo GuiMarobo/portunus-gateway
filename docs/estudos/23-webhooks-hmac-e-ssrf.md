@@ -7,7 +7,7 @@
 
 ## 1. O problema
 
-Quando um job assíncrono termina, o cliente precisa saber. Ele pode perguntar de tempos em tempos (*polling*), mas é ineficiente. A alternativa é o gateway **chamar uma URL do cliente** (webhook). Isso cria dois riscos de segurança:
+Quando um job assíncrono termina, o cliente precisa saber. Ele pode perguntar de tempos em tempos (_polling_), mas é ineficiente. A alternativa é o gateway **chamar uma URL do cliente** (webhook). Isso cria dois riscos de segurança:
 
 1. **Do lado do cliente:** como ele sabe que a chamada veio mesmo do gateway, e não de um impostor?
 2. **Do lado do gateway:** e se o "cliente" cadastrar uma URL que aponta para a **rede interna** do próprio gateway?
@@ -20,7 +20,7 @@ Quando um job assíncrono termina, o cliente precisa saber. Ele pode perguntar d
 
 ### 2.2 Assinatura com HMAC
 
-**HMAC** (*Hash-based Message Authentication Code*) combina uma função de hash (SHA-256) com uma **chave secreta compartilhada** para produzir uma assinatura que só quem tem o segredo consegue gerar.
+**HMAC** (_Hash-based Message Authentication Code_) combina uma função de hash (SHA-256) com uma **chave secreta compartilhada** para produzir uma assinatura que só quem tem o segredo consegue gerar.
 
 ```
 assinatura = HMAC-SHA256(segredo_do_tenant, timestamp + "." + corpo_bruto)
@@ -61,7 +61,7 @@ O gateway vai fazer uma requisição a uma URL **escolhida pelo cliente**. Um at
 
 - **Webhook:** em vez de você ligar para a lavanderia a cada hora perguntando "ficou pronto?", a lavanderia **te liga** quando termina.
 - **HMAC:** a lavanderia e você combinaram uma **senha secreta**. Ao ligar, ela diz uma "contra-senha" calculada a partir da senha, do horário e do número do pedido. Um golpista que ouviu uma ligação antiga não consegue gerar a contra-senha de um pedido novo nem reaproveitar a antiga, porque o horário mudou.
-- **SSRF:** um "cliente" pede à lavanderia: "quando terminar, entregue no endereço *Sala do Cofre, 2º andar, dentro da própria lavanderia*". Um entregador ingênuo obedeceria. A defesa é recusar endereços internos e conferir o endereço real na hora da entrega.
+- **SSRF:** um "cliente" pede à lavanderia: "quando terminar, entregue no endereço _Sala do Cofre, 2º andar, dentro da própria lavanderia_". Um entregador ingênuo obedeceria. A defesa é recusar endereços internos e conferir o endereço real na hora da entrega.
 
 ## 4. Por que está nesta arquitetura
 
@@ -71,14 +71,14 @@ O gateway vai fazer uma requisição a uma URL **escolhida pelo cliente**. Um at
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença |
-|---|---|
-| **Svix** | Webhooks como serviço (assinatura, retry, portal para o cliente); define o padrão *Standard Webhooks* |
-| **Hookdeck** | Infraestrutura de recebimento e entrega de webhooks |
-| **Standard Webhooks** (especificação) | Padroniza headers e o esquema de assinatura; boa referência para o formato do gateway |
-| **Polling** | Alternativa sem webhook: mais simples e seguro para o servidor, porém mais lento e custoso |
-| **WebSockets / SSE** | Notificação com conexão aberta; não serve para processos de horas |
-| **Bibliotecas anti-SSRF** (ex.: `ssrf-req-filter`, agentes HTTP com validação de IP) | Fazem a checagem de IP na conexão |
+| Ferramenta                                                                           | Diferença                                                                                             |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **Svix**                                                                             | Webhooks como serviço (assinatura, retry, portal para o cliente); define o padrão _Standard Webhooks_ |
+| **Hookdeck**                                                                         | Infraestrutura de recebimento e entrega de webhooks                                                   |
+| **Standard Webhooks** (especificação)                                                | Padroniza headers e o esquema de assinatura; boa referência para o formato do gateway                 |
+| **Polling**                                                                          | Alternativa sem webhook: mais simples e seguro para o servidor, porém mais lento e custoso            |
+| **WebSockets / SSE**                                                                 | Notificação com conexão aberta; não serve para processos de horas                                     |
+| **Bibliotecas anti-SSRF** (ex.: `ssrf-req-filter`, agentes HTTP com validação de IP) | Fazem a checagem de IP na conexão                                                                     |
 
 ## 6. Armadilhas
 
@@ -97,5 +97,5 @@ O gateway vai fazer uma requisição a uma URL **escolhida pelo cliente**. Um at
 
 - RFC 2104 — HMAC: https://www.rfc-editor.org/rfc/rfc2104
 - Standard Webhooks: https://www.standardwebhooks.com/
-- Stripe — *Verify webhook signatures*: https://docs.stripe.com/webhooks#verify-events
-- OWASP — *SSRF Prevention Cheat Sheet*: https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+- Stripe — _Verify webhook signatures_: https://docs.stripe.com/webhooks#verify-events
+- OWASP — _SSRF Prevention Cheat Sheet_: https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html

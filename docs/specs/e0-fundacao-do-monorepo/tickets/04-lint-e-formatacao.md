@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 02
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/11 — Clean Architecture e padrões](../../../estudos/11-clean-architecture-e-padroes.md)
 
@@ -12,14 +12,14 @@
 
 ## Critérios de aceite
 
-- [ ] ESLint em flat config com o preset strict com checagem de tipos do typescript-eslint, cobrindo todos os pacotes.
-- [ ] `no-console` como erro.
-- [ ] Em qualquer `domain/`, importar `@nestjs/*`, `fastify`, `drizzle-orm`, `ioredis`, `amqplib`, `bullmq` ou as camadas `application/`, `infrastructure/` e `presentation/` é erro de lint.
-- [ ] Em qualquer `application/`, importar `infrastructure/` ou `presentation/` é erro de lint.
-- [ ] As regras de camada foram demonstradas com um import proibido temporário que o lint rejeitou (registrado no PR, não commitado).
-- [ ] Prettier como formatador único; o ESLint não aplica regras de estilo.
-- [ ] Scripts `lint`, `format` e `format:check`; o repositório inteiro passa nos dois checks.
-- [ ] Seção de comandos do CLAUDE.md atualizada.
+- [x] ESLint em flat config com o preset strict com checagem de tipos do typescript-eslint, cobrindo todos os pacotes.
+- [x] `no-console` como erro.
+- [x] Em qualquer `domain/`, importar `@nestjs/*`, `fastify`, `drizzle-orm`, `ioredis`, `amqplib`, `bullmq` ou as camadas `application/`, `infrastructure/` e `presentation/` é erro de lint.
+- [x] Em qualquer `application/`, importar `infrastructure/` ou `presentation/` é erro de lint.
+- [x] As regras de camada foram demonstradas com um import proibido temporário que o lint rejeitou (registrado no PR, não commitado).
+- [x] Prettier como formatador único; o ESLint não aplica regras de estilo.
+- [x] Scripts `lint`, `format` e `format:check`; o repositório inteiro passa nos dois checks.
+- [x] Seção de comandos do CLAUDE.md atualizada.
 
 ## Pontos de atenção
 

@@ -23,16 +23,16 @@ Preços são publicados por **1 milhão de tokens**, separados para entrada e sa
 ### 2.2 Por que não usar `number` (float)
 
 ```js
-0.1 + 0.2 === 0.30000000000000004
+0.1 + 0.2 === 0.30000000000000004;
 ```
 
 Floats (IEEE 754) não representam exatamente a maioria das frações decimais. Somar milhões de custos pequenos acumula erro. Para dinheiro, as opções são:
 
-| Opção | Como | Prós | Contras |
-|---|---|---|---|
-| **Inteiro em unidades mínimas** | Guardar **micro-dólares** (1 USD = 1.000.000) como `bigint` | Exato, rápido, simples de somar | Definir a unidade com folga para preços muito pequenos por token |
-| **Decimal** | `numeric` no Postgres + biblioteca decimal no JS (`decimal.js`, `big.js`) | Exato e flexível | Mais lento; dependência nova |
-| **Float** | `number` | Simples | **Errado para dinheiro** |
+| Opção                           | Como                                                                      | Prós                            | Contras                                                          |
+| ------------------------------- | ------------------------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------- |
+| **Inteiro em unidades mínimas** | Guardar **micro-dólares** (1 USD = 1.000.000) como `bigint`               | Exato, rápido, simples de somar | Definir a unidade com folga para preços muito pequenos por token |
+| **Decimal**                     | `numeric` no Postgres + biblioteca decimal no JS (`decimal.js`, `big.js`) | Exato e flexível                | Mais lento; dependência nova                                     |
+| **Float**                       | `number`                                                                  | Simples                         | **Errado para dinheiro**                                         |
 
 Um **value object `Money`** no domínio esconde a escolha e impede misturar dinheiro com números soltos ([11](./11-clean-architecture-e-padroes.md)).
 
@@ -50,7 +50,7 @@ model_prices
 ```
 
 - O custo é calculado com o preço **vigente no momento da chamada** e **gravado** no evento. Relatórios somam o custo gravado, nunca recalculam.
-- Nunca se faz `UPDATE` num preço; insere-se uma nova linha e fecha-se a anterior (*effective dating*).
+- Nunca se faz `UPDATE` num preço; insere-se uma nova linha e fecha-se a anterior (_effective dating_).
 - Um `EXCLUDE` constraint (ou validação) impede vigências sobrepostas para o mesmo modelo.
 
 ### 2.4 Orçamento mensal
@@ -88,13 +88,13 @@ Num hit, o custo é zero, mas a **economia** é o custo que a chamada **teria ti
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença |
-|---|---|
-| **LiteLLM** (budgets e spend tracking) | Orçamento por chave/time e tabela de preços mantida pela comunidade |
-| **Helicone, Langfuse** | Rastreamento de custo por chamada, sem bloqueio |
-| **Painéis dos provedores** (OpenAI, Anthropic) | Custo agregado por projeto, com atraso; sem visão por cliente seu |
-| **OpenCost / Kubecost, FinOps** | Custo de infraestrutura, não de tokens; mesma disciplina de alocar custo por dono |
-| **Bibliotecas de dinheiro** (`dinero.js`, `decimal.js`, `big.js`) | Representação monetária e aritmética decimal em JS |
+| Ferramenta                                                        | Diferença                                                                         |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **LiteLLM** (budgets e spend tracking)                            | Orçamento por chave/time e tabela de preços mantida pela comunidade               |
+| **Helicone, Langfuse**                                            | Rastreamento de custo por chamada, sem bloqueio                                   |
+| **Painéis dos provedores** (OpenAI, Anthropic)                    | Custo agregado por projeto, com atraso; sem visão por cliente seu                 |
+| **OpenCost / Kubecost, FinOps**                                   | Custo de infraestrutura, não de tokens; mesma disciplina de alocar custo por dono |
+| **Bibliotecas de dinheiro** (`dinero.js`, `decimal.js`, `big.js`) | Representação monetária e aritmética decimal em JS                                |
 
 ## 6. Armadilhas
 
@@ -113,7 +113,7 @@ Num hit, o custo é zero, mas a **economia** é o custo que a chamada **teria ti
 
 ## 8. Para aprofundar
 
-- *What Every Computer Scientist Should Know About Floating-Point Arithmetic* (Goldberg): https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
-- Martin Fowler — *Money* (padrão): https://martinfowler.com/eaaCatalog/money.html
-- Martin Fowler — *Temporal Patterns*: https://martinfowler.com/eaaDev/timeNarrative.html
+- _What Every Computer Scientist Should Know About Floating-Point Arithmetic_ (Goldberg): https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+- Martin Fowler — _Money_ (padrão): https://martinfowler.com/eaaCatalog/money.html
+- Martin Fowler — _Temporal Patterns_: https://martinfowler.com/eaaDev/timeNarrative.html
 - PostgreSQL — tipo `numeric`: https://www.postgresql.org/docs/current/datatype-numeric.html

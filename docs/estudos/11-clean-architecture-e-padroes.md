@@ -23,12 +23,12 @@ flowchart LR
     A["application<br/>use cases"] --> D["domain<br/>entidades, regras, ports"]
 ```
 
-| Camada | Contém | Pode importar |
-|---|---|---|
-| `domain/` | Entidades, value objects, regras puras, **ports** (interfaces) | Nada de infraestrutura nem de framework |
-| `application/` | **Use cases**: orquestram o domínio por meio dos ports | Só `domain/` |
-| `infrastructure/` | **Adapters**: implementam os ports com tecnologias reais | `domain/`, `application/` e bibliotecas |
-| `presentation/` | Controllers, schemas de request/response | `application/` |
+| Camada            | Contém                                                         | Pode importar                           |
+| ----------------- | -------------------------------------------------------------- | --------------------------------------- |
+| `domain/`         | Entidades, value objects, regras puras, **ports** (interfaces) | Nada de infraestrutura nem de framework |
+| `application/`    | **Use cases**: orquestram o domínio por meio dos ports         | Só `domain/`                            |
+| `infrastructure/` | **Adapters**: implementam os ports com tecnologias reais       | `domain/`, `application/` e bibliotecas |
+| `presentation/`   | Controllers, schemas de request/response                       | `application/`                          |
 
 ### 2.2 Ports and adapters (arquitetura hexagonal)
 
@@ -42,15 +42,15 @@ Ganho direto: o use case é testado com um fake em memória, em milissegundos, s
 
 ### 2.3 Os padrões que o projeto pede
 
-| Padrão | Problema que resolve | Onde aparece |
-|---|---|---|
-| **Adapter** | Interfaces incompatíveis (cada provedor tem sua API) | `OpenAIAdapter`, `AnthropicAdapter`, `MockAdapter` atrás do port `LlmProvider` |
-| **Strategy** | Trocar um algoritmo sem mudar quem o usa | Algoritmo de rate limit; critérios de eval |
-| **Chain of Responsibility / Pipeline** | Uma sequência de etapas, cada uma pode encerrar ou passar adiante | A esteira: auth → limite → cache → router |
-| **Repository** | Esconder o acesso a dados atrás de uma coleção do domínio | `TenantRepository`, `SemanticCacheRepository` |
-| **Circuit Breaker** | Parar de chamar um serviço que está falhando | Módulo `resilience` ([18](./18-resiliencia.md)) |
-| **Outbox** | Publicar eventos de forma confiável | Módulo `events` ([21](./21-outbox-e-idempotencia.md)) |
-| **Value Object** | Um valor com regras próprias e sem identidade | `Money`, `ApiKeyHash`, `CacheKey` |
+| Padrão                                 | Problema que resolve                                              | Onde aparece                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Adapter**                            | Interfaces incompatíveis (cada provedor tem sua API)              | `OpenAIAdapter`, `AnthropicAdapter`, `MockAdapter` atrás do port `LlmProvider` |
+| **Strategy**                           | Trocar um algoritmo sem mudar quem o usa                          | Algoritmo de rate limit; critérios de eval                                     |
+| **Chain of Responsibility / Pipeline** | Uma sequência de etapas, cada uma pode encerrar ou passar adiante | A esteira: auth → limite → cache → router                                      |
+| **Repository**                         | Esconder o acesso a dados atrás de uma coleção do domínio         | `TenantRepository`, `SemanticCacheRepository`                                  |
+| **Circuit Breaker**                    | Parar de chamar um serviço que está falhando                      | Módulo `resilience` ([18](./18-resiliencia.md))                                |
+| **Outbox**                             | Publicar eventos de forma confiável                               | Módulo `events` ([21](./21-outbox-e-idempotencia.md))                          |
+| **Value Object**                       | Um valor com regras próprias e sem identidade                     | `Money`, `ApiKeyHash`, `CacheKey`                                              |
 
 A regra do CLAUDE.md: use um padrão **quando ele resolver um problema real**, e diga qual é e por quê.
 
@@ -79,13 +79,13 @@ Pense numa **tomada elétrica**. O aparelho (o domínio) foi projetado para um *
 
 ## 5. Abordagens similares
 
-| Abordagem | Diferença |
-|---|---|
-| **Hexagonal (ports and adapters)** | A origem da ideia; foca em "dentro × fora" sem prescrever camadas |
-| **Onion Architecture** (Jeffrey Palermo) | Mesma regra de dependência, com nomes de camadas diferentes |
+| Abordagem                                                                  | Diferença                                                                                                   |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Hexagonal (ports and adapters)**                                         | A origem da ideia; foca em "dentro × fora" sem prescrever camadas                                           |
+| **Onion Architecture** (Jeffrey Palermo)                                   | Mesma regra de dependência, com nomes de camadas diferentes                                                 |
 | **Arquitetura em camadas tradicional** (controller → service → repository) | Mais simples; o service costuma depender diretamente do ORM, então o domínio fica acoplado à infraestrutura |
-| **Vertical slices** | Organiza por feature (tudo de "criar chave" junto) em vez de por camada; menos cerimônia |
-| **DDD (Domain-Driven Design)** | Complementar: fala de modelagem (agregados, contextos delimitados, linguagem ubíqua), não só de camadas |
+| **Vertical slices**                                                        | Organiza por feature (tudo de "criar chave" junto) em vez de por camada; menos cerimônia                    |
+| **DDD (Domain-Driven Design)**                                             | Complementar: fala de modelagem (agregados, contextos delimitados, linguagem ubíqua), não só de camadas     |
 
 ## 6. Armadilhas
 
@@ -102,7 +102,7 @@ Pense numa **tomada elétrica**. O aparelho (o domínio) foi projetado para um *
 
 ## 8. Para aprofundar
 
-- Robert C. Martin — *The Clean Architecture*: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
-- Alistair Cockburn — *Hexagonal Architecture*: https://alistair.cockburn.us/hexagonal-architecture/
+- Robert C. Martin — _The Clean Architecture_: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
+- Alistair Cockburn — _Hexagonal Architecture_: https://alistair.cockburn.us/hexagonal-architecture/
 - Refactoring.Guru — catálogo de design patterns: https://refactoring.guru/design-patterns
-- Livro: *Clean Architecture* (Robert C. Martin) e *Domain-Driven Design Distilled* (Vaughn Vernon)
+- Livro: _Clean Architecture_ (Robert C. Martin) e _Domain-Driven Design Distilled_ (Vaughn Vernon)

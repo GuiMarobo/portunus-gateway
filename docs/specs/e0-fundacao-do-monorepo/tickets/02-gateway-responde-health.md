@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 01
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/10 — NestJS e Fastify](../../../estudos/10-nestjs-e-fastify.md), [estudos/09](../../../estudos/09-monorepo-pnpm-e-typescript.md) §2.3–2.5
 
@@ -12,14 +12,14 @@
 
 ## Critérios de aceite
 
-- [ ] Configuração base de TypeScript na raiz com `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `experimentalDecorators`, `emitDecoratorMetadata`, saída CommonJS e alvo suportado pelo Node 22. O gateway a estende.
-- [ ] Pacote `@portunus/gateway` escrito à mão (sem `nest new`), com `@nestjs/cli` como devDependency e `nest-cli.json` com `generateOptions.spec: false`.
-- [ ] A construção da aplicação (montar o Nest com Fastify) fica separada do ponto de entrada que faz o `listen`. Essa separação é o seam de teste do ticket 03.
-- [ ] `GET /health` → `200`, corpo `{"status":"ok"}`, sem autenticação e fora de `/v1`.
-- [ ] Porta e host vêm de constantes nomeadas (a configuração validada entra no ticket 07).
-- [ ] Scripts raiz `dev`, `build` e `typecheck` funcionando; `node` sobre o build responde `/health`.
-- [ ] ADR 008 (Fastify em vez de Express no NestJS) registrado com status "A validar" e a medição prevista para o E3.
-- [ ] Seção de comandos do CLAUDE.md em sincronia com os scripts criados.
+- [x] Configuração base de TypeScript na raiz com `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `experimentalDecorators`, `emitDecoratorMetadata`, saída CommonJS e alvo suportado pelo Node 22. O gateway a estende.
+- [x] Pacote `@portunus/gateway` escrito à mão (sem `nest new`), com `@nestjs/cli` como devDependency e `nest-cli.json` com `generateOptions.spec: false`.
+- [x] A construção da aplicação (montar o Nest com Fastify) fica separada do ponto de entrada que faz o `listen`. Essa separação é o seam de teste do ticket 03.
+- [x] `GET /health` → `200`, corpo `{"status":"ok"}`, sem autenticação e fora de `/v1`.
+- [x] Porta e host vêm de constantes nomeadas (a configuração validada entra no ticket 07).
+- [x] Scripts raiz `dev`, `build` e `typecheck` funcionando; `node` sobre o build responde `/health`.
+- [x] ADR 008 (Fastify em vez de Express no NestJS) registrado com status "A validar" e a medição prevista para o E3.
+- [x] Seção de comandos do CLAUDE.md em sincronia com os scripts criados.
 
 ## Pontos de atenção
 

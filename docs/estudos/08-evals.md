@@ -20,26 +20,26 @@ name: classificacao-tickets
 target: { alias: rapido }
 threshold: 0.9
 cases:
-  - input: "Meu cartão foi cobrado duas vezes"
-    expect: { type: equals, value: "financeiro" }
-  - input: "O app fecha sozinho ao abrir"
-    expect: { type: equals, value: "bug" }
-  - input: "Explique a política de reembolso"
-    expect: { type: llm_judge, rubric: "Menciona prazo de 7 dias e não inventa condições" }
+  - input: 'Meu cartão foi cobrado duas vezes'
+    expect: { type: equals, value: 'financeiro' }
+  - input: 'O app fecha sozinho ao abrir'
+    expect: { type: equals, value: 'bug' }
+  - input: 'Explique a política de reembolso'
+    expect: { type: llm_judge, rubric: 'Menciona prazo de 7 dias e não inventa condições' }
 ```
 
 (Formato ilustrativo; o real será definido na spec do E15.)
 
 ### 2.2 Tipos de critério
 
-| Critério | Como avalia | Custo | Confiabilidade |
-|---|---|---|---|
-| **Contém / igual** | Comparação de strings | Grátis | Alta, mas rígido |
-| **Regex** | Padrão de texto | Grátis | Alta |
-| **JSON Schema** | A saída é um JSON válido para o schema? | Grátis | Alta; ótimo para extração e classificação |
-| **Similaridade semântica** | Embedding da resposta × embedding da referência ≥ limiar | Baixo | Média (ver [05](./05-embeddings.md)) |
-| **LLM-as-judge** | Outro modelo dá nota segundo uma rubrica | Alto | Média; tem vieses |
-| **Avaliação humana** | Pessoas julgam | Muito alto | A referência, mas não escala |
+| Critério                   | Como avalia                                              | Custo      | Confiabilidade                            |
+| -------------------------- | -------------------------------------------------------- | ---------- | ----------------------------------------- |
+| **Contém / igual**         | Comparação de strings                                    | Grátis     | Alta, mas rígido                          |
+| **Regex**                  | Padrão de texto                                          | Grátis     | Alta                                      |
+| **JSON Schema**            | A saída é um JSON válido para o schema?                  | Grátis     | Alta; ótimo para extração e classificação |
+| **Similaridade semântica** | Embedding da resposta × embedding da referência ≥ limiar | Baixo      | Média (ver [05](./05-embeddings.md))      |
+| **LLM-as-judge**           | Outro modelo dá nota segundo uma rubrica                 | Alto       | Média; tem vieses                         |
+| **Avaliação humana**       | Pessoas julgam                                           | Muito alto | A referência, mas não escala              |
 
 A regra prática: **use o critério mais barato e determinístico que responda à pergunta**. LLM-as-judge só onde nada mais serve.
 
@@ -82,13 +82,13 @@ pull request altera prompt → CI sobe gateway + mock (ou modelo real) → evals
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Tipo | Diferença principal |
-|---|---|---|
-| **promptfoo** | CLI open source (Node), YAML | Muito próximo do que o E15 constrói; ótimo para ler como referência |
-| **OpenAI Evals** | Framework + plataforma | Integrado à OpenAI |
-| **DeepEval** | Framework Python, estilo pytest | Muitas métricas prontas (incluindo para RAG) |
-| **Ragas** | Python | Especializado em avaliar RAG |
-| **LangSmith, Braintrust, Langfuse** | Plataformas (SaaS ou self-hosted) | Datasets, experimentos e avaliação online em produção |
+| Ferramenta                          | Tipo                              | Diferença principal                                                 |
+| ----------------------------------- | --------------------------------- | ------------------------------------------------------------------- |
+| **promptfoo**                       | CLI open source (Node), YAML      | Muito próximo do que o E15 constrói; ótimo para ler como referência |
+| **OpenAI Evals**                    | Framework + plataforma            | Integrado à OpenAI                                                  |
+| **DeepEval**                        | Framework Python, estilo pytest   | Muitas métricas prontas (incluindo para RAG)                        |
+| **Ragas**                           | Python                            | Especializado em avaliar RAG                                        |
+| **LangSmith, Braintrust, Langfuse** | Plataformas (SaaS ou self-hosted) | Datasets, experimentos e avaliação online em produção               |
 
 ## 6. Armadilhas
 
@@ -108,6 +108,6 @@ pull request altera prompt → CI sobe gateway + mock (ou modelo real) → evals
 ## 8. Para aprofundar
 
 - promptfoo — docs: https://www.promptfoo.dev/docs/intro/
-- Zheng et al. — *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*: https://arxiv.org/abs/2306.05685
-- Hamel Husain — *Your AI Product Needs Evals*: https://hamel.dev/blog/posts/evals/
-- OpenAI — *Evaluation best practices*: https://platform.openai.com/docs/guides/evaluation-best-practices
+- Zheng et al. — _Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena_: https://arxiv.org/abs/2306.05685
+- Hamel Husain — _Your AI Product Needs Evals_: https://hamel.dev/blog/posts/evals/
+- OpenAI — _Evaluation best practices_: https://platform.openai.com/docs/guides/evaluation-best-practices

@@ -30,23 +30,23 @@ Projeto pessoal cujo objetivo principal é **eu aprender** a construir esse tipo
 
 ## 1. Stack e ferramentas
 
-| Área | Escolha |
-|---|---|
-| Runtime | **Node 22 LTS** (fixado em `.nvmrc` e `engines`) |
-| Linguagem | **TypeScript** em modo `strict`, **CommonJS** |
-| Gerenciador de pacotes | **pnpm** com **workspaces** (não usar npm nem yarn) |
-| Framework | **NestJS** com adapter **Fastify** |
-| Validação e schemas | **Zod** (fonte única dos tipos via `z.infer`; pipe de validação próprio no Nest) |
-| Banco | **PostgreSQL + pgvector** via **Drizzle ORM** e **drizzle-kit** (migrations), tudo em `libs/database` |
-| Cache, rate limit, jobs | **Redis** + **BullMQ** |
-| Eventos | **RabbitMQ** (exchange `gateway.events`, padrão outbox) |
-| Busca de logs | **Elasticsearch** |
-| Logs | **pino** (JSON estruturado) |
-| Telemetria | **OpenTelemetry** → Prometheus, Loki, Tempo, Grafana |
-| Testes | **Vitest** (com plugin SWC para decorators) + **Testcontainers** nos testes de integração |
-| Lint e formatação | **ESLint** (typescript-eslint strict) + **Prettier** |
-| Carga | **k6** |
-| Infra local | **Docker Compose** com perfis `core`, `search`, `observability`, `full` |
+| Área                    | Escolha                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| Runtime                 | **Node 22 LTS** (fixado em `.nvmrc` e `engines`)                                                      |
+| Linguagem               | **TypeScript** em modo `strict`, **CommonJS**                                                         |
+| Gerenciador de pacotes  | **pnpm** com **workspaces** (não usar npm nem yarn)                                                   |
+| Framework               | **NestJS** com adapter **Fastify**                                                                    |
+| Validação e schemas     | **Zod** (fonte única dos tipos via `z.infer`; pipe de validação próprio no Nest)                      |
+| Banco                   | **PostgreSQL + pgvector** via **Drizzle ORM** e **drizzle-kit** (migrations), tudo em `libs/database` |
+| Cache, rate limit, jobs | **Redis** + **BullMQ**                                                                                |
+| Eventos                 | **RabbitMQ** (exchange `gateway.events`, padrão outbox)                                               |
+| Busca de logs           | **Elasticsearch**                                                                                     |
+| Logs                    | **pino** (JSON estruturado)                                                                           |
+| Telemetria              | **OpenTelemetry** → Prometheus, Loki, Tempo, Grafana                                                  |
+| Testes                  | **Vitest** (com plugin SWC para decorators) + **Testcontainers** nos testes de integração             |
+| Lint e formatação       | **ESLint** (typescript-eslint strict) + **Prettier**                                                  |
+| Carga                   | **k6**                                                                                                |
+| Infra local             | **Docker Compose** com perfis `core`, `search`, `observability`, `full`                               |
 
 ### Estrutura de pastas
 
@@ -89,7 +89,7 @@ apps/gateway/src/modules/<modulo>/
 
 ## 2. Comandos
 
-> O repositório está na fase de documentação. Estes são os scripts-alvo, que devem ser criados assim que o monorepo for montado (Fase 1). **Mantenha esta seção em sincronia com o `package.json` raiz.**
+> Já existem na raiz: `dev`, `build`, `typecheck`, `test`, `lint`, `format` e `format:check`. Os demais comandos são alvos, criados nos tickets seguintes. **Mantenha esta seção em sincronia com o `package.json` raiz.**
 
 ```bash
 pnpm install                                   # instalar dependências
@@ -99,9 +99,10 @@ pnpm dev                                       # gateway em modo watch
 pnpm --filter @portunus/consumers dev       # consumidores e worker
 
 pnpm typecheck                                 # tsc --noEmit em todos os pacotes
-pnpm lint                                      # ESLint
+pnpm lint                                      # ESLint (typed, regras de camada) no monorepo inteiro
 pnpm format                                    # Prettier --write
-pnpm test                                      # unitários (Vitest)
+pnpm format:check                              # Prettier --check (falha se algo estiver fora do formato)
+pnpm test                                      # unitários (Vitest: *.spec.ts de todos os pacotes, sem Docker nem build)
 pnpm test:int                                  # integração (Vitest + Testcontainers, exige Docker)
 pnpm build                                     # build de produção de todos os apps
 

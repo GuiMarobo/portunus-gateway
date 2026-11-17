@@ -10,7 +10,7 @@ Quando várias aplicações chamam provedores de LLM diretamente, cada uma reimp
 
 ## 2. Como funciona
 
-Um **LLM gateway** (ou *AI gateway*) é um **proxy reverso especializado**: fica entre os clientes e os provedores, fala o mesmo protocolo que os provedores (aqui, o da OpenAI) e aplica uma **esteira** de políticas em cada chamada.
+Um **LLM gateway** (ou _AI gateway_) é um **proxy reverso especializado**: fica entre os clientes e os provedores, fala o mesmo protocolo que os provedores (aqui, o da OpenAI) e aplica uma **esteira** de políticas em cada chamada.
 
 ```mermaid
 flowchart LR
@@ -26,15 +26,15 @@ flowchart LR
 
 Um **API gateway** genérico (Kong, NGINX, AWS API Gateway, Envoy) já faz autenticação, rate limit, roteamento e logs. O que muda num gateway de LLM:
 
-| Aspecto | API gateway genérico | LLM gateway |
-|---|---|---|
-| Unidade de custo | Requisição | **Token**, com preço diferente por modelo e por direção |
-| Rate limit | Requisições/segundo | Requisições **e tokens** por minuto |
-| Cache | Por URL e headers (GET) | Por **conteúdo** do corpo (POST), inclusive por **sentido** (semântico) |
-| Roteamento | Por caminho/host | Por **alias de modelo**, com fallback entre provedores com APIs diferentes |
-| Respostas | Curtas | Longas e em **streaming** |
-| Logs | Metadados | Metadados + **conteúdo** (prompts), com questões de PII |
-| Qualidade | Status HTTP | A resposta pode ser `200` e estar **errada**, daí os evals |
+| Aspecto          | API gateway genérico    | LLM gateway                                                                |
+| ---------------- | ----------------------- | -------------------------------------------------------------------------- |
+| Unidade de custo | Requisição              | **Token**, com preço diferente por modelo e por direção                    |
+| Rate limit       | Requisições/segundo     | Requisições **e tokens** por minuto                                        |
+| Cache            | Por URL e headers (GET) | Por **conteúdo** do corpo (POST), inclusive por **sentido** (semântico)    |
+| Roteamento       | Por caminho/host        | Por **alias de modelo**, com fallback entre provedores com APIs diferentes |
+| Respostas        | Curtas                  | Longas e em **streaming**                                                  |
+| Logs             | Metadados               | Metadados + **conteúdo** (prompts), com questões de PII                    |
+| Qualidade        | Status HTTP             | A resposta pode ser `200` e estar **errada**, daí os evals                 |
 
 ### 2.2 As capacidades típicas
 
@@ -56,15 +56,15 @@ Um **API gateway** genérico (Kong, NGINX, AWS API Gateway, Envoy) já faz auten
 
 ## 5. Ferramentas similares (produtos de mercado)
 
-| Ferramenta | Tipo | Diferença principal |
-|---|---|---|
-| **LiteLLM** | Open source (Python), SDK + proxy | O mais popular; suporta centenas de modelos, formato OpenAI, orçamento, chaves virtuais |
-| **Portkey** | SaaS + gateway open source | Foco em roteamento, guardrails e observabilidade |
-| **Kong AI Gateway** | Plugins sobre o Kong | Para quem já usa Kong como API gateway |
-| **Cloudflare AI Gateway** | Serviço gerenciado na edge | Cache, rate limit e analytics sem infraestrutura própria |
-| **Envoy AI Gateway** | Open source sobre o Envoy | Voltado para Kubernetes e service mesh |
-| **OpenRouter** | Marketplace hospedado | Uma chave para muitos modelos; ele é o intermediário de cobrança |
-| **Helicone, Langfuse** | Observabilidade de LLM (proxy ou SDK) | Foco em logs, custo e traces de chamadas, menos em controle |
+| Ferramenta                | Tipo                                  | Diferença principal                                                                     |
+| ------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------- |
+| **LiteLLM**               | Open source (Python), SDK + proxy     | O mais popular; suporta centenas de modelos, formato OpenAI, orçamento, chaves virtuais |
+| **Portkey**               | SaaS + gateway open source            | Foco em roteamento, guardrails e observabilidade                                        |
+| **Kong AI Gateway**       | Plugins sobre o Kong                  | Para quem já usa Kong como API gateway                                                  |
+| **Cloudflare AI Gateway** | Serviço gerenciado na edge            | Cache, rate limit e analytics sem infraestrutura própria                                |
+| **Envoy AI Gateway**      | Open source sobre o Envoy             | Voltado para Kubernetes e service mesh                                                  |
+| **OpenRouter**            | Marketplace hospedado                 | Uma chave para muitos modelos; ele é o intermediário de cobrança                        |
+| **Helicone, Langfuse**    | Observabilidade de LLM (proxy ou SDK) | Foco em logs, custo e traces de chamadas, menos em controle                             |
 
 O Portunus faz, em escala de estudo, o que LiteLLM e Portkey fazem. Ler a documentação deles é um ótimo jeito de ver decisões reais (como nomeiam headers, como calculam orçamento etc.).
 
@@ -84,4 +84,4 @@ A esteira (CLAUDE.md, invariante 2): `auth → rate limit → orçamento → cac
 - LiteLLM — docs do proxy: https://docs.litellm.ai/docs/simple_proxy
 - Portkey — AI Gateway (open source): https://github.com/Portkey-AI/gateway
 - Cloudflare AI Gateway: https://developers.cloudflare.com/ai-gateway/
-- Chris Richardson — *API Gateway pattern*: https://microservices.io/patterns/apigateway.html
+- Chris Richardson — _API Gateway pattern_: https://microservices.io/patterns/apigateway.html

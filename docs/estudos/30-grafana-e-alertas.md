@@ -13,7 +13,7 @@ Ter métricas, logs e traces não adianta se ninguém olha, e ninguém consegue 
 
 ### 2.1 Grafana
 
-Uma ferramenta de **visualização**: não guarda dados, **consulta** outras fontes (*data sources*: Prometheus, Loki, Tempo, Postgres, Elasticsearch...) e as mostra em painéis.
+Uma ferramenta de **visualização**: não guarda dados, **consulta** outras fontes (_data sources_: Prometheus, Loki, Tempo, Postgres, Elasticsearch...) e as mostra em painéis.
 
 - **Dashboard:** uma página de **painéis** (gráficos de série temporal, números, tabelas, mapas de calor).
 - **Variáveis:** filtros no topo (ex.: `$tenant`, `$model`) que mudam todas as consultas da página.
@@ -57,7 +57,7 @@ Peças:
 - **Todo alerta precisa ser acionável:** se a resposta é "ignore", o alerta não deveria existir.
 - **Fadiga de alertas:** alertas demais fazem as pessoas ignorarem os importantes.
 - **Runbook:** cada alerta com um link para "o que fazer".
-- **Burn rate de SLO:** alertar quando o *error budget* está sendo consumido rápido demais é mais robusto que limiares fixos.
+- **Burn rate de SLO:** alertar quando o _error budget_ está sendo consumido rápido demais é mais robusto que limiares fixos.
 
 ## 3. Analogia
 
@@ -71,21 +71,21 @@ O Grafana é o **painel da torre de controle de um aeroporto**: ele não pilota 
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença |
-|---|---|
-| **Grafana** | Multi-fonte, open source, provisionamento como código. **A escolha do projeto** |
-| **Kibana** | Visualização do ecossistema Elastic; forte em logs e busca |
-| **OpenSearch Dashboards** | Equivalente do Kibana no OpenSearch |
+| Ferramenta                  | Diferença                                                                                                        |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Grafana**                 | Multi-fonte, open source, provisionamento como código. **A escolha do projeto**                                  |
+| **Kibana**                  | Visualização do ecossistema Elastic; forte em logs e busca                                                       |
+| **OpenSearch Dashboards**   | Equivalente do Kibana no OpenSearch                                                                              |
 | **Prometheus Alertmanager** | Roteamento de alertas do ecossistema Prometheus (agrupamento, silenciamento); alternativa ao alerting do Grafana |
-| **Datadog, New Relic** | Dashboards e alertas integrados na plataforma SaaS |
-| **PagerDuty, Opsgenie** | Gestão de plantão e escalonamento; **recebem** alertas, não os geram |
-| **Metabase, Superset** | BI e analytics de negócio (relatórios de custo a partir do Postgres), não monitoramento operacional |
+| **Datadog, New Relic**      | Dashboards e alertas integrados na plataforma SaaS                                                               |
+| **PagerDuty, Opsgenie**     | Gestão de plantão e escalonamento; **recebem** alertas, não os geram                                             |
+| **Metabase, Superset**      | BI e analytics de negócio (relatórios de custo a partir do Postgres), não monitoramento operacional              |
 
 ## 6. Armadilhas
 
 - **Dashboards criados à mão** e perdidos ao recriar o ambiente.
 - **Consultas pesadas** em dashboards com atualização a cada 5 s, que sobrecarregam o Prometheus e o Loki.
-- **Alertas sem `pending period`** (*flapping*).
+- **Alertas sem `pending period`** (_flapping_).
 - **Alertas sobre métricas que somem:** se o serviço cai, a métrica para de existir e a regra "erro > 5%" nunca dispara. Alerte também sobre ausência de dados (`absent()`).
 - **Alerta de orçamento duplicado:** o "80% do orçamento" deve disparar uma vez por tenant por mês (dedupe, no E12).
 
@@ -98,7 +98,7 @@ O Grafana é o **painel da torre de controle de um aeroporto**: ele não pilota 
 ## 8. Para aprofundar
 
 - Grafana — documentação: https://grafana.com/docs/grafana/latest/
-- Grafana — *Provisioning*: https://grafana.com/docs/grafana/latest/administration/provisioning/
-- Grafana — *Alerting*: https://grafana.com/docs/grafana/latest/alerting/
-- Rob Ewaschuk — *My Philosophy on Alerting*: https://docs.google.com/document/d/199PqyG3UsyXlwieHaqbGiWVa8eMWi8zzAn0YfcApr8Q/
-- Google SRE Workbook — *Alerting on SLOs*: https://sre.google/workbook/alerting-on-slos/
+- Grafana — _Provisioning_: https://grafana.com/docs/grafana/latest/administration/provisioning/
+- Grafana — _Alerting_: https://grafana.com/docs/grafana/latest/alerting/
+- Rob Ewaschuk — _My Philosophy on Alerting_: https://docs.google.com/document/d/199PqyG3UsyXlwieHaqbGiWVa8eMWi8zzAn0YfcApr8Q/
+- Google SRE Workbook — _Alerting on SLOs_: https://sre.google/workbook/alerting-on-slos/

@@ -4,21 +4,21 @@ Tickets do épico [E0 — Fundação do monorepo](../spec.md). Cada ticket é um
 
 ## Sequência
 
-| # | Ticket | Bloqueado por | Status |
-|---|---|---|---|
-| 01 | [Raiz do workspace com Node e pnpm fixados](./01-raiz-do-workspace.md) | — | done |
-| 02 | [Gateway responde `GET /health`](./02-gateway-responde-health.md) | 01 | ready-for-agent |
-| 03 | [Testes unitários pelo seam do app](./03-testes-unitarios-pelo-seam-do-app.md) | 02 | ready-for-agent |
-| 04 | [Lint e formatação com a regra de camadas](./04-lint-e-formatacao.md) | 02 | ready-for-agent |
-| 05 | [CI de qualidade e proteção da `main`](./05-ci-de-qualidade-e-protecao-da-main.md) | 03, 04 | ready-for-agent |
-| 06 | [Primeira lib compartilhada: `@portunus/common`](./06-primeira-lib-compartilhada.md) | 03, 04 | ready-for-agent |
-| 07 | [Contrato de configuração do gateway](./07-contrato-de-configuracao.md) | 06 | ready-for-agent |
-| 08 | [Logs estruturados com pino](./08-logs-estruturados.md) | 07 | ready-for-agent |
-| 09 | [`request_id` e redação de dados sensíveis](./09-request-id-e-redacao.md) | 08 | ready-for-agent |
-| 10 | [Graceful shutdown](./10-graceful-shutdown.md) | 09 | ready-for-agent |
-| 11 | [Esqueletos das libs restantes](./11-esqueletos-das-libs.md) | 06 | ready-for-agent |
-| 12 | [Compose `core` e testes de integração](./12-compose-core-e-testes-de-integracao.md) | 05 | ready-for-agent |
-| 13 | [Fechamento do épico](./13-fechamento-do-epico.md) | 01–12 | ready-for-agent |
+| #   | Ticket                                                                               | Bloqueado por | Status          |
+| --- | ------------------------------------------------------------------------------------ | ------------- | --------------- |
+| 01  | [Raiz do workspace com Node e pnpm fixados](./01-raiz-do-workspace.md)               | —             | done            |
+| 02  | [Gateway responde `GET /health`](./02-gateway-responde-health.md)                    | 01            | ready-for-agent |
+| 03  | [Testes unitários pelo seam do app](./03-testes-unitarios-pelo-seam-do-app.md)       | 02            | ready-for-agent |
+| 04  | [Lint e formatação com a regra de camadas](./04-lint-e-formatacao.md)                | 02            | ready-for-agent |
+| 05  | [CI de qualidade e proteção da `main`](./05-ci-de-qualidade-e-protecao-da-main.md)   | 03, 04        | ready-for-agent |
+| 06  | [Primeira lib compartilhada: `@portunus/common`](./06-primeira-lib-compartilhada.md) | 03, 04        | ready-for-agent |
+| 07  | [Contrato de configuração do gateway](./07-contrato-de-configuracao.md)              | 06            | ready-for-agent |
+| 08  | [Logs estruturados com pino](./08-logs-estruturados.md)                              | 07            | ready-for-agent |
+| 09  | [`request_id` e redação de dados sensíveis](./09-request-id-e-redacao.md)            | 08            | ready-for-agent |
+| 10  | [Graceful shutdown](./10-graceful-shutdown.md)                                       | 09            | ready-for-agent |
+| 11  | [Esqueletos das libs restantes](./11-esqueletos-das-libs.md)                         | 06            | ready-for-agent |
+| 12  | [Compose `core` e testes de integração](./12-compose-core-e-testes-de-integracao.md) | 05            | ready-for-agent |
+| 13  | [Fechamento do épico](./13-fechamento-do-epico.md)                                   | 01–12         | ready-for-agent |
 
 ## Dependências
 
@@ -48,16 +48,16 @@ Depois do 06, existem três trilhas independentes: **07 → 08 → 09 → 10** (
 
 Vêm das "Decisões a confirmar" da [spec](../spec.md#decisões-a-confirmar-na-revisão-desta-spec). Cada ticket abaixo começa confirmando a sua.
 
-| Decisão | Ticket |
-|---|---|
-| Dependências novas do ferramental (TypeScript, Nest, Fastify) | 02 |
-| Contrato do `GET /health` | 02 |
-| Dependências de teste (Vitest, SWC) | 03 |
-| Dependências de lint e formatação | 04 |
-| Estratégia de resolução de pacotes (opção C, ADR 011) e `zod` | 06 |
-| Logger `nestjs-pino` e suas dependências | 08 |
-| Contrato do header `x-request-id` | 09 |
-| Testcontainers | 12 |
+| Decisão                                                       | Ticket |
+| ------------------------------------------------------------- | ------ |
+| Dependências novas do ferramental (TypeScript, Nest, Fastify) | 02     |
+| Contrato do `GET /health`                                     | 02     |
+| Dependências de teste (Vitest, SWC)                           | 03     |
+| Dependências de lint e formatação                             | 04     |
+| Estratégia de resolução de pacotes (opção C, ADR 011) e `zod` | 06     |
+| Logger `nestjs-pino` e suas dependências                      | 08     |
+| Contrato do header `x-request-id`                             | 09     |
+| Testcontainers                                                | 12     |
 
 ## Definição de pronto (vale para todo ticket)
 

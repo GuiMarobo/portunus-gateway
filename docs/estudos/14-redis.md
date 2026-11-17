@@ -19,14 +19,14 @@ Várias etapas do caminho crítico precisam de um estado **compartilhado entre i
 
 ### 2.2 Estruturas de dados e onde servem
 
-| Estrutura | Comandos típicos | Complexidade | Uso no projeto |
-|---|---|---|---|
-| **String** | `GET`, `SET key val EX 60`, `INCR`, `INCRBY` | O(1) | Cache exato, cache de chave de API, contadores |
-| **Hash** | `HSET`, `HGET`, `HINCRBY` | O(1) por campo | Estado do circuit breaker (estado, falhas, aberto em) |
-| **Sorted set** | `ZADD`, `ZRANGEBYSCORE`, `ZREMRANGEBYSCORE` | O(log n) | Rate limit por janela deslizante (log) |
-| **List** | `LPUSH`, `BRPOP` | O(1) nas pontas | Filas simples (o BullMQ usa por baixo) |
-| **Stream** | `XADD`, `XREADGROUP`, `XACK` | O(1) amortizado | Log de eventos com grupos de consumidores |
-| **Pub/Sub** | `PUBLISH`, `SUBSCRIBE` | O(assinantes) | Notificações efêmeras (sem persistência) |
+| Estrutura      | Comandos típicos                             | Complexidade    | Uso no projeto                                        |
+| -------------- | -------------------------------------------- | --------------- | ----------------------------------------------------- |
+| **String**     | `GET`, `SET key val EX 60`, `INCR`, `INCRBY` | O(1)            | Cache exato, cache de chave de API, contadores        |
+| **Hash**       | `HSET`, `HGET`, `HINCRBY`                    | O(1) por campo  | Estado do circuit breaker (estado, falhas, aberto em) |
+| **Sorted set** | `ZADD`, `ZRANGEBYSCORE`, `ZREMRANGEBYSCORE`  | O(log n)        | Rate limit por janela deslizante (log)                |
+| **List**       | `LPUSH`, `BRPOP`                             | O(1) nas pontas | Filas simples (o BullMQ usa por baixo)                |
+| **Stream**     | `XADD`, `XREADGROUP`, `XACK`                 | O(1) amortizado | Log de eventos com grupos de consumidores             |
+| **Pub/Sub**    | `PUBLISH`, `SUBSCRIBE`                       | O(assinantes)   | Notificações efêmeras (sem persistência)              |
 
 ### 2.3 TTL e expiração
 
@@ -73,14 +73,14 @@ O Redis é o **quadro branco da sala de operações**. Todo mundo olha para ele,
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença principal | Quando escolher |
-|---|---|---|
-| **Valkey** | Fork open source do Redis (Linux Foundation), criado após a mudança de licença do Redis em 2024; compatível com o protocolo | Quer garantia de licença open source |
-| **Memcached** | Só strings, multi-thread, sem persistência nem estruturas | Cache puro e simples |
-| **Dragonfly** | Compatível com Redis, multi-thread, alto throughput numa máquina | Instância única muito carregada |
-| **KeyDB** | Fork multi-thread do Redis | Similar ao Dragonfly |
-| **Hazelcast, Apache Ignite** | Grid de dados distribuído (JVM) | Ecossistema Java, computação distribuída |
-| **Cache em memória do processo** (`lru-cache`) | Sem rede, mais rápido, mas não compartilhado | Dados imutáveis ou por instância (ex.: tabela de preços) |
+| Ferramenta                                     | Diferença principal                                                                                                         | Quando escolher                                          |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Valkey**                                     | Fork open source do Redis (Linux Foundation), criado após a mudança de licença do Redis em 2024; compatível com o protocolo | Quer garantia de licença open source                     |
+| **Memcached**                                  | Só strings, multi-thread, sem persistência nem estruturas                                                                   | Cache puro e simples                                     |
+| **Dragonfly**                                  | Compatível com Redis, multi-thread, alto throughput numa máquina                                                            | Instância única muito carregada                          |
+| **KeyDB**                                      | Fork multi-thread do Redis                                                                                                  | Similar ao Dragonfly                                     |
+| **Hazelcast, Apache Ignite**                   | Grid de dados distribuído (JVM)                                                                                             | Ecossistema Java, computação distribuída                 |
+| **Cache em memória do processo** (`lru-cache`) | Sem rede, mais rápido, mas não compartilhado                                                                                | Dados imutáveis ou por instância (ex.: tabela de preços) |
 
 Sobre licença: o Redis mudou para licenças source-available em 2024 e voltou a oferecer a AGPLv3 a partir do Redis 8. Para um projeto de estudo isso não muda nada, mas é um tema que aparece em entrevistas e decisões de empresa.
 
@@ -91,22 +91,22 @@ Sobre licença: o Redis mudou para licenças source-available em 2024 e voltou a
 - **Race conditions** em "ler e depois escrever" sem Lua.
 - **Redis fora do ar:** precisa de comportamento definido (fail-open no rate limit e no cache, ADR 006; `503` no assíncrono).
 - **Eviction apagando o que não é cache.** Considere instâncias (ou bancos lógicos e políticas) separados para cache × filas.
-- **Chaves sem tenant:** violaria o isolamento (invariante 3). Padronize um *key builder*.
+- **Chaves sem tenant:** violaria o isolamento (invariante 3). Padronize um _key builder_.
 
 ## 7. No Portunus
 
-| Chave | Épico |
-|---|---|
-| `auth:key:{hash}` | E2 |
-| `cb:{provider}` | E7 |
-| `rl:{tenant}:{janela}`, `budget:{tenant}:{aaaamm}` | E8 |
-| `cache:exact:{tenant}:{hash}` | E9 |
-| Filas BullMQ `async-chat`, `webhooks` | E14 |
+| Chave                                              | Épico |
+| -------------------------------------------------- | ----- |
+| `auth:key:{hash}`                                  | E2    |
+| `cb:{provider}`                                    | E7    |
+| `rl:{tenant}:{janela}`, `budget:{tenant}:{aaaamm}` | E8    |
+| `cache:exact:{tenant}:{hash}`                      | E9    |
+| Filas BullMQ `async-chat`, `webhooks`              | E14   |
 
 ## 8. Para aprofundar
 
 - Redis — documentação de tipos de dados: https://redis.io/docs/latest/develop/data-types/
-- Redis — *Programmability with Lua*: https://redis.io/docs/latest/develop/interact/programmability/eval-intro/
-- Redis — *Key eviction*: https://redis.io/docs/latest/develop/reference/eviction/
+- Redis — _Programmability with Lua_: https://redis.io/docs/latest/develop/interact/programmability/eval-intro/
+- Redis — _Key eviction_: https://redis.io/docs/latest/develop/reference/eviction/
 - ioredis: https://github.com/redis/ioredis
 - Valkey: https://valkey.io/

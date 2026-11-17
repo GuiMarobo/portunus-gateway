@@ -4,5 +4,25 @@
   "engines": {
     "node": ">=22 <23"
   },
-  "packageManager": "pnpm@12.21.0"
+  "packageManager": "pnpm@12.21.0",
+  "scripts": {
+    "dev": "pnpm --filter @portunus/gateway dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@swc/core": "1.16.21",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.2",
+    "unplugin-swc": "2.0.0",
+    "vitest": "5.0.5"
+  }
 }

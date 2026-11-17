@@ -23,17 +23,17 @@ lgw_live_8f3KxQ2...   (prefixo visível)  +  segredo aleatório (ex.: 32 bytes e
 ```
 
 - **Alta entropia:** 32 bytes aleatórios (256 bits) de um gerador criptográfico (`crypto.randomBytes`). Adivinhar é impossível na prática.
-- **Prefixo identificável:** permite saber de onde a chave veio num log ou num vazamento, e habilita ferramentas de *secret scanning* (o GitHub detecta prefixos registrados).
+- **Prefixo identificável:** permite saber de onde a chave veio num log ou num vazamento, e habilita ferramentas de _secret scanning_ (o GitHub detecta prefixos registrados).
 - **Exibida uma única vez:** o gateway guarda apenas o **hash**.
 
 ### 2.3 Por que SHA-256, e não bcrypt?
 
-| Segredo | Entropia | Hash adequado | Motivo |
-|---|---|---|---|
-| **Senha humana** | Baixa ("Senha@123") | **bcrypt / scrypt / argon2** (lentos de propósito) | Lentidão impede ataque de força bruta com dicionário |
-| **API key aleatória** | Altíssima (256 bits) | **SHA-256** (rápido) | Força bruta é inviável mesmo com hash rápido; e o hash é calculado em **toda requisição**, então precisa ser barato |
+| Segredo               | Entropia             | Hash adequado                                      | Motivo                                                                                                              |
+| --------------------- | -------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Senha humana**      | Baixa ("Senha@123")  | **bcrypt / scrypt / argon2** (lentos de propósito) | Lentidão impede ataque de força bruta com dicionário                                                                |
+| **API key aleatória** | Altíssima (256 bits) | **SHA-256** (rápido)                               | Força bruta é inviável mesmo com hash rápido; e o hash é calculado em **toda requisição**, então precisa ser barato |
 
-Com SHA-256, a busca é direta: `hash(chave_recebida)` → procurar esse hash no Redis/Postgres. Com bcrypt, isso seria impossível (cada hash tem um *salt* diferente) e lento.
+Com SHA-256, a busca é direta: `hash(chave_recebida)` → procurar esse hash no Redis/Postgres. Com bcrypt, isso seria impossível (cada hash tem um _salt_ diferente) e lento.
 
 ### 2.4 Fluxo de autenticação
 
@@ -50,7 +50,7 @@ flowchart TD
 ```
 
 - **TTL curto no cache** = janela em que uma chave revogada ainda funciona. Solução: na revogação, apagar a entrada do Redis (invalidação ativa) além do TTL.
-- **Último uso:** atualizar a cada requisição seria uma escrita no Postgres por chamada. Use *throttle* (no máximo uma vez por minuto por chave) e fora do caminho crítico.
+- **Último uso:** atualizar a cada requisição seria uma escrita no Postgres por chamada. Use _throttle_ (no máximo uma vez por minuto por chave) e fora do caminho crítico.
 
 ### 2.5 Credencial de admin separada
 
@@ -58,11 +58,11 @@ Rotas de administração (criar tenant, emitir chave) usam outra credencial. Uma
 
 ### 2.6 Multi-tenancy: modelos de isolamento
 
-| Modelo | Como | Prós | Contras |
-|---|---|---|---|
-| **Banco compartilhado, coluna `tenant_id`** | Toda tabela tem `tenant_id` | Simples, barato, escala bem | Isolamento depende de **toda query** filtrar |
-| **Schema por tenant** | Um schema Postgres por cliente | Isolamento melhor | Migrations N vezes |
-| **Banco por tenant** | Uma instância por cliente | Isolamento máximo | Caro e complexo |
+| Modelo                                      | Como                           | Prós                        | Contras                                      |
+| ------------------------------------------- | ------------------------------ | --------------------------- | -------------------------------------------- |
+| **Banco compartilhado, coluna `tenant_id`** | Toda tabela tem `tenant_id`    | Simples, barato, escala bem | Isolamento depende de **toda query** filtrar |
+| **Schema por tenant**                       | Um schema Postgres por cliente | Isolamento melhor           | Migrations N vezes                           |
+| **Banco por tenant**                        | Uma instância por cliente      | Isolamento máximo           | Caro e complexo                              |
 
 O projeto usa **coluna `tenant_id`** e aplica o tenant em tudo: queries, chaves de Redis, entradas de cache, métricas e índices de busca. **Row Level Security** do Postgres pode reforçar no banco.
 
@@ -80,20 +80,20 @@ O projeto usa **coluna `tenant_id`** e aplica o tenant em tudo: queries, chaves 
 
 ## 5. Ferramentas similares (mecanismos de autenticação)
 
-| Mecanismo | Diferença principal | Quando usar |
-|---|---|---|
-| **API key (opaca)** | Simples; validação por consulta | **APIs máquina-a-máquina**, como a da OpenAI. Escolha do projeto |
-| **JWT** | Token autocontido e assinado; validação sem consulta | Sessões de usuário, microserviços; revogação é difícil (precisa de lista de bloqueio ou expiração curta) |
-| **OAuth 2.0 (client credentials)** | Troca credenciais por tokens de curta duração | Integrações entre empresas, escopos finos |
-| **mTLS** | Certificado do cliente na conexão TLS | Comunicação interna de alta segurança |
-| **HMAC por requisição** (estilo AWS SigV4) | Cada requisição é assinada; o segredo nunca trafega | APIs de alto risco |
-| **Provedores gerenciados** (Unkey, Auth0, Kong) | API keys como serviço | Não quer construir |
+| Mecanismo                                       | Diferença principal                                  | Quando usar                                                                                              |
+| ----------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **API key (opaca)**                             | Simples; validação por consulta                      | **APIs máquina-a-máquina**, como a da OpenAI. Escolha do projeto                                         |
+| **JWT**                                         | Token autocontido e assinado; validação sem consulta | Sessões de usuário, microserviços; revogação é difícil (precisa de lista de bloqueio ou expiração curta) |
+| **OAuth 2.0 (client credentials)**              | Troca credenciais por tokens de curta duração        | Integrações entre empresas, escopos finos                                                                |
+| **mTLS**                                        | Certificado do cliente na conexão TLS                | Comunicação interna de alta segurança                                                                    |
+| **HMAC por requisição** (estilo AWS SigV4)      | Cada requisição é assinada; o segredo nunca trafega  | APIs de alto risco                                                                                       |
+| **Provedores gerenciados** (Unkey, Auth0, Kong) | API keys como serviço                                | Não quer construir                                                                                       |
 
 Compatibilidade com o SDK da OpenAI exige `Authorization: Bearer <chave>`, ou seja, API key opaca.
 
 ## 6. Armadilhas
 
-- **Comparação de strings com `===`** pode vazar informação por tempo (*timing attack*). Com busca por hash isso é mitigado, mas em comparações diretas use `crypto.timingSafeEqual`.
+- **Comparação de strings com `===`** pode vazar informação por tempo (_timing attack_). Com busca por hash isso é mitigado, mas em comparações diretas use `crypto.timingSafeEqual`.
 - **Logar a chave** (inclusive em erros). Logue só o prefixo.
 - **Chave na URL** (`?api_key=`) fica em logs de proxies. Só em header.
 - **Cache negativo:** guardar "chave inválida" no Redis evita martelar o Postgres com chaves falsas, mas precisa de TTL curto.
@@ -107,7 +107,7 @@ Compatibilidade com o SDK da OpenAI exige `Authorization: Bearer <chave>`, ou se
 
 ## 8. Para aprofundar
 
-- OWASP — *Authentication Cheat Sheet*: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
-- OWASP — *Password Storage Cheat Sheet* (para entender o contraste com senhas): https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
-- GitHub — *About secret scanning*: https://docs.github.com/en/code-security/secret-scanning/about-secret-scanning
-- AWS — *SaaS tenant isolation strategies* (whitepaper)
+- OWASP — _Authentication Cheat Sheet_: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+- OWASP — _Password Storage Cheat Sheet_ (para entender o contraste com senhas): https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+- GitHub — _About secret scanning_: https://docs.github.com/en/code-security/secret-scanning/about-secret-scanning
+- AWS — _SaaS tenant isolation strategies_ (whitepaper)

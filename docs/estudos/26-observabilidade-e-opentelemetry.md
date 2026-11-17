@@ -18,13 +18,13 @@ Um sistema com gateway, Redis, Postgres, RabbitMQ, consumidores e provedores ext
 
 ### 2.2 Os três sinais
 
-| Sinal | O que é | Responde | Custo | Ferramenta no projeto |
-|---|---|---|---|---|
-| **Métricas** | Números agregados ao longo do tempo | "Quanto? Com que frequência?" | Baixo (agregado) | Prometheus ([27](./27-metricas-e-prometheus.md)) |
-| **Logs** | Registros de eventos discretos | "O que aconteceu exatamente?" | Médio/alto | Loki ([28](./28-logs-pino-e-loki.md)) |
-| **Traces** | O caminho de uma requisição pelos componentes | "Onde o tempo foi gasto? Quem chamou quem?" | Médio (com amostragem) | Tempo ([29](./29-tracing-e-tempo.md)) |
+| Sinal        | O que é                                       | Responde                                    | Custo                  | Ferramenta no projeto                            |
+| ------------ | --------------------------------------------- | ------------------------------------------- | ---------------------- | ------------------------------------------------ |
+| **Métricas** | Números agregados ao longo do tempo           | "Quanto? Com que frequência?"               | Baixo (agregado)       | Prometheus ([27](./27-metricas-e-prometheus.md)) |
+| **Logs**     | Registros de eventos discretos                | "O que aconteceu exatamente?"               | Médio/alto             | Loki ([28](./28-logs-pino-e-loki.md))            |
+| **Traces**   | O caminho de uma requisição pelos componentes | "Onde o tempo foi gasto? Quem chamou quem?" | Médio (com amostragem) | Tempo ([29](./29-tracing-e-tempo.md))            |
 
-O poder vem da **correlação**: uma métrica mostra o pico → um exemplo (*exemplar*) leva ao trace → o trace leva aos logs daquela requisição pelo `trace_id`.
+O poder vem da **correlação**: uma métrica mostra o pico → um exemplo (_exemplar_) leva ao trace → o trace leva aos logs daquela requisição pelo `trace_id`.
 
 ### 2.3 OpenTelemetry (OTel)
 
@@ -68,8 +68,8 @@ No Node, o OTel usa `AsyncLocalStorage` para que o contexto "siga" o fluxo assí
 ### 2.5 O que medir: métodos clássicos
 
 - **Golden signals** (Google SRE): latência, tráfego, erros e saturação.
-- **RED** (para serviços): *Rate*, *Errors*, *Duration*.
-- **USE** (para recursos): *Utilization*, *Saturation*, *Errors*.
+- **RED** (para serviços): _Rate_, _Errors_, _Duration_.
+- **USE** (para recursos): _Utilization_, _Saturation_, _Errors_.
 
 ### 2.6 SLI, SLO e SLA
 
@@ -95,15 +95,15 @@ O sistema é um **paciente**:
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Tipo | Diferença |
-|---|---|---|
-| **OpenTelemetry** | Padrão aberto + SDKs | Neutro, sinais unificados. **A escolha do projeto** |
-| **Datadog, New Relic, Dynatrace** | Plataformas SaaS completas | Tudo integrado, agentes próprios (aceitam OTel); caras em volume |
-| **Honeycomb** | SaaS focado em eventos de alta cardinalidade | Excelente para observabilidade "pura"; nativo em OTel |
-| **Grafana Cloud / stack LGTM** (Loki, Grafana, Tempo, Mimir) | Open source ou SaaS | **A stack local do projeto** |
-| **Elastic Observability** | ES para logs, métricas e APM | Unifica com a busca |
-| **Prometheus client direto** (`prom-client`) | Só métricas | Mais simples, sem traces |
-| **Langfuse, Helicone, LangSmith** | Observabilidade específica de LLM | Prompts, custo e avaliações; complementares |
+| Ferramenta                                                   | Tipo                                         | Diferença                                                        |
+| ------------------------------------------------------------ | -------------------------------------------- | ---------------------------------------------------------------- |
+| **OpenTelemetry**                                            | Padrão aberto + SDKs                         | Neutro, sinais unificados. **A escolha do projeto**              |
+| **Datadog, New Relic, Dynatrace**                            | Plataformas SaaS completas                   | Tudo integrado, agentes próprios (aceitam OTel); caras em volume |
+| **Honeycomb**                                                | SaaS focado em eventos de alta cardinalidade | Excelente para observabilidade "pura"; nativo em OTel            |
+| **Grafana Cloud / stack LGTM** (Loki, Grafana, Tempo, Mimir) | Open source ou SaaS                          | **A stack local do projeto**                                     |
+| **Elastic Observability**                                    | ES para logs, métricas e APM                 | Unifica com a busca                                              |
+| **Prometheus client direto** (`prom-client`)                 | Só métricas                                  | Mais simples, sem traces                                         |
+| **Langfuse, Helicone, LangSmith**                            | Observabilidade específica de LLM            | Prompts, custo e avaliações; complementares                      |
 
 ## 6. Armadilhas
 
@@ -122,7 +122,7 @@ O sistema é um **paciente**:
 ## 8. Para aprofundar
 
 - OpenTelemetry — documentação (conceitos e JS): https://opentelemetry.io/docs/
-- OpenTelemetry — *Semantic conventions for GenAI*: https://opentelemetry.io/docs/specs/semconv/gen-ai/
-- Google SRE Book — *Monitoring Distributed Systems*: https://sre.google/sre-book/monitoring-distributed-systems/
-- W3C — *Trace Context*: https://www.w3.org/TR/trace-context/
-- Livro: *Observability Engineering* (Majors, Fong-Jones, Miranda)
+- OpenTelemetry — _Semantic conventions for GenAI_: https://opentelemetry.io/docs/specs/semconv/gen-ai/
+- Google SRE Book — _Monitoring Distributed Systems_: https://sre.google/sre-book/monitoring-distributed-systems/
+- W3C — _Trace Context_: https://www.w3.org/TR/trace-context/
+- Livro: _Observability Engineering_ (Majors, Fong-Jones, Miranda)

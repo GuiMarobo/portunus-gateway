@@ -15,9 +15,9 @@ Implementa o ticket [NN — título](docs/specs/<feature>/tickets/NN-slug.md) do
 
 <!-- Um arquivo ou grupo de arquivos por linha. Diga o que mudou, não repita o diff. -->
 
-| Arquivo | Mudança |
-|---|---|
-| `caminho/arquivo.ts` | |
+| Arquivo              | Mudança |
+| -------------------- | ------- |
+| `caminho/arquivo.ts` |         |
 
 ## Decisões e porquês
 
@@ -33,7 +33,7 @@ Padrão de projeto usado (Adapter, Strategy, Circuit Breaker...)? Diga qual e po
 
 <!-- Copie do ticket e marque. Critério não atendido fica desmarcado e com a explicação ao lado. -->
 
-- [ ] 
+- [ ]
 
 ## Mudanças que exigem atenção
 
@@ -68,13 +68,13 @@ Ambiente: <!-- SO, versão do Node e do pnpm, Docker ligado ou não -->
 
 <!-- Cole o resumo real da saída de cada comando. Nunca marque sem ter rodado. -->
 
-| Verificação | Resultado |
-|---|---|
-| `pnpm typecheck` | |
-| `pnpm lint` | |
-| `pnpm test` | <!-- ex.: 12 passed --> |
-| `pnpm test:int` | |
-| App contra o mock + chamada na rota afetada | |
+| Verificação                                 | Resultado               |
+| ------------------------------------------- | ----------------------- |
+| `pnpm typecheck`                            |                         |
+| `pnpm lint`                                 |                         |
+| `pnpm test`                                 | <!-- ex.: 12 passed --> |
+| `pnpm test:int`                             |                         |
+| App contra o mock + chamada na rota afetada |                         |
 
 ### Testes específicos deste PR
 
@@ -88,15 +88,15 @@ $ comando
 saída
 ```
 
-Resultado: 
+Resultado:
 
 ### O que não foi verificado
 
 <!-- O que ficou sem rodar e por quê (Docker parado, rota inexistente, fora do escopo). Se tudo rodou, escreva "Nada". -->
 
 | Verificação | Motivo | Quando passa a ser possível |
-|---|---|---|
-| | | |
+| ----------- | ------ | --------------------------- |
+|             |        |                             |
 
 ## Como testar localmente
 
@@ -121,4 +121,4 @@ O que costuma passar despercebido, quando se aplica:
 
 <!-- O que ficou de fora de propósito e em qual ticket ou épico entra. -->
 
-- 
+-

@@ -33,16 +33,16 @@ flowchart LR
 - **Exchange:** decide para quais filas copiar a mensagem, com base no tipo e nas **bindings**.
 - **Binding:** regra "fila X recebe mensagens da exchange Y com o padrão Z".
 - **Fila (queue):** armazena as mensagens até um consumidor confirmar.
-- **Consumidor:** lê da fila e confirma (*ack*).
+- **Consumidor:** lê da fila e confirma (_ack_).
 
 **Tipos de exchange:**
 
-| Tipo | Roteia por | Exemplo |
-|---|---|---|
-| **direct** | Routing key exata | `usage.completed` → fila de usage |
-| **fanout** | Ignora a key; copia para todas as filas ligadas | Broadcast |
-| **topic** | Padrão com curingas (`*` uma palavra, `#` zero ou mais) | `usage.*`, `budget.#` — **o tipo usado no projeto** |
-| **headers** | Atributos nos headers | Roteamento por metadados |
+| Tipo        | Roteia por                                              | Exemplo                                             |
+| ----------- | ------------------------------------------------------- | --------------------------------------------------- |
+| **direct**  | Routing key exata                                       | `usage.completed` → fila de usage                   |
+| **fanout**  | Ignora a key; copia para todas as filas ligadas         | Broadcast                                           |
+| **topic**   | Padrão com curingas (`*` uma palavra, `#` zero ou mais) | `usage.*`, `budget.#` — **o tipo usado no projeto** |
+| **headers** | Atributos nos headers                                   | Roteamento por metadados                            |
 
 ### 2.3 Garantias de entrega
 
@@ -54,7 +54,7 @@ flowchart LR
 
 ### 2.4 Dead letter exchange (DLX) e DLQ
 
-Uma mensagem que falha repetidamente (*poison message*) não pode travar a fila nem ser perdida. Com `x-dead-letter-exchange`, mensagens rejeitadas (ou expiradas, ou que excedem o tamanho da fila) vão para a exchange `gateway.dlx`, que as encaminha para `q.indexer.dlq`, por exemplo. Lá ficam para análise e reprocessamento.
+Uma mensagem que falha repetidamente (_poison message_) não pode travar a fila nem ser perdida. Com `x-dead-letter-exchange`, mensagens rejeitadas (ou expiradas, ou que excedem o tamanho da fila) vão para a exchange `gateway.dlx`, que as encaminha para `q.indexer.dlq`, por exemplo. Lá ficam para análise e reprocessamento.
 
 Para retry com espera entre tentativas, um padrão comum é uma fila de "retry" com TTL que devolve a mensagem à fila original quando o TTL expira. Outra opção é o plugin de mensagens atrasadas.
 
@@ -82,25 +82,25 @@ O RabbitMQ é os **Correios com uma central de triagem**. O gateway (remetente) 
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Modelo | Diferença principal | Quando escolher |
-|---|---|---|---|
-| **RabbitMQ** | Broker de filas (*smart broker*) | Roteamento flexível, acks por mensagem, DLX; a mensagem some após o ack | Eventos e tarefas com roteamento; volume moderado a alto |
-| **Apache Kafka** | **Log distribuído particionado** | Mensagens ficam retidas (dias/semanas); consumidores controlam o próprio *offset* e podem **reler**; ordem garantida por partição; throughput enorme | Streaming de eventos em grande escala, *event sourcing*, reprocessamento histórico |
-| **Amazon SQS / SNS** | Fila / pub-sub gerenciados | Zero operação; SNS faz fan-out para várias SQS; *visibility timeout* em vez de ack | Na AWS e sem querer operar broker |
-| **Google Pub/Sub, Azure Service Bus** | Gerenciados | Equivalentes nas outras nuvens | Na respectiva nuvem |
-| **NATS / NATS JetStream** | Mensageria leve | Muito rápido e simples; JetStream adiciona persistência | Microserviços, IoT, edge |
-| **Redis Streams** | Log no Redis | Grupos de consumidores e acks, sem um serviço novo | Já tem Redis e o volume é moderado |
-| **Apache Pulsar** | Log + filas | Separa armazenamento (BookKeeper) do broker | Multi-tenant em grande escala |
+| Ferramenta                            | Modelo                           | Diferença principal                                                                                                                                  | Quando escolher                                                                    |
+| ------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **RabbitMQ**                          | Broker de filas (_smart broker_) | Roteamento flexível, acks por mensagem, DLX; a mensagem some após o ack                                                                              | Eventos e tarefas com roteamento; volume moderado a alto                           |
+| **Apache Kafka**                      | **Log distribuído particionado** | Mensagens ficam retidas (dias/semanas); consumidores controlam o próprio _offset_ e podem **reler**; ordem garantida por partição; throughput enorme | Streaming de eventos em grande escala, _event sourcing_, reprocessamento histórico |
+| **Amazon SQS / SNS**                  | Fila / pub-sub gerenciados       | Zero operação; SNS faz fan-out para várias SQS; _visibility timeout_ em vez de ack                                                                   | Na AWS e sem querer operar broker                                                  |
+| **Google Pub/Sub, Azure Service Bus** | Gerenciados                      | Equivalentes nas outras nuvens                                                                                                                       | Na respectiva nuvem                                                                |
+| **NATS / NATS JetStream**             | Mensageria leve                  | Muito rápido e simples; JetStream adiciona persistência                                                                                              | Microserviços, IoT, edge                                                           |
+| **Redis Streams**                     | Log no Redis                     | Grupos de consumidores e acks, sem um serviço novo                                                                                                   | Já tem Redis e o volume é moderado                                                 |
+| **Apache Pulsar**                     | Log + filas                      | Separa armazenamento (BookKeeper) do broker                                                                                                          | Multi-tenant em grande escala                                                      |
 
 **RabbitMQ × Kafka, a comparação mais importante:**
 
-| | RabbitMQ | Kafka |
-|---|---|---|
-| Modelo mental | Caixa de correio: lida e removida | Livro-razão: lido por posição, nada é removido |
-| Releitura | Não (após ack) | Sim, voltando o offset |
-| Ordem | Por fila (perde-se com competing consumers) | Por partição |
-| Roteamento | Rico (exchanges) | Por tópico/partição (lógica no consumidor) |
-| Operação | Mais simples | Mais complexa (KRaft, partições, rebalanceamento) |
+|               | RabbitMQ                                    | Kafka                                             |
+| ------------- | ------------------------------------------- | ------------------------------------------------- |
+| Modelo mental | Caixa de correio: lida e removida           | Livro-razão: lido por posição, nada é removido    |
+| Releitura     | Não (após ack)                              | Sim, voltando o offset                            |
+| Ordem         | Por fila (perde-se com competing consumers) | Por partição                                      |
+| Roteamento    | Rico (exchanges)                            | Por tópico/partição (lógica no consumidor)        |
+| Operação      | Mais simples                                | Mais complexa (KRaft, partições, rebalanceamento) |
 
 Para o volume e as necessidades do gateway (fan-out, DLQ, roteamento), o RabbitMQ é mais simples e suficiente.
 
@@ -122,7 +122,7 @@ Para o volume e as necessidades do gateway (fan-out, DLQ, roteamento), o RabbitM
 ## 8. Para aprofundar
 
 - RabbitMQ — tutoriais (comece pelos 1 a 5): https://www.rabbitmq.com/tutorials
-- RabbitMQ — *AMQP 0-9-1 Model Explained*: https://www.rabbitmq.com/tutorials/amqp-concepts
-- RabbitMQ — *Dead Letter Exchanges*: https://www.rabbitmq.com/docs/dlx
-- RabbitMQ — *Consumer Acknowledgements and Publisher Confirms*: https://www.rabbitmq.com/docs/confirms
-- Livro: *Enterprise Integration Patterns* (Hohpe & Woolf): https://www.enterpriseintegrationpatterns.com/
+- RabbitMQ — _AMQP 0-9-1 Model Explained_: https://www.rabbitmq.com/tutorials/amqp-concepts
+- RabbitMQ — _Dead Letter Exchanges_: https://www.rabbitmq.com/docs/dlx
+- RabbitMQ — _Consumer Acknowledgements and Publisher Confirms_: https://www.rabbitmq.com/docs/confirms
+- Livro: _Enterprise Integration Patterns_ (Hohpe & Woolf): https://www.enterpriseintegrationpatterns.com/

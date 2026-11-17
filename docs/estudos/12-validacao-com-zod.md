@@ -16,10 +16,10 @@ Tipos do TypeScript **somem em runtime**. Se o corpo de uma requisição diz `te
 Com Zod, você escreve o **schema** (que existe em runtime) e **deriva o tipo** dele:
 
 ```ts
-import { z } from "zod";
+import { z } from 'zod';
 
 export const chatMessageSchema = z.object({
-  role: z.enum(["system", "user", "assistant", "tool"]),
+  role: z.enum(['system', 'user', 'assistant', 'tool']),
   content: z.string(),
 });
 
@@ -48,13 +48,13 @@ Princípio importante: **converta o dado não confiável num tipo confiável na 
 
 ### 2.4 Onde o projeto usa
 
-| Fronteira | Exemplo |
-|---|---|
-| **Variáveis de ambiente** | `envSchema.parse(process.env)` na inicialização: o app não sobe com config inválida |
-| **Requisições HTTP** | Pipe de validação no Nest |
-| **Eventos** | `usageCompletedEventSchema` em `libs/events`, validado ao publicar e ao consumir |
-| **Respostas de provedores** | O adapter valida o que o provedor devolveu antes de confiar |
-| **Suítes de eval** | O YAML lido pelo `evals-cli` |
+| Fronteira                   | Exemplo                                                                             |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| **Variáveis de ambiente**   | `envSchema.parse(process.env)` na inicialização: o app não sobe com config inválida |
+| **Requisições HTTP**        | Pipe de validação no Nest                                                           |
+| **Eventos**                 | `usageCompletedEventSchema` em `libs/events`, validado ao publicar e ao consumir    |
+| **Respostas de provedores** | O adapter valida o que o provedor devolveu antes de confiar                         |
+| **Suítes de eval**          | O YAML lido pelo `evals-cli`                                                        |
 
 ### 2.5 Complexidade
 
@@ -72,14 +72,14 @@ Validar é O(tamanho do dado): cada campo é visitado uma vez. Para um request c
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença principal | Quando escolher |
-|---|---|---|
-| **class-validator + class-transformer** | Padrão do NestJS; validação por decorators em classes | Projetos Nest clássicos; tipos e validação "juntos" via classe |
-| **Joi** | Veterano (ecossistema hapi); não deriva tipos TS nativamente | Projetos JS legados |
-| **Yup** | Popular em formulários no front-end | Validação de formulários |
-| **Valibot** | API modular, bundle muito menor | Front-end e edge, onde o tamanho importa |
-| **TypeBox** | Gera **JSON Schema** e tipos TS; integra nativamente com o Fastify | Quando se quer schema JSON padrão para serialização rápida |
-| **ArkType** | Sintaxe parecida com a de tipos TS, muito rápido | Desempenho de validação crítico |
+| Ferramenta                              | Diferença principal                                                | Quando escolher                                                |
+| --------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
+| **class-validator + class-transformer** | Padrão do NestJS; validação por decorators em classes              | Projetos Nest clássicos; tipos e validação "juntos" via classe |
+| **Joi**                                 | Veterano (ecossistema hapi); não deriva tipos TS nativamente       | Projetos JS legados                                            |
+| **Yup**                                 | Popular em formulários no front-end                                | Validação de formulários                                       |
+| **Valibot**                             | API modular, bundle muito menor                                    | Front-end e edge, onde o tamanho importa                       |
+| **TypeBox**                             | Gera **JSON Schema** e tipos TS; integra nativamente com o Fastify | Quando se quer schema JSON padrão para serialização rápida     |
+| **ArkType**                             | Sintaxe parecida com a de tipos TS, muito rápido                   | Desempenho de validação crítico                                |
 
 O Zod foi escolhido pela ergonomia e pelo ecossistema. A versão 4 trouxe ganho de desempenho e conversão nativa para JSON Schema, o que ajuda se um dia o Fastify precisar dos schemas.
 
@@ -100,5 +100,5 @@ O Zod foi escolhido pela ergonomia e pelo ecossistema. A versão 4 trouxe ganho 
 ## 8. Para aprofundar
 
 - Zod — documentação: https://zod.dev/
-- Alexis King — *Parse, don't validate*: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
-- NestJS — *Pipes* (validação com schema): https://docs.nestjs.com/pipes#schema-based-validation
+- Alexis King — _Parse, don't validate_: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
+- NestJS — _Pipes_ (validação com schema): https://docs.nestjs.com/pipes#schema-based-validation
