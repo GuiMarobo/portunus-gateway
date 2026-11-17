@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 03, 04
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/09](../../../estudos/09-monorepo-pnpm-e-typescript.md) §6, [estudos/12 — Validação com Zod](../../../estudos/12-validacao-com-zod.md)
 
