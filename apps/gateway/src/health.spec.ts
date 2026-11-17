@@ -6,7 +6,7 @@ describe('GET /health', () => {
   let app: NestFastifyApplication;
 
   beforeEach(async () => {
-    app = await createApp();
+    ({ app } = await createApp({}));
   });
 
   afterEach(async () => {
