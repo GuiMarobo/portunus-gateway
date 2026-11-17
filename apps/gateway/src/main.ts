@@ -1,9 +1,22 @@
 import 'reflect-metadata';
+import { ConfigValidationError } from '@portunus/common';
 import { createApp } from './app.factory';
+import { GatewayConfig } from './gateway-config';
+
+const INVALID_CONFIGURATION_EXIT_CODE = 1;
 
 async function bootstrap(): Promise<void> {
-  const { app, config } = await createApp(process.env);
-  await app.listen(config.PORT, config.HOST);
+  const app = await createApp(process.env);
+  const { PORT, HOST } = app.get(GatewayConfig);
+  await app.listen(PORT, HOST);
 }
 
-void bootstrap();
+function handleStartupFailure(error: unknown): void {
+  if (!(error instanceof ConfigValidationError)) {
+    throw error;
+  }
+  process.stderr.write(`${error.message}\n`);
+  process.exitCode = INVALID_CONFIGURATION_EXIT_CODE;
+}
+
+bootstrap().catch(handleStartupFailure);

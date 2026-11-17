@@ -12,6 +12,8 @@ const FRAMEWORK_AND_DRIVER_PACKAGES = [
   'bullmq',
 ];
 
+const CONFIGURATION_ENTRY_POINTS = 'apps/*/src/main.ts';
+
 const OUTER_LAYERS_OF_DOMAIN = '(^|/)(application|infrastructure|presentation)(/|$)';
 const OUTER_LAYERS_OF_APPLICATION = '(^|/)(infrastructure|presentation)(/|$)';
 
@@ -35,7 +37,25 @@ export default defineConfig(
     },
     rules: {
       'no-console': 'error',
-      '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'process',
+          property: 'env',
+          message:
+            'Only the entry point reads process.env; inject the validated config class instead.',
+        },
+      ],
+      '@typescript-eslint/no-extraneous-class': [
+        'error',
+        { allowWithDecorator: true, allowConstructorOnly: true },
+      ],
+    },
+  },
+  {
+    files: [CONFIGURATION_ENTRY_POINTS],
+    rules: {
+      'no-restricted-properties': 'off',
     },
   },
   {

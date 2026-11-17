@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+import { ConfigValidationError } from './config-validation-error';
 import { loadConfig } from './load-config';
 
 const portSchema = z.object({ PORT: z.coerce.number().int() });
@@ -12,6 +13,6 @@ describe('loadConfig', () => {
   });
 
   it('throws a validation error when the environment does not satisfy the schema', () => {
-    expect(() => loadConfig(portSchema, { PORT: 'not-a-number' })).toThrow(z.ZodError);
+    expect(() => loadConfig(portSchema, { PORT: 'not-a-number' })).toThrow(ConfigValidationError);
   });
 });
