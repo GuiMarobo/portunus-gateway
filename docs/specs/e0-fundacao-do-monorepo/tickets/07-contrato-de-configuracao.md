@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 06
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/12 — Validação com Zod](../../../estudos/12-validacao-com-zod.md)
 
