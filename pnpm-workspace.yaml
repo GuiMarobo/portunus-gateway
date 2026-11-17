@@ -2,4 +2,7 @@ packages:
   - 'apps/*'
   - 'libs/*'
 
+allowBuilds:
+  '@swc/core': false
+
 engineStrict: true
