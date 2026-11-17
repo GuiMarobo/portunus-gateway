@@ -39,12 +39,12 @@ O cache semântico tem uma parte **exata** e uma parte **aproximada**:
 
 O limiar define quão parecido precisa ser. É um trade-off direto:
 
-| Limiar | Hit rate | Risco |
-|---|---|---|
-| Baixo (ex.: 0,85) | Alto | **Falsos positivos**: responder a pergunta errada |
-| Alto (ex.: 0,97) | Baixo | Quase um cache exato; pouca economia |
+| Limiar            | Hit rate | Risco                                             |
+| ----------------- | -------- | ------------------------------------------------- |
+| Baixo (ex.: 0,85) | Alto     | **Falsos positivos**: responder a pergunta errada |
+| Alto (ex.: 0,97)  | Baixo    | Quase um cache exato; pouca economia              |
 
-O padrão do projeto é `0.92` *(a validar)*. A calibração é feita com uma suíte de pares:
+O padrão do projeto é `0.92` _(a validar)_. A calibração é feita com uma suíte de pares:
 
 - **Paráfrases verdadeiras** (deveriam dar hit).
 - **"Parecidas mas diferentes"** (deveriam dar miss): "reembolso em 7 dias?" × "reembolso em 30 dias?", "como cancelo?" × "como não ser cancelado?".
@@ -80,11 +80,11 @@ Se a taxa de hit for baixa, o cache semântico **piora** custo e latência. Por 
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença principal |
-|---|---|
-| **GPTCache** (Zilliz) | Biblioteca Python dedicada a cache semântico, com vários backends vetoriais |
-| **Redis LangCache / RedisVL** | Cache semântico sobre o Redis, com busca vetorial em memória |
-| **LiteLLM / Portkey** | Gateways com cache semântico embutido (Redis ou Qdrant como backend) |
+| Ferramenta                                            | Diferença principal                                                                                                                                           |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GPTCache** (Zilliz)                                 | Biblioteca Python dedicada a cache semântico, com vários backends vetoriais                                                                                   |
+| **Redis LangCache / RedisVL**                         | Cache semântico sobre o Redis, com busca vetorial em memória                                                                                                  |
+| **LiteLLM / Portkey**                                 | Gateways com cache semântico embutido (Redis ou Qdrant como backend)                                                                                          |
 | **Prompt caching dos provedores** (OpenAI, Anthropic) | **Não é cache semântico:** reaproveita o processamento de um **prefixo idêntico** dentro do provedor; reduz custo de entrada, mas a resposta é gerada de novo |
 
 ## 6. Armadilhas
@@ -104,6 +104,6 @@ Se a taxa de hit for baixa, o cache semântico **piora** custo e latência. Por 
 ## 8. Para aprofundar
 
 - GPTCache: https://github.com/zilliztech/GPTCache
-- Redis — *Semantic caching for LLMs*: https://redis.io/docs/latest/develop/ai/redisvl/user_guide/llmcache/
-- OpenAI — *Prompt caching* (para entender a diferença): https://platform.openai.com/docs/guides/prompt-caching
-- Anthropic — *Prompt caching*: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
+- Redis — _Semantic caching for LLMs_: https://redis.io/docs/latest/develop/ai/redisvl/user_guide/llmcache/
+- OpenAI — _Prompt caching_ (para entender a diferença): https://platform.openai.com/docs/guides/prompt-caching
+- Anthropic — _Prompt caching_: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching

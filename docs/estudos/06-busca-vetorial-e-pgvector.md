@@ -8,14 +8,14 @@
 
 ## 1. O problema
 
-Com embeddings ([05](./05-embeddings.md)), "achar a pergunta mais parecida" vira "achar o vetor mais próximo". Fazer isso comparando com **todos** os vetores (força bruta) custa O(n·d) por consulta e fica inviável quando *n* cresce. É preciso um índice que encontre vizinhos próximos rápido, aceitando uma pequena imprecisão.
+Com embeddings ([05](./05-embeddings.md)), "achar a pergunta mais parecida" vira "achar o vetor mais próximo". Fazer isso comparando com **todos** os vetores (força bruta) custa O(n·d) por consulta e fica inviável quando _n_ cresce. É preciso um índice que encontre vizinhos próximos rápido, aceitando uma pequena imprecisão.
 
 ## 2. Como funciona
 
 ### 2.1 kNN exato × ANN
 
-- **kNN exato** (*k nearest neighbors*): garante os *k* mais próximos. Custo O(n·d).
-- **ANN** (*approximate nearest neighbors*): encontra vizinhos **quase sempre** corretos, muito mais rápido. A qualidade é medida pelo **recall**: de 10 vizinhos verdadeiros, quantos o índice achou.
+- **kNN exato** (_k nearest neighbors_): garante os _k_ mais próximos. Custo O(n·d).
+- **ANN** (_approximate nearest neighbors_): encontra vizinhos **quase sempre** corretos, muito mais rápido. A qualidade é medida pelo **recall**: de 10 vizinhos verdadeiros, quantos o índice achou.
 
 Todo índice vetorial é um trade-off entre **velocidade, recall, memória e tempo de construção**.
 
@@ -39,13 +39,13 @@ Todo índice vetorial é um trade-off entre **velocidade, recall, memória e tem
 - **Prós:** melhor relação velocidade/recall; pode ser criado com a tabela vazia e cresce com inserções.
 - **Contras:** construção mais lenta e mais memória (o grafo).
 
-| | IVFFlat | HNSW |
-|---|---|---|
-| Velocidade de busca | Boa | Melhor |
-| Recall típico | Bom (depende de `probes`) | Melhor |
-| Memória | Menor | Maior |
-| Construção | Rápida, exige dados prévios | Lenta, funciona com tabela vazia |
-| Inserções contínuas | Degrada com o tempo | Lida bem |
+|                     | IVFFlat                     | HNSW                             |
+| ------------------- | --------------------------- | -------------------------------- |
+| Velocidade de busca | Boa                         | Melhor                           |
+| Recall típico       | Bom (depende de `probes`)   | Melhor                           |
+| Memória             | Menor                       | Maior                            |
+| Construção          | Rápida, exige dados prévios | Lenta, funciona com tabela vazia |
+| Inserções contínuas | Degrada com o tempo         | Lida bem                         |
 
 Para um cache que começa vazio e cresce continuamente, **HNSW tende a ser a escolha natural**. Isso precisa ser confirmado com medição no E10.
 
@@ -77,7 +77,7 @@ Operadores: `<->` (distância L2), `<=>` (distância de cosseno), `<#>` (produto
 
 ### 2.5 O problema do filtro + ANN
 
-A consulta acima filtra por `tenant_id` e `context_hash` **e** ordena por vetor. O índice HNSW percorre os vizinhos globais e só **depois** aplica o `WHERE` (*post-filtering*). Se os vizinhos mais próximos forem de outros tenants, o resultado pode vir vazio mesmo existindo um bom candidato do tenant. Saídas:
+A consulta acima filtra por `tenant_id` e `context_hash` **e** ordena por vetor. O índice HNSW percorre os vizinhos globais e só **depois** aplica o `WHERE` (_post-filtering_). Se os vizinhos mais próximos forem de outros tenants, o resultado pode vir vazio mesmo existindo um bom candidato do tenant. Saídas:
 
 - Versões recentes do pgvector (0.8+) têm **iterative index scans**, que continuam buscando até satisfazer o filtro.
 - **Índices parciais** ou particionamento por tenant.
@@ -99,15 +99,15 @@ Esse é exatamente o tipo de coisa que passa despercebida e só aparece em produ
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Tipo | Diferença principal | Quando escolher |
-|---|---|---|---|
-| **pgvector** | Extensão do Postgres | Vetores junto dos dados relacionais, SQL, transações | Já usa Postgres; volume moderado |
-| **Redis (Redis Stack / RediSearch)** | Busca vetorial em memória | Latência muito baixa; tudo em RAM | O cache exato já está no Redis e a latência é crítica |
-| **Qdrant** | Banco vetorial dedicado (Rust) | Filtros ricos durante a busca, quantização | Volume grande, filtros complexos |
-| **Weaviate, Milvus** | Bancos vetoriais dedicados | Escala horizontal, vários tipos de índice | Bilhões de vetores |
-| **Pinecone** | SaaS gerenciado | Zero operação | Não quer operar infraestrutura |
-| **Elasticsearch / OpenSearch (kNN)** | Busca textual + vetorial | Busca híbrida (palavras + vetores) | Já usa ES e quer busca híbrida |
-| **FAISS** | Biblioteca (Meta) | Não é banco: índice em memória dentro do processo | Pesquisa, lotes offline |
+| Ferramenta                           | Tipo                           | Diferença principal                                  | Quando escolher                                       |
+| ------------------------------------ | ------------------------------ | ---------------------------------------------------- | ----------------------------------------------------- |
+| **pgvector**                         | Extensão do Postgres           | Vetores junto dos dados relacionais, SQL, transações | Já usa Postgres; volume moderado                      |
+| **Redis (Redis Stack / RediSearch)** | Busca vetorial em memória      | Latência muito baixa; tudo em RAM                    | O cache exato já está no Redis e a latência é crítica |
+| **Qdrant**                           | Banco vetorial dedicado (Rust) | Filtros ricos durante a busca, quantização           | Volume grande, filtros complexos                      |
+| **Weaviate, Milvus**                 | Bancos vetoriais dedicados     | Escala horizontal, vários tipos de índice            | Bilhões de vetores                                    |
+| **Pinecone**                         | SaaS gerenciado                | Zero operação                                        | Não quer operar infraestrutura                        |
+| **Elasticsearch / OpenSearch (kNN)** | Busca textual + vetorial       | Busca híbrida (palavras + vetores)                   | Já usa ES e quer busca híbrida                        |
+| **FAISS**                            | Biblioteca (Meta)              | Não é banco: índice em memória dentro do processo    | Pesquisa, lotes offline                               |
 
 ## 6. Armadilhas
 
@@ -127,5 +127,5 @@ Esse é exatamente o tipo de coisa que passa despercebida e só aparece em produ
 
 - pgvector (README completo, com guias de índices): https://github.com/pgvector/pgvector
 - Malkov & Yashunin — artigo original do HNSW: https://arxiv.org/abs/1603.09320
-- Pinecone Learn — *Vector indexes* (explicações visuais de IVF e HNSW): https://www.pinecone.io/learn/series/faiss/
-- Supabase — *pgvector: HNSW vs IVFFlat*: https://supabase.com/docs/guides/ai/vector-indexes
+- Pinecone Learn — _Vector indexes_ (explicações visuais de IVF e HNSW): https://www.pinecone.io/learn/series/faiss/
+- Supabase — _pgvector: HNSW vs IVFFlat_: https://supabase.com/docs/guides/ai/vector-indexes

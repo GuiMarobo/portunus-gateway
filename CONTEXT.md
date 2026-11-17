@@ -34,28 +34,33 @@ Quem coloca LLM em produção chamando o provedor direto costuma enfrentar:
 ## 4. O que precisa funcionar
 
 ### 4.1 Receber chamadas como se fosse a OpenAI
+
 - Aceitar requisições de chat e de embeddings no formato da OpenAI.
 - Suportar respostas em streaming (texto chegando aos poucos).
 - Devolver erros no mesmo formato, para os SDKs existentes entenderem.
 - Informar, em cada resposta, se veio do cache, qual provedor respondeu e quanto custou.
 
 ### 4.2 Clientes e chaves
+
 - Cada cliente (tenant) tem suas próprias chaves do gateway.
 - Chaves podem ser criadas, revogadas e ter validade.
 - As chaves reais dos provedores ficam só no gateway, nunca com os clientes.
 - Um cliente nunca enxerga dados de outro.
 
 ### 4.3 Modelos por apelido
+
 - Em vez de citar um modelo específico, o app usa um apelido (ex.: `rapido`, `inteligente`).
 - O gateway decide qual provedor e modelo atende cada apelido, podendo mudar isso sem os apps saberem.
 
 ### 4.4 Resiliência
+
 - Se o provedor falhar ou demorar demais, tentar de novo de forma inteligente.
 - Se continuar falhando, passar automaticamente para outro provedor.
 - Se um provedor estiver claramente fora do ar, parar de insistir nele por um tempo.
 - Para o cliente, tudo isso deve ser transparente.
 
 ### 4.5 Cache
+
 - **Cache exato:** a mesma pergunta já respondida volta na hora, sem pagar de novo.
 - **Cache semântico:** perguntas com o mesmo sentido, escritas de outra forma, também reaproveitam a resposta.
 - O cache nunca mistura respostas entre clientes.
@@ -63,16 +68,19 @@ Quem coloca LLM em produção chamando o provedor direto costuma enfrentar:
 - Mostrar quanto o cache economizou.
 
 ### 4.6 Limites e orçamento
+
 - Limite de uso por cliente (ex.: requisições e tokens por minuto), para um não derrubar os outros.
 - Orçamento mensal por cliente, com aviso ao se aproximar e bloqueio (ou apenas alerta) ao estourar.
 - Custo calculado em cada chamada, com base nos preços de cada modelo.
 
 ### 4.7 Chamadas assíncronas
+
 - Para tarefas longas ou em lote: enviar o pedido, receber um identificador e consultar o resultado depois (ou ser avisado por callback).
 - Processar muitos pedidos de uma vez sem travar conexões.
 - Pedidos que falham repetidamente não podem se perder; ficam guardados para análise e reprocessamento.
 
 ### 4.8 Registro e busca
+
 - Cada chamada fica registrada: quem chamou, modelo, provedor, tempo, tokens, custo, se usou cache e se deu erro.
 - Prompts e respostas podem ser pesquisados por texto, com filtros (cliente, período, modelo, erro, custo).
 - Dados sensíveis (e-mail, CPF, telefone, cartão) podem ser mascarados antes de guardar.
@@ -80,15 +88,18 @@ Quem coloca LLM em produção chamando o provedor direto costuma enfrentar:
 - O registro nunca pode atrasar nem derrubar a resposta ao cliente: se ele falhar, a resposta sai normalmente.
 
 ### 4.9 Visibilidade (observabilidade)
+
 - Ver, em tempo real, volume de chamadas, erros, latência, cache, custo e saúde dos provedores.
 - Acompanhar o caminho completo de uma requisição, etapa por etapa, inclusive quando houve retry ou fallback.
 - Alertas quando algo sai do normal (erros altos, provedor fora, orçamento perto do limite, filas acumulando).
 
 ### 4.10 Administração e relatórios
+
 - Gerenciar clientes, chaves, apelidos de modelos, limites e preços.
 - Relatórios: custo por cliente, por modelo e por dia; prompts mais caros; economia gerada pelo cache.
 
 ### 4.11 Avaliação de qualidade (evals)
+
 - Definir conjuntos de casos de teste para prompts e modelos (entrada + o que se espera).
 - Rodar esses testes contra um modelo/apelido e ver taxa de acerto, custo e tempo.
 - Comparar duas configurações (ex.: modelo A vs. modelo B, prompt antigo vs. novo).
@@ -126,16 +137,16 @@ Para tarefas longas ou em lote:
 
 ### 5.4 O que acontece quando algo dá errado
 
-| Situação | O que o cliente vê |
-|---|---|
-| Provedor principal fora do ar | Nada. O gateway usa o provedor reserva |
-| Todos os provedores fora do ar | Erro claro de indisponibilidade |
-| Cliente passou do limite de uso | Erro 429 com o tempo de espera |
-| Cliente estourou o orçamento | Erro de orçamento (ou segue normal, se a regra for só avisar) |
-| Chave inválida ou revogada | Erro de autenticação |
+| Situação                            | O que o cliente vê                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------- |
+| Provedor principal fora do ar       | Nada. O gateway usa o provedor reserva                                       |
+| Todos os provedores fora do ar      | Erro claro de indisponibilidade                                              |
+| Cliente passou do limite de uso     | Erro 429 com o tempo de espera                                               |
+| Cliente estourou o orçamento        | Erro de orçamento (ou segue normal, se a regra for só avisar)                |
+| Chave inválida ou revogada          | Erro de autenticação                                                         |
 | Sistema de busca de logs fora do ar | Nada. As respostas continuam; a busca volta a funcionar e se atualiza depois |
-| Sistema de mensagens fora do ar | Nada. Os registros ficam guardados e são enviados quando voltar |
-| Cache fora do ar | Nada visível, só mais lento e mais caro |
+| Sistema de mensagens fora do ar     | Nada. Os registros ficam guardados e são enviados quando voltar              |
+| Cache fora do ar                    | Nada visível, só mais lento e mais caro                                      |
 
 ### 5.5 Como um novo cliente entra
 
@@ -197,7 +208,7 @@ Para tarefas longas ou em lote:
 ## 7. O que NÃO é (por enquanto)
 
 - Não treina nem hospeda modelos próprios.
-- Não é um framework de agentes; esses podem *usar* o gateway.
+- Não é um framework de agentes; esses podem _usar_ o gateway.
 - Não cobra clientes (só mede e reporta custo).
 - Não precisa de interface elaborada; foco é a API e os dashboards.
 - Não precisa suportar todos os provedores: dois reais e um falso (para testes) bastam.

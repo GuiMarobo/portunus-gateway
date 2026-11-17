@@ -25,25 +25,25 @@
 
 ## 3. Visão geral
 
-| # | Épico | Marco | Status |
-|---|---|---|---|
-| E0 | Fundação do monorepo | M1 — Fundação | Em andamento |
-| E1 | Provedor mock | M1 — Fundação | Não iniciado |
-| E2 | Tenants, chaves e autenticação | M2 — Gateway básico | Não iniciado |
-| E3 | Chat completions síncrono | M2 — Gateway básico | Não iniciado |
-| E4 | Aliases, preços e custo | M2 — Gateway básico | Não iniciado |
-| E5 | Streaming (SSE) | M2 — Gateway básico | Não iniciado |
-| E6 | Observabilidade (fundação) | M3 — Visibilidade | Não iniciado |
-| E7 | Resiliência e multi-provedor | M4 — Proteção | Não iniciado |
-| E8 | Rate limit e orçamento | M4 — Proteção | Não iniciado |
-| E9 | Cache exato | M5 — Cache | Não iniciado |
-| E10 | Cache semântico | M5 — Cache | Não iniciado |
-| E11 | Eventos de uso e outbox | M6 — Eventos, custo e busca | Não iniciado |
+| #   | Épico                            | Marco                       | Status       |
+| --- | -------------------------------- | --------------------------- | ------------ |
+| E0  | Fundação do monorepo             | M1 — Fundação               | Em andamento |
+| E1  | Provedor mock                    | M1 — Fundação               | Não iniciado |
+| E2  | Tenants, chaves e autenticação   | M2 — Gateway básico         | Não iniciado |
+| E3  | Chat completions síncrono        | M2 — Gateway básico         | Não iniciado |
+| E4  | Aliases, preços e custo          | M2 — Gateway básico         | Não iniciado |
+| E5  | Streaming (SSE)                  | M2 — Gateway básico         | Não iniciado |
+| E6  | Observabilidade (fundação)       | M3 — Visibilidade           | Não iniciado |
+| E7  | Resiliência e multi-provedor     | M4 — Proteção               | Não iniciado |
+| E8  | Rate limit e orçamento           | M4 — Proteção               | Não iniciado |
+| E9  | Cache exato                      | M5 — Cache                  | Não iniciado |
+| E10 | Cache semântico                  | M5 — Cache                  | Não iniciado |
+| E11 | Eventos de uso e outbox          | M6 — Eventos, custo e busca | Não iniciado |
 | E12 | Aggregator, relatórios e alertas | M6 — Eventos, custo e busca | Não iniciado |
-| E13 | Indexação e busca de logs | M6 — Eventos, custo e busca | Não iniciado |
-| E14 | Assíncrono e batch | M7 — Assíncrono | Não iniciado |
-| E15 | Evals | M8 — Qualidade | Não iniciado |
-| E16 | Carga, caos e acabamento | M9 — Acabamento | Não iniciado |
+| E13 | Indexação e busca de logs        | M6 — Eventos, custo e busca | Não iniciado |
+| E14 | Assíncrono e batch               | M7 — Assíncrono             | Não iniciado |
+| E15 | Evals                            | M8 — Qualidade              | Não iniciado |
+| E16 | Carga, caos e acabamento         | M9 — Acabamento             | Não iniciado |
 
 ### Dependências entre épicos
 
@@ -79,13 +79,13 @@ flowchart LR
 
 ### Diferenças em relação à ordem do ARQUITETURA.md §15
 
-| Mudança | Motivo |
-|---|---|
-| Provedor mock virou um épico próprio (E1) | "Mock primeiro" é um invariante; o mock precisa simular latência, falhas e streaming antes que o gateway dependa dele |
-| Observabilidade subiu para logo após o gateway básico (E6) | Usar traces para **entender** retry, fallback e cache enquanto eles são construídos, em vez de instrumentar depois |
-| Orçamento entra junto com o rate limit (E8) | O contador no Redis é incrementado pelo gateway desde cedo; o Aggregator (E12) só reconcilia com o Postgres |
-| Cache dividido em exato (E9) e semântico (E10) | O semântico traz pgvector, embeddings, índices vetoriais e calibração de limiar; merece um ciclo próprio |
-| Mensageria dividida em E11, E12 e E13 | Outbox/RabbitMQ, agregação de custo e busca no Elasticsearch são aprendizados distintos e demos distintas |
+| Mudança                                                    | Motivo                                                                                                                |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Provedor mock virou um épico próprio (E1)                  | "Mock primeiro" é um invariante; o mock precisa simular latência, falhas e streaming antes que o gateway dependa dele |
+| Observabilidade subiu para logo após o gateway básico (E6) | Usar traces para **entender** retry, fallback e cache enquanto eles são construídos, em vez de instrumentar depois    |
+| Orçamento entra junto com o rate limit (E8)                | O contador no Redis é incrementado pelo gateway desde cedo; o Aggregator (E12) só reconcilia com o Postgres           |
+| Cache dividido em exato (E9) e semântico (E10)             | O semântico traz pgvector, embeddings, índices vetoriais e calibração de limiar; merece um ciclo próprio              |
+| Mensageria dividida em E11, E12 e E13                      | Outbox/RabbitMQ, agregação de custo e busca no Elasticsearch são aprendizados distintos e demos distintas             |
 
 ---
 
@@ -98,6 +98,7 @@ flowchart LR
 **Objetivo:** ter um monorepo que compila, testa, faz lint e roda no CI, com um gateway Nest "vazio" de pé.
 
 **Entregáveis**
+
 - Repositório git, `main` protegida, convenção de branches e commits.
 - Raiz do workspace à mão: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `.nvmrc` (Node 22), `engines`.
 - ESLint (typescript-eslint strict) + Prettier; Vitest com plugin SWC; separação entre `test` (unitário) e `test:int` (Testcontainers).
@@ -124,6 +125,7 @@ flowchart LR
 **Objetivo:** um servidor que imita a API da OpenAI de forma **determinística e controlável**, base de todos os testes e da carga.
 
 **Entregáveis**
+
 - `apps/mock-provider` com `POST /v1/chat/completions` (normal e streaming SSE com chunk final de `usage`) e `POST /v1/embeddings`.
 - Respostas determinísticas (mesma entrada → mesma saída) e contagem de tokens previsível.
 - Cenários controláveis por configuração ou header: latência fixa/aleatória, tempo até o primeiro byte, taxa de erro, `429` com `Retry-After`, `500`/`503`, timeout e **falha no meio do stream**.
@@ -147,6 +149,7 @@ flowchart LR
 **Objetivo:** só entra quem tem chave válida, e cada requisição sabe a qual tenant pertence.
 
 **Entregáveis**
+
 - `libs/database`: Drizzle, drizzle-kit, client, primeira migration (`tenants`, `api_keys`); Testcontainers configurado para testes de integração com Postgres.
 - Geração de chave com alta entropia, prefixo visível, armazenamento só do hash SHA-256, exibição única.
 - Guard de autenticação: chave inexistente, revogada ou vencida → `401` no formato OpenAI.
@@ -170,6 +173,7 @@ flowchart LR
 **Objetivo:** um app com o SDK da OpenAI faz uma chamada de chat pelo gateway e recebe a resposta do mock.
 
 **Entregáveis**
+
 - Schemas Zod de request/response de `chat.completions` (fonte única dos tipos) e pipe de validação próprio.
 - Exception filter que converte qualquer erro para o formato de erro da OpenAI; limite de tamanho de corpo.
 - Port `LlmProvider` no domínio e `MockAdapter` na infraestrutura (padrão Adapter).
@@ -193,6 +197,7 @@ flowchart LR
 **Objetivo:** o app pede `inteligente`, o gateway decide quem atende e informa quanto custou.
 
 **Entregáveis**
+
 - Tabelas `providers`, `model_aliases`, `alias_targets`, `model_prices` (com vigência).
 - Resolução de alias → lista ordenada de provedor+modelo (neste épico usa só o primeiro alvo).
 - `OpenAIAdapter` (primeiro provedor real, só para demo e nunca em teste).
@@ -217,6 +222,7 @@ flowchart LR
 **Objetivo:** o texto chega aos poucos, como na OpenAI, com custo calculado ao final.
 
 **Entregáveis**
+
 - `stream: true` com repasse de chunks SSE pelo Fastify, no formato da OpenAI.
 - Tokens e custo a partir do chunk final de `usage`; estratégia para quando o provedor não manda `usage`.
 - Falha no meio do stream encerra com evento de erro, sem misturar respostas.
@@ -241,6 +247,7 @@ flowchart LR
 **Objetivo:** ver cada requisição de ponta a ponta antes de construir as partes mais complexas.
 
 **Entregáveis**
+
 - `libs/telemetry`: setup do OpenTelemetry (traces + métricas) e auto-instrumentação de HTTP, Fastify, ioredis e pg.
 - Span por etapa da esteira (`auth`, `provider.call`...), com o padrão de nomes que os próximos épicos vão seguir.
 - Métricas base: `gateway_requests_total`, `gateway_request_duration_seconds`, `gateway_provider_duration_seconds`, `gateway_tokens_total`, `gateway_cost_usd_total`.
@@ -266,6 +273,7 @@ flowchart LR
 **Objetivo:** o provedor principal cai e o cliente não percebe.
 
 **Entregáveis**
+
 - `AnthropicAdapter` (segundo provedor real), com tradução OpenAI ↔ Anthropic também no streaming.
 - Timeouts por alias: tempo total e tempo até o primeiro byte.
 - Retry com backoff exponencial e jitter, só para erros transitórios (429, 5xx, timeout), respeitando `Retry-After`.
@@ -291,6 +299,7 @@ flowchart LR
 **Objetivo:** um cliente com bug não derruba os outros, e ninguém gasta além do combinado.
 
 **Entregáveis**
+
 - Tabela `rate_limit_policies` e endpoints de admin para limites e orçamento.
 - Rate limit por tenant/chave em requisições/min e tokens/min, com operações atômicas no Redis (Lua).
 - `429` com `Retry-After` e headers `x-ratelimit-*`.
@@ -317,6 +326,7 @@ flowchart LR
 **Objetivo:** a mesma pergunta não é paga duas vezes.
 
 **Entregáveis**
+
 - Normalização das messages e chave canônica: hash de `{tenant, modelo resolvido, messages, parâmetros que afetam a saída}` (TDD).
 - `cache:exact:{tenant}:{hash}` com TTL; grava só respostas completas e bem-sucedidas.
 - Em stream: grava ao final e, em hit, reproduz como stream.
@@ -340,6 +350,7 @@ flowchart LR
 **Objetivo:** perguntas com o mesmo sentido reaproveitam a resposta.
 
 **Entregáveis**
+
 - Extensão `vector`, tabela `semantic_cache_entries` e índice vetorial.
 - Embedding do prompt via `/v1/embeddings` da esteira (com o custo do embedding contabilizado).
 - Escopo: mesmo tenant, mesmo modelo resolvido, mesmo hash de system prompt e parâmetros.
@@ -367,6 +378,7 @@ flowchart LR
 **Objetivo:** cada chamada vira um evento entregue de forma confiável, sem atrasar a resposta.
 
 **Entregáveis**
+
 - `libs/events`: schemas Zod de `usage.completed`, `usage.failed` e `budget.threshold`, com versão.
 - Tabela `outbox_events`; gravação fora do caminho crítico; relay que publica e marca `published_at`.
 - RabbitMQ no Compose `core`: exchange `gateway.events` (topic), filas `q.indexer`, `q.aggregator`, `q.alerter`, DLX `gateway.dlx` e filas `.dlq`.
@@ -390,6 +402,7 @@ flowchart LR
 **Objetivo:** saber quanto cada cliente e cada modelo custam, e ser avisado quando algo sai do normal.
 
 **Entregáveis**
+
 - Consumidor Aggregator: `usage_aggregates` (tenant, dia, modelo → requisições, tokens, custo, hits de cache).
 - Reconciliação do contador de orçamento do Redis com o Postgres (fonte da verdade).
 - Evento `budget.threshold` e consumidor Alerter (orçamento a 80%, anomalias).
@@ -413,6 +426,7 @@ flowchart LR
 **Objetivo:** encontrar uma chamada pelo texto e entender o que aconteceu com ela.
 
 **Entregáveis**
+
 - Perfil `search` no Compose; index template `request-logs-*` com mapeamento explícito; ILM com retenção.
 - Consumidor Indexer com redação de PII (e-mail, CPF, telefone, cartão) e respeito ao `storeContent` do tenant.
 - Busca no admin: texto livre + filtros (tenant, período, modelo, erro, custo), com link para o trace.
@@ -436,6 +450,7 @@ flowchart LR
 **Objetivo:** tarefas longas e lotes sem manter conexão aberta e sem perder pedidos.
 
 **Entregáveis**
+
 - Filas BullMQ `async-chat` e `webhooks`; tabela `async_jobs`.
 - `POST /v1/async/chat/completions` → `202` com `job_id`; `GET /v1/async/jobs/{id}`.
 - Worker em `apps/consumers` reutilizando **a mesma esteira** do síncrono (limites, cache, custo, fallback).
@@ -462,6 +477,7 @@ flowchart LR
 **Objetivo:** uma mudança de prompt ou modelo que piora a qualidade é barrada automaticamente.
 
 **Entregáveis**
+
 - `apps/evals-cli`: suite em YAML validada com Zod (entrada + critério esperado).
 - Runner que chama o gateway como um cliente qualquer (chave de tenant de teste).
 - Critérios como Strategy: contém, regex, JSON schema, similaridade semântica e LLM-as-judge.
@@ -488,6 +504,7 @@ flowchart LR
 **Objetivo:** provar com números e demonstrações que o sistema faz o que o CONTEXT.md promete.
 
 **Entregáveis**
+
 - Cenários k6 para cada meta do ARQUITETURA §13 (overhead, cache exato, cache semântico, throughput, atraso do pipeline de eventos).
 - Testes de caos: um por linha da tabela do ARQUITETURA §8 (derrubar o container e verificar o comportamento).
 - README com o problema, a demo e os números reais medidos (com a máquina descrita).
@@ -504,17 +521,17 @@ flowchart LR
 
 ## 5. Critérios de portfólio (CONTEXT.md §8) × épicos
 
-| Critério | Onde é entregue |
-|---|---|
-| Um app com o SDK da OpenAI funciona apontando para o gateway | E3 (síncrono), E5 (streaming) |
-| Demonstrar cache economizando | E9, E10 |
-| Demonstrar provedor caindo sem o cliente perceber | E7 |
-| Demonstrar um cliente limitado sem afetar os outros | E8 |
-| Registro/busca fora do ar sem afetar as respostas | E11, E13 |
-| Medição real de desempenho documentada | E3 (inicial), E16 |
-| Seguir uma requisição do início ao fim nos dashboards | E6 (base), evolui em todo épico |
-| Teste de qualidade barra uma mudança ruim | E15 |
-| README com problema, demo e como rodar | cresce a cada marco; fechado no E16 |
+| Critério                                                     | Onde é entregue                     |
+| ------------------------------------------------------------ | ----------------------------------- |
+| Um app com o SDK da OpenAI funciona apontando para o gateway | E3 (síncrono), E5 (streaming)       |
+| Demonstrar cache economizando                                | E9, E10                             |
+| Demonstrar provedor caindo sem o cliente perceber            | E7                                  |
+| Demonstrar um cliente limitado sem afetar os outros          | E8                                  |
+| Registro/busca fora do ar sem afetar as respostas            | E11, E13                            |
+| Medição real de desempenho documentada                       | E3 (inicial), E16                   |
+| Seguir uma requisição do início ao fim nos dashboards        | E6 (base), evolui em todo épico     |
+| Teste de qualidade barra uma mudança ruim                    | E15                                 |
+| README com problema, demo e como rodar                       | cresce a cada marco; fechado no E16 |
 
 ## 6. Linha de corte
 
@@ -522,12 +539,12 @@ Se o tempo apertar, a ordem de corte é: **E15 (Evals)** e depois **E14 (Assínc
 
 ## 7. Decisões em aberto
 
-| Decisão | Até quando | Contexto |
-|---|---|---|
-| Provedores reais | Início do E4 / E7 | O diagrama prevê OpenAI e Anthropic; confirmar antes de escrever os adapters |
-| Embeddings em teste | Início do E10 | Um mock determinístico não captura sentido. Opções: fixtures de paráfrases no mock, modelo de embedding local, ou provedor real só na calibração |
-| Algoritmo de rate limit | Início do E8 | Janela fixa × deslizante × token bucket (ADR) |
-| Canal de notificação do Alerter | Início do E12 | Alerta no Grafana, webhook ou só evento/log |
-| Tokenizer para estimativa de tokens | E5 / E8 | Necessário para stream sem `usage` e para limite de tokens/min |
-| Administração com tela | Pós-v1 | CONTEXT.md §7: o foco é API e dashboards; tela simples fica fora da v1 |
-| Nome final do projeto | Antes do E16 | — |
+| Decisão                             | Até quando        | Contexto                                                                                                                                         |
+| ----------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Provedores reais                    | Início do E4 / E7 | O diagrama prevê OpenAI e Anthropic; confirmar antes de escrever os adapters                                                                     |
+| Embeddings em teste                 | Início do E10     | Um mock determinístico não captura sentido. Opções: fixtures de paráfrases no mock, modelo de embedding local, ou provedor real só na calibração |
+| Algoritmo de rate limit             | Início do E8      | Janela fixa × deslizante × token bucket (ADR)                                                                                                    |
+| Canal de notificação do Alerter     | Início do E12     | Alerta no Grafana, webhook ou só evento/log                                                                                                      |
+| Tokenizer para estimativa de tokens | E5 / E8           | Necessário para stream sem `usage` e para limite de tokens/min                                                                                   |
+| Administração com tela              | Pós-v1            | CONTEXT.md §7: o foco é API e dashboards; tela simples fica fora da v1                                                                           |
+| Nome final do projeto               | Antes do E16      | —                                                                                                                                                |

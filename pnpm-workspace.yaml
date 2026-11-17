@@ -1,5 +1,5 @@
 packages:
-  - "apps/*"
-  - "libs/*"
+  - 'apps/*'
+  - 'libs/*'
 
 engineStrict: true

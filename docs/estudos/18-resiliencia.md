@@ -32,7 +32,7 @@ Toda chamada externa precisa de um limite de tempo. Sem isso, uma conexão trava
 
 - **Timeout de conexão:** quanto esperar para conectar.
 - **Tempo até o primeiro byte (TTFB):** essencial em streaming. O provedor aceitou, mas não começou a responder.
-- **Timeout total:** limite para a operação inteira, **incluindo todas as tentativas** (um *budget* de tempo). Sem ele, 3 retries × 30 s = 90 s de espera.
+- **Timeout total:** limite para a operação inteira, **incluindo todas as tentativas** (um _budget_ de tempo). Sem ele, 3 retries × 30 s = 90 s de espera.
 
 Em Node: `AbortController` + `AbortSignal.timeout(ms)`.
 
@@ -40,13 +40,13 @@ Em Node: `AbortController` + `AbortSignal.timeout(ms)`.
 
 Repetir só faz sentido para erros **transitórios**:
 
-| Repetir | Não repetir |
-|---|---|
+| Repetir                                                      | Não repetir                                                                |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | `429`, `500`, `502`, `503`, `504`, timeout, conexão recusada | `400`, `401`, `403`, `404`, `422` (o erro é do pedido, e vai falhar igual) |
 
 **Backoff exponencial:** esperar cada vez mais entre tentativas: `base × 2^tentativa` (100 ms, 200 ms, 400 ms...), com um teto (`cap`).
 
-**Jitter:** adicionar aleatoriedade. Sem jitter, mil clientes que falharam juntos tentam de novo **juntos**, criando ondas sincronizadas (*thundering herd*). O "full jitter" recomendado pela AWS:
+**Jitter:** adicionar aleatoriedade. Sem jitter, mil clientes que falharam juntos tentam de novo **juntos**, criando ondas sincronizadas (_thundering herd_). O "full jitter" recomendado pela AWS:
 
 ```
 espera = random(0, min(cap, base × 2^tentativa))
@@ -70,7 +70,7 @@ stateDiagram-v2
 ```
 
 - **Fechado:** tudo passa; falhas são contadas.
-- **Aberto:** nada passa; falha imediata (*fail fast*), e o router vai direto para o fallback.
+- **Aberto:** nada passa; falha imediata (_fail fast_), e o router vai direto para o fallback.
 - **Semiaberto:** deixa passar uma (ou poucas) requisição de teste.
 
 **Distribuído (Redis) × local (memória):** com estado no Redis (`cb:{provider}`), todas as instâncias abrem juntas e aprendem juntas; o custo é uma ida ao Redis por chamada e o cuidado com race conditions (várias instâncias querendo ser "a que testa" no semiaberto). Local é mais simples e rápido, mas cada instância precisa "descobrir" a falha sozinha.
@@ -102,14 +102,14 @@ Quando as tentativas num alvo se esgotam (ou o circuito está aberto), passar ao
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Plataforma | Diferença |
-|---|---|---|
-| **opossum** | Node | Circuit breaker popular, em memória |
-| **cockatiel** | Node/TS | Retry, circuit breaker, timeout, bulkhead e fallback compostos como políticas; inspirado no Polly |
-| **resilience4j** | Java | Referência na JVM; sucessor do Hystrix |
-| **Polly** | .NET | Referência em .NET |
-| **Hystrix** (Netflix) | Java | Pioneiro, hoje em modo de manutenção |
-| **Envoy / Istio** | Service mesh | Retry, timeout e *outlier detection* na infraestrutura, sem código |
+| Ferramenta            | Plataforma   | Diferença                                                                                         |
+| --------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
+| **opossum**           | Node         | Circuit breaker popular, em memória                                                               |
+| **cockatiel**         | Node/TS      | Retry, circuit breaker, timeout, bulkhead e fallback compostos como políticas; inspirado no Polly |
+| **resilience4j**      | Java         | Referência na JVM; sucessor do Hystrix                                                            |
+| **Polly**             | .NET         | Referência em .NET                                                                                |
+| **Hystrix** (Netflix) | Java         | Pioneiro, hoje em modo de manutenção                                                              |
+| **Envoy / Istio**     | Service mesh | Retry, timeout e _outlier detection_ na infraestrutura, sem código                                |
 
 O projeto implementa à mão no domínio (máquina de estados testada com TDD), o que é ideal para aprender. Em produção, cockatiel seria uma boa referência para comparar.
 
@@ -128,7 +128,7 @@ O projeto implementa à mão no domínio (máquina de estados testada com TDD), 
 
 ## 8. Para aprofundar
 
-- AWS Architecture Blog — *Exponential Backoff And Jitter*: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
-- Martin Fowler — *CircuitBreaker*: https://martinfowler.com/bliki/CircuitBreaker.html
-- Amazon Builders' Library — *Timeouts, retries, and backoff with jitter*: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
-- Livro: *Release It!* (Michael Nygard), que popularizou o circuit breaker
+- AWS Architecture Blog — _Exponential Backoff And Jitter_: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+- Martin Fowler — _CircuitBreaker_: https://martinfowler.com/bliki/CircuitBreaker.html
+- Amazon Builders' Library — _Timeouts, retries, and backoff with jitter_: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+- Livro: _Release It!_ (Michael Nygard), que popularizou o circuit breaker

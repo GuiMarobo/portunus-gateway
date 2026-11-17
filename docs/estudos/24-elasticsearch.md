@@ -28,7 +28,7 @@ Buscar "prazo reembolso" vira **intersecção de listas**, quase sem depender do
 Antes de indexar, o texto passa por um **analyzer**:
 
 1. **Tokenizer:** quebra em termos ("Qual o prazo?" → `qual`, `o`, `prazo`).
-2. **Filtros:** minúsculas, remoção de acentos (`asciifolding`), *stopwords* ("o", "de"), **stemming** (`reembolsos`, `reembolsar` → `reembols`).
+2. **Filtros:** minúsculas, remoção de acentos (`asciifolding`), _stopwords_ ("o", "de"), **stemming** (`reembolsos`, `reembolsar` → `reembols`).
 
 O mesmo analyzer é aplicado na consulta, e é por isso que "Reembolsos" encontra "reembolso". Existe um analyzer `portuguese` pronto.
 
@@ -36,8 +36,8 @@ O mesmo analyzer é aplicado na consulta, e é por isso que "Reembolsos" encontr
 
 O Elasticsearch ordena os resultados por **score**, usando o BM25 por padrão. A intuição:
 
-- **TF (*term frequency*):** o termo aparece muitas vezes no documento? Mais relevante, mas com saturação (dez vezes não é dez vezes melhor).
-- **IDF (*inverse document frequency*):** o termo é raro na base? Mais informativo ("reembolso" vale mais que "qual").
+- **TF (_term frequency_):** o termo aparece muitas vezes no documento? Mais relevante, mas com saturação (dez vezes não é dez vezes melhor).
+- **IDF (_inverse document frequency_):** o termo é raro na base? Mais informativo ("reembolso" vale mais que "qual").
 - **Normalização pelo tamanho:** documentos curtos com o termo pesam mais.
 
 ### 2.4 Arquitetura
@@ -45,19 +45,19 @@ O Elasticsearch ordena os resultados por **score**, usando o BM25 por padrão. A
 - **Índice:** coleção de documentos JSON (como uma "tabela").
 - **Shards:** o índice é dividido em pedaços (cada um é um índice Lucene) que podem ficar em nós diferentes, o que permite escalar horizontalmente.
 - **Réplicas:** cópias dos shards, para alta disponibilidade e mais vazão de leitura.
-- **Near real-time:** um documento indexado fica pesquisável após o próximo *refresh* (1 s por padrão).
+- **Near real-time:** um documento indexado fica pesquisável após o próximo _refresh_ (1 s por padrão).
 
 ### 2.5 Mapping: o "schema"
 
 O mapping define o tipo de cada campo:
 
-| Tipo | Uso | Campos do projeto |
-|---|---|---|
-| `text` | Analisado, para busca full-text | `prompt`, `response` |
-| `keyword` | Exato, para filtros, agregações e ordenação | `tenant_id`, `model`, `provider`, `status`, `request_id`, `trace_id` |
-| `long`, `float`, `scaled_float` | Numéricos e intervalos | `latency_ms`, `tokens_in`, `cost_usd` |
-| `date` | Intervalos de tempo | `@timestamp` |
-| `nested` | Arrays de objetos consultáveis individualmente | `attempts[]` |
+| Tipo                            | Uso                                            | Campos do projeto                                                    |
+| ------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
+| `text`                          | Analisado, para busca full-text                | `prompt`, `response`                                                 |
+| `keyword`                       | Exato, para filtros, agregações e ordenação    | `tenant_id`, `model`, `provider`, `status`, `request_id`, `trace_id` |
+| `long`, `float`, `scaled_float` | Numéricos e intervalos                         | `latency_ms`, `tokens_in`, `cost_usd`                                |
+| `date`                          | Intervalos de tempo                            | `@timestamp`                                                         |
+| `nested`                        | Arrays de objetos consultáveis individualmente | `attempts[]`                                                         |
 
 **Dynamic mapping** (deixar o ES adivinhar os tipos) é perigoso: um campo pode virar `text` quando deveria ser `keyword`, e mudar o tipo depois exige reindexar. Por isso, ARQUITETURA.md §5.4 exige mapping explícito via **index template**.
 
@@ -67,11 +67,11 @@ O mapping define o tipo de cada campo:
 {
   "query": {
     "bool": {
-      "must":   [{ "match": { "prompt": "prazo reembolso" } }],
+      "must": [{ "match": { "prompt": "prazo reembolso" } }],
       "filter": [
-        { "term":  { "tenant_id": "t_123" } },
+        { "term": { "tenant_id": "t_123" } },
         { "range": { "@timestamp": { "gte": "now-7d" } } },
-        { "term":  { "status": "error" } }
+        { "term": { "status": "error" } }
       ]
     }
   },
@@ -83,7 +83,7 @@ O mapping define o tipo de cada campo:
 
 ### 2.7 Ciclo de vida: índices por tempo e ILM
 
-Logs crescem sem parar. O padrão é escrever em índices por período (`request-logs-2026.11.13`), ou num **data stream** que gerencia isso sozinho, e aplicar **ILM** (*Index Lifecycle Management*): fase *hot* (escrita), *warm*/*cold* (só leitura, recursos menores) e *delete* (após 30 dias, no projeto). Apagar um índice inteiro é instantâneo; apagar documentos um a um é caro.
+Logs crescem sem parar. O padrão é escrever em índices por período (`request-logs-2026.11.13`), ou num **data stream** que gerencia isso sozinho, e aplicar **ILM** (_Index Lifecycle Management_): fase _hot_ (escrita), _warm_/_cold_ (só leitura, recursos menores) e _delete_ (após 30 dias, no projeto). Apagar um índice inteiro é instantâneo; apagar documentos um a um é caro.
 
 ## 3. Analogia
 
@@ -98,14 +98,14 @@ O índice invertido é o **índice remissivo no fim de um livro**: em vez de ler
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença principal | Quando escolher |
-|---|---|---|
-| **OpenSearch** | Fork do Elasticsearch 7.10 mantido pela AWS (2021), após a mudança de licença do ES; API muito parecida | Licença Apache 2.0, AWS |
-| **Postgres full-text** (`tsvector` + GIN) | Sem serviço extra; relevância e recursos mais simples | Volume moderado, busca simples |
-| **Meilisearch, Typesense** | Leves, fáceis, ótimos para busca de produto com tolerância a erros de digitação | Busca de aplicação (catálogo, docs) |
-| **Loki** | Indexa só **labels**, não o conteúdo; busca por conteúdo = varredura (grep distribuído) | Logs de aplicação baratos ([28](./28-logs-pino-e-loki.md)) |
-| **ClickHouse** | Banco colunar analítico; busca textual possível, foco em agregações | Analytics de logs em grande volume |
-| **Apache Solr** | Também sobre o Lucene; mais antigo | Legados |
+| Ferramenta                                | Diferença principal                                                                                     | Quando escolher                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **OpenSearch**                            | Fork do Elasticsearch 7.10 mantido pela AWS (2021), após a mudança de licença do ES; API muito parecida | Licença Apache 2.0, AWS                                    |
+| **Postgres full-text** (`tsvector` + GIN) | Sem serviço extra; relevância e recursos mais simples                                                   | Volume moderado, busca simples                             |
+| **Meilisearch, Typesense**                | Leves, fáceis, ótimos para busca de produto com tolerância a erros de digitação                         | Busca de aplicação (catálogo, docs)                        |
+| **Loki**                                  | Indexa só **labels**, não o conteúdo; busca por conteúdo = varredura (grep distribuído)                 | Logs de aplicação baratos ([28](./28-logs-pino-e-loki.md)) |
+| **ClickHouse**                            | Banco colunar analítico; busca textual possível, foco em agregações                                     | Analytics de logs em grande volume                         |
+| **Apache Solr**                           | Também sobre o Lucene; mais antigo                                                                      | Legados                                                    |
 
 Sobre a licença: o Elasticsearch saiu da Apache 2.0 em 2021 (Elastic License e SSPL) e, em 2024, voltou a oferecer uma opção open source (AGPL). Isso explica a existência do OpenSearch.
 
@@ -128,6 +128,6 @@ Sobre a licença: o Elasticsearch saiu da Apache 2.0 em 2021 (Elastic License e 
 ## 8. Para aprofundar
 
 - Elasticsearch — guia de referência: https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html
-- Elastic — *Practical BM25*: https://www.elastic.co/blog/practical-bm25-part-2-the-bm25-algorithm-and-its-variables
+- Elastic — _Practical BM25_: https://www.elastic.co/blog/practical-bm25-part-2-the-bm25-algorithm-and-its-variables
 - OpenSearch — documentação: https://opensearch.org/docs/latest/
-- Livro: *Relevant Search* (Turnbull & Berryman)
+- Livro: _Relevant Search_ (Turnbull & Berryman)

@@ -8,7 +8,7 @@
 
 ## 1. O problema
 
-**O problema da escrita dupla (*dual write*):** o gateway precisa (a) responder/gravar algo e (b) publicar um evento no RabbitMQ. São dois sistemas diferentes, sem transação comum. Qualquer combinação de falhas gera inconsistência:
+**O problema da escrita dupla (_dual write_):** o gateway precisa (a) responder/gravar algo e (b) publicar um evento no RabbitMQ. São dois sistemas diferentes, sem transação comum. Qualquer combinação de falhas gera inconsistência:
 
 - Grava no banco e o RabbitMQ está fora → evento perdido.
 - Publica e o processo cai antes de gravar → evento sobre algo que não existe.
@@ -19,11 +19,11 @@ Do outro lado, o broker entrega **at-least-once**: a mesma mensagem pode chegar 
 
 ### 2.1 Garantias de entrega
 
-| Garantia | Significado | Como se obtém |
-|---|---|---|
-| **At-most-once** | Entrega 0 ou 1 vez (pode perder) | Ack antes de processar; publicar sem confirmação |
-| **At-least-once** | Entrega 1 ou mais vezes (pode duplicar) | Ack depois de processar; retry na publicação |
-| **Exactly-once** | Exatamente 1 vez | Em sistemas distribuídos, na prática: **at-least-once + idempotência** ("effectively once") |
+| Garantia          | Significado                             | Como se obtém                                                                               |
+| ----------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **At-most-once**  | Entrega 0 ou 1 vez (pode perder)        | Ack antes de processar; publicar sem confirmação                                            |
+| **At-least-once** | Entrega 1 ou mais vezes (pode duplicar) | Ack depois de processar; retry na publicação                                                |
+| **Exactly-once**  | Exatamente 1 vez                        | Em sistemas distribuídos, na prática: **at-least-once + idempotência** ("effectively once") |
 
 ### 2.2 O padrão Transactional Outbox
 
@@ -47,7 +47,7 @@ sequenceDiagram
 ```
 
 - **`FOR UPDATE SKIP LOCKED`:** várias instâncias do relay pegam lotes diferentes sem se bloquear.
-- **Polling × CDC:** em vez de consultar a tabela, é possível ler o log de replicação do Postgres (*Change Data Capture*, ex.: Debezium). Menos latência e menos carga, mais infraestrutura.
+- **Polling × CDC:** em vez de consultar a tabela, é possível ler o log de replicação do Postgres (_Change Data Capture_, ex.: Debezium). Menos latência e menos carga, mais infraestrutura.
 
 **A particularidade do projeto:** a inferência não grava um "dado de negócio" no Postgres antes de responder. Aqui o outbox funciona mais como um **buffer durável**: garante que o evento sobreviva à queda do RabbitMQ. A garantia transacional plena só existe onde há escrita de negócio junto (ex.: criação de um job). Essa nuance é discutida no E11. O que acontece se o **Postgres** estiver fora (buffer limitado em memória) também.
 
@@ -88,14 +88,14 @@ O mesmo conceito aparece na criação de jobs (E14): o cliente envia um header `
 
 ## 5. Ferramentas e abordagens similares
 
-| Abordagem | Diferença |
-|---|---|
-| **Outbox com polling** | Simples, só Postgres; latência = intervalo do polling. **A escolha do projeto** |
-| **Outbox com CDC (Debezium)** | Lê o WAL do Postgres e publica no Kafka/RabbitMQ; baixa latência, mais infraestrutura |
-| **Publicar direto e aceitar perda** | Mais simples; a alternativa descartada no ADR 005 |
+| Abordagem                                        | Diferença                                                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Outbox com polling**                           | Simples, só Postgres; latência = intervalo do polling. **A escolha do projeto**                  |
+| **Outbox com CDC (Debezium)**                    | Lê o WAL do Postgres e publica no Kafka/RabbitMQ; baixa latência, mais infraestrutura            |
+| **Publicar direto e aceitar perda**              | Mais simples; a alternativa descartada no ADR 005                                                |
 | **Transações do Kafka (exactly-once semantics)** | Exactly-once **dentro do Kafka** (ler, processar, escrever no Kafka); não cobre efeitos externos |
-| **Inbox pattern** | O espelho do outbox no consumidor: grava a mensagem recebida numa tabela antes de processar |
-| **Temporal, sagas** | Orquestração durável de fluxos com vários passos e compensações |
+| **Inbox pattern**                                | O espelho do outbox no consumidor: grava a mensagem recebida numa tabela antes de processar      |
+| **Temporal, sagas**                              | Orquestração durável de fluxos com vários passos e compensações                                  |
 
 ## 6. Armadilhas
 
@@ -115,8 +115,8 @@ O mesmo conceito aparece na criação de jobs (E14): o cliente envia um header `
 
 ## 8. Para aprofundar
 
-- Chris Richardson — *Transactional Outbox*: https://microservices.io/patterns/data/transactional-outbox.html
-- Chris Richardson — *Idempotent Consumer*: https://microservices.io/patterns/communication-style/idempotent-consumer.html
-- Stripe — *Designing robust and predictable APIs with idempotency*: https://stripe.com/blog/idempotency
-- Debezium — *Outbox Event Router*: https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html
-- Livro: *Designing Data-Intensive Applications* (Kleppmann), caps. 9 e 11
+- Chris Richardson — _Transactional Outbox_: https://microservices.io/patterns/data/transactional-outbox.html
+- Chris Richardson — _Idempotent Consumer_: https://microservices.io/patterns/communication-style/idempotent-consumer.html
+- Stripe — _Designing robust and predictable APIs with idempotency_: https://stripe.com/blog/idempotency
+- Debezium — _Outbox Event Router_: https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html
+- Livro: _Designing Data-Intensive Applications_ (Kleppmann), caps. 9 e 11

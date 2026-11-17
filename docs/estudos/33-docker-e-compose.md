@@ -58,18 +58,18 @@ Descreve vários containers, suas redes, volumes e dependências num arquivo YAM
 services:
   postgres:
     image: pgvector/pgvector:pg17
-    profiles: ["core", "full"]
+    profiles: ['core', 'full']
     environment:
       POSTGRES_PASSWORD: dev
-    volumes: ["pgdata:/var/lib/postgresql/data"]
+    volumes: ['pgdata:/var/lib/postgresql/data']
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       retries: 10
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:<versão>
-    profiles: ["search", "full"]
+    profiles: ['search', 'full']
 
 volumes:
   pgdata:
@@ -92,15 +92,15 @@ volumes:
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença |
-|---|---|
-| **Docker + Compose** | Padrão para desenvolvimento local. **A escolha do projeto** |
-| **Podman (+ podman-compose)** | Sem daemon, *rootless* por padrão, compatível com a CLI do Docker |
+| Ferramenta                                      | Diferença                                                                    |
+| ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Docker + Compose**                            | Padrão para desenvolvimento local. **A escolha do projeto**                  |
+| **Podman (+ podman-compose)**                   | Sem daemon, _rootless_ por padrão, compatível com a CLI do Docker            |
 | **Kubernetes** (kind, minikube, k3d localmente) | Orquestração de produção; muito mais conceitos (pods, deployments, services) |
-| **Tilt, Skaffold** | Ciclo de desenvolvimento rápido sobre Kubernetes |
-| **Dev Containers** | O ambiente de desenvolvimento inteiro (editor + ferramentas) num container |
-| **Nix, devbox** | Ambientes reproduzíveis sem containers |
-| **Instalar tudo na máquina** | Sem isolamento; versões divergem entre devs |
+| **Tilt, Skaffold**                              | Ciclo de desenvolvimento rápido sobre Kubernetes                             |
+| **Dev Containers**                              | O ambiente de desenvolvimento inteiro (editor + ferramentas) num container   |
+| **Nix, devbox**                                 | Ambientes reproduzíveis sem containers                                       |
+| **Instalar tudo na máquina**                    | Sem isolamento; versões divergem entre devs                                  |
 
 ## 6. Armadilhas
 
@@ -119,8 +119,8 @@ volumes:
 
 ## 8. Para aprofundar
 
-- Docker — *Get started* e conceitos: https://docs.docker.com/get-started/
-- Docker Compose — *Profiles*: https://docs.docker.com/compose/how-tos/profiles/
-- Docker Compose — *Startup order* (healthchecks): https://docs.docker.com/compose/how-tos/startup-order/
-- Docker — *Multi-stage builds*: https://docs.docker.com/build/building/multi-stage/
-- pnpm — *Working with Docker*: https://pnpm.io/docker
+- Docker — _Get started_ e conceitos: https://docs.docker.com/get-started/
+- Docker Compose — _Profiles_: https://docs.docker.com/compose/how-tos/profiles/
+- Docker Compose — _Startup order_ (healthchecks): https://docs.docker.com/compose/how-tos/startup-order/
+- Docker — _Multi-stage builds_: https://docs.docker.com/build/building/multi-stage/
+- pnpm — _Working with Docker_: https://pnpm.io/docker

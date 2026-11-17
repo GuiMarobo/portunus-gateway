@@ -32,7 +32,7 @@ POST /v1/chat/completions                    ███████████�
 └─ event.publish                             █ 2 ms
 ```
 
-Esse "diagrama de cascata" (*waterfall*) responde em segundos o que levaria horas com logs.
+Esse "diagrama de cascata" (_waterfall_) responde em segundos o que levaria horas com logs.
 
 ### 2.2 Atributos, eventos e status
 
@@ -67,7 +67,7 @@ O Grafana Tempo é um backend de traces desenhado para ser **barato**:
 - Guarda traces em **armazenamento de objetos** (S3, GCS, disco local), sem um banco indexado pesado.
 - A busca principal é **por trace id**, que chega via links de logs (Loki) e exemplars de métricas (Prometheus).
 - **TraceQL** permite buscar por atributos: `{ span.provider = "openai" && status = error && duration > 1s }`.
-- Pode gerar métricas a partir de spans (*metrics generator*: RED por serviço, grafo de serviços).
+- Pode gerar métricas a partir de spans (_metrics generator_: RED por serviço, grafo de serviços).
 
 ## 3. Analogia
 
@@ -81,15 +81,15 @@ Um trace é o **rastreamento de uma encomenda**: "postado em SP 10:00 → triage
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Diferença principal |
-|---|---|
-| **Grafana Tempo** | Armazenamento em objeto, barato, busca por id + TraceQL. **A escolha do projeto** |
-| **Jaeger** | Open source (CNCF), UI própria, backends como Cassandra/Elasticsearch; muito popular |
-| **Zipkin** | O pioneiro open source (inspirado no Dapper do Google), mais simples |
-| **Honeycomb** | SaaS de eventos com alta cardinalidade; consultas exploratórias poderosas |
-| **Datadog APM, New Relic, Dynatrace** | SaaS completos, com perfilamento e correlação automática |
-| **AWS X-Ray, Google Cloud Trace** | Gerenciados nas nuvens |
-| **Langfuse, LangSmith** | Traces específicos de aplicações LLM (prompts, cadeias, custo) |
+| Ferramenta                            | Diferença principal                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Grafana Tempo**                     | Armazenamento em objeto, barato, busca por id + TraceQL. **A escolha do projeto**    |
+| **Jaeger**                            | Open source (CNCF), UI própria, backends como Cassandra/Elasticsearch; muito popular |
+| **Zipkin**                            | O pioneiro open source (inspirado no Dapper do Google), mais simples                 |
+| **Honeycomb**                         | SaaS de eventos com alta cardinalidade; consultas exploratórias poderosas            |
+| **Datadog APM, New Relic, Dynatrace** | SaaS completos, com perfilamento e correlação automática                             |
+| **AWS X-Ray, Google Cloud Trace**     | Gerenciados nas nuvens                                                               |
+| **Langfuse, LangSmith**               | Traces específicos de aplicações LLM (prompts, cadeias, custo)                       |
 
 ## 6. Armadilhas
 
@@ -108,7 +108,7 @@ Um trace é o **rastreamento de uma encomenda**: "postado em SP 10:00 → triage
 
 ## 8. Para aprofundar
 
-- OpenTelemetry — *Traces* (conceitos): https://opentelemetry.io/docs/concepts/signals/traces/
-- OpenTelemetry — *Sampling*: https://opentelemetry.io/docs/concepts/sampling/
+- OpenTelemetry — _Traces_ (conceitos): https://opentelemetry.io/docs/concepts/signals/traces/
+- OpenTelemetry — _Sampling_: https://opentelemetry.io/docs/concepts/sampling/
 - Grafana Tempo — documentação e TraceQL: https://grafana.com/docs/tempo/latest/
-- Google — *Dapper, a Large-Scale Distributed Systems Tracing Infrastructure* (artigo que originou a área): https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/
+- Google — _Dapper, a Large-Scale Distributed Systems Tracing Infrastructure_ (artigo que originou a área): https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/

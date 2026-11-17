@@ -15,18 +15,18 @@ Uma chamada de LLM custa dinheiro e leva segundos. Se a mesma pergunta, com os m
 
 - **Hit:** o dado estava no cache. **Miss:** não estava.
 - **Hit rate:** hits ÷ (hits + misses). É a métrica número um.
-- **TTL (*time to live*):** por quanto tempo uma entrada vale.
+- **TTL (_time to live_):** por quanto tempo uma entrada vale.
 - **Invalidação:** remover ou atualizar uma entrada quando o dado de origem muda. ("Há só duas coisas difíceis em Ciência da Computação: invalidação de cache e dar nomes às coisas." — Phil Karlton)
 - **Eviction:** remoção por falta de espaço (LRU, LFU...).
 
 ### 2.2 Estratégias de leitura e escrita
 
-| Estratégia | Como funciona | Uso |
-|---|---|---|
-| **Cache-aside (lazy loading)** | A aplicação consulta o cache; no miss, busca na origem e grava no cache | **A usada no gateway** |
-| **Read-through** | O próprio cache busca na origem no miss | Bibliotecas e CDNs |
-| **Write-through** | Toda escrita vai ao cache e à origem juntas | Dados que mudam e são lidos muito |
-| **Write-behind (write-back)** | Escreve no cache e grava na origem depois, em lote | Alto volume de escrita, tolera perda |
+| Estratégia                     | Como funciona                                                           | Uso                                  |
+| ------------------------------ | ----------------------------------------------------------------------- | ------------------------------------ |
+| **Cache-aside (lazy loading)** | A aplicação consulta o cache; no miss, busca na origem e grava no cache | **A usada no gateway**               |
+| **Read-through**               | O próprio cache busca na origem no miss                                 | Bibliotecas e CDNs                   |
+| **Write-through**              | Toda escrita vai ao cache e à origem juntas                             | Dados que mudam e são lidos muito    |
+| **Write-behind (write-back)**  | Escreve no cache e grava na origem depois, em lote                      | Alto volume de escrita, tolera perda |
 
 ### 2.3 A chave do cache exato
 
@@ -81,13 +81,13 @@ Uma entrada popular expira e 100 requisições simultâneas dão miss, chamando 
 
 ## 5. Ferramentas similares (camadas de cache)
 
-| Ferramenta / camada | Diferença |
-|---|---|
-| **Redis / Valkey** | Cache distribuído, compartilhado entre instâncias; **a escolha do projeto** |
-| **Memcached** | Cache distribuído mais simples (só strings) |
-| **Cache em memória** (`lru-cache`) | Mais rápido, mas por instância; bom para dados quase imutáveis (preços, aliases) |
-| **CDN / cache HTTP** (Cloudflare, Varnish) | Cacheia por URL em GET; não serve para POST com corpo variável, como chat |
-| **Prompt caching do provedor** | Reaproveita o processamento de prefixos dentro do provedor; reduz custo de entrada, mas não evita a chamada |
+| Ferramenta / camada                        | Diferença                                                                                                   |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Redis / Valkey**                         | Cache distribuído, compartilhado entre instâncias; **a escolha do projeto**                                 |
+| **Memcached**                              | Cache distribuído mais simples (só strings)                                                                 |
+| **Cache em memória** (`lru-cache`)         | Mais rápido, mas por instância; bom para dados quase imutáveis (preços, aliases)                            |
+| **CDN / cache HTTP** (Cloudflare, Varnish) | Cacheia por URL em GET; não serve para POST com corpo variável, como chat                                   |
+| **Prompt caching do provedor**             | Reaproveita o processamento de prefixos dentro do provedor; reduz custo de entrada, mas não evita a chamada |
 
 ## 6. Armadilhas
 
@@ -105,7 +105,7 @@ Uma entrada popular expira e 100 requisições simultâneas dão miss, chamando 
 
 ## 8. Para aprofundar
 
-- AWS — *Caching best practices*: https://aws.amazon.com/caching/best-practices/
-- RFC 8785 — *JSON Canonicalization Scheme*: https://www.rfc-editor.org/rfc/rfc8785
-- Wikipedia — *Cache stampede* (inclui a expiração probabilística): https://en.wikipedia.org/wiki/Cache_stampede
-- Livro: *Designing Data-Intensive Applications* (Kleppmann), seções sobre caches e consistência
+- AWS — _Caching best practices_: https://aws.amazon.com/caching/best-practices/
+- RFC 8785 — _JSON Canonicalization Scheme_: https://www.rfc-editor.org/rfc/rfc8785
+- Wikipedia — _Cache stampede_ (inclui a expiração probabilística): https://en.wikipedia.org/wiki/Cache_stampede
+- Livro: _Designing Data-Intensive Applications_ (Kleppmann), seções sobre caches e consistência

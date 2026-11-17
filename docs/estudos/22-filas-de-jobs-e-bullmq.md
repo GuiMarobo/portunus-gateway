@@ -14,13 +14,13 @@
 
 ### 2.1 Fila de jobs × fila de eventos
 
-| | Evento (RabbitMQ, [20](./20-mensageria-e-rabbitmq.md)) | Job (BullMQ) |
-|---|---|---|
-| Semântica | "Algo **aconteceu**" | "**Faça** isto" |
-| Consumidores | Vários interessados (fan-out) | Um worker executa |
-| Estado | Some após o ack | Tem ciclo de vida consultável: aguardando, ativo, concluído, falhou |
-| Resultado | Não há | Há um resultado, que o cliente consulta |
-| Recursos típicos | Roteamento, DLX | Retry com backoff, atraso, prioridade, limite de taxa, progresso |
+|                  | Evento (RabbitMQ, [20](./20-mensageria-e-rabbitmq.md)) | Job (BullMQ)                                                        |
+| ---------------- | ------------------------------------------------------ | ------------------------------------------------------------------- |
+| Semântica        | "Algo **aconteceu**"                                   | "**Faça** isto"                                                     |
+| Consumidores     | Vários interessados (fan-out)                          | Um worker executa                                                   |
+| Estado           | Some após o ack                                        | Tem ciclo de vida consultável: aguardando, ativo, concluído, falhou |
+| Resultado        | Não há                                                 | Há um resultado, que o cliente consulta                             |
+| Recursos típicos | Roteamento, DLX                                        | Retry com backoff, atraso, prioridade, limite de taxa, progresso    |
 
 Essa diferença sustenta o ADR 002. Usar só um dos dois é possível, mas força uma ferramenta a fazer o papel da outra (ver a seção 5).
 
@@ -29,15 +29,15 @@ Essa diferença sustenta o ADR 002. Usar só um dos dois é possível, mas forç
 BullMQ é uma biblioteca Node que implementa filas de jobs **sobre o Redis**, com scripts Lua para garantir atomicidade.
 
 ```ts
-const queue = new Queue("async-chat", { connection });
-await queue.add("chat", payload, {
+const queue = new Queue('async-chat', { connection });
+await queue.add('chat', payload, {
   jobId,
   attempts: 5,
-  backoff: { type: "exponential", delay: 1000 },
+  backoff: { type: 'exponential', delay: 1000 },
   removeOnComplete: { age: 86400 },
 });
 
-new Worker("async-chat", async (job) => runInferencePipeline(job.data), {
+new Worker('async-chat', async (job) => runInferencePipeline(job.data), {
   connection,
   concurrency: 10,
 });
@@ -61,7 +61,7 @@ stateDiagram-v2
 
 - **Retries com backoff** (`attempts`, `backoff`).
 - **Concorrência** por worker e **rate limiter** por fila.
-- **Locks e stalled jobs:** um worker ativo renova um lock no Redis. Se ele morrer, o job é detectado como *stalled* e volta para a fila. Por isso o processamento é **at-least-once** e precisa ser idempotente.
+- **Locks e stalled jobs:** um worker ativo renova um lock no Redis. Se ele morrer, o job é detectado como _stalled_ e volta para a fila. Por isso o processamento é **at-least-once** e precisa ser idempotente.
 - **Prioridades, jobs atrasados e repetíveis** (cron).
 - **Flows:** jobs pai/filho (útil para batch: um pai "lote" com N filhos).
 - **Eventos** (`completed`, `failed`) para acompanhar o progresso.
@@ -75,7 +75,7 @@ O BullMQ **não tem DLQ nativa** como o RabbitMQ: jobs que esgotam as tentativas
 
 ### 2.4 Batch com concorrência por tenant
 
-N prompts → N jobs. Para que um tenant com 50 mil itens não monopolize os workers, é preciso limitar a concorrência **por tenant**: filas por tenant, *group keys* (recurso do BullMQ Pro) ou um controle próprio no Redis. É uma decisão do E14.
+N prompts → N jobs. Para que um tenant com 50 mil itens não monopolize os workers, é preciso limitar a concorrência **por tenant**: filas por tenant, _group keys_ (recurso do BullMQ Pro) ou um controle próprio no Redis. É uma decisão do E14.
 
 ### 2.5 Fluxo completo do projeto
 
@@ -97,16 +97,16 @@ N prompts → N jobs. Para que um tenant com 50 mil itens não monopolize os wor
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Plataforma / base | Diferença principal |
-|---|---|---|
-| **BullMQ** | Node / Redis | Rico em recursos, TypeScript, ativo. **A escolha do projeto** |
-| **Bull, Bee-Queue** | Node / Redis | Antecessores (Bull) ou mais simples (Bee-Queue) |
-| **pg-boss, Graphile Worker** | Node / **Postgres** | Fila no próprio Postgres (`SKIP LOCKED`), sem Redis; transacional com seus dados |
-| **Agenda** | Node / MongoDB | Agendamento de tarefas |
-| **Sidekiq** (Ruby), **Celery** (Python) | Redis/RabbitMQ | Equivalentes clássicos em outras linguagens |
-| **RabbitMQ como fila de tarefas** | Broker | Funciona, mas sem estado consultável nem resultado; você constrói por cima |
-| **Temporal, Inngest, Trigger.dev** | Orquestração durável | Workflows com vários passos, estado durável e retries por etapa; mais poder, mais infraestrutura |
-| **SQS + Lambda** | Gerenciado (AWS) | Zero servidor; limites de tempo de execução |
+| Ferramenta                              | Plataforma / base    | Diferença principal                                                                              |
+| --------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------ |
+| **BullMQ**                              | Node / Redis         | Rico em recursos, TypeScript, ativo. **A escolha do projeto**                                    |
+| **Bull, Bee-Queue**                     | Node / Redis         | Antecessores (Bull) ou mais simples (Bee-Queue)                                                  |
+| **pg-boss, Graphile Worker**            | Node / **Postgres**  | Fila no próprio Postgres (`SKIP LOCKED`), sem Redis; transacional com seus dados                 |
+| **Agenda**                              | Node / MongoDB       | Agendamento de tarefas                                                                           |
+| **Sidekiq** (Ruby), **Celery** (Python) | Redis/RabbitMQ       | Equivalentes clássicos em outras linguagens                                                      |
+| **RabbitMQ como fila de tarefas**       | Broker               | Funciona, mas sem estado consultável nem resultado; você constrói por cima                       |
+| **Temporal, Inngest, Trigger.dev**      | Orquestração durável | Workflows com vários passos, estado durável e retries por etapa; mais poder, mais infraestrutura |
+| **SQS + Lambda**                        | Gerenciado (AWS)     | Zero servidor; limites de tempo de execução                                                      |
 
 ## 6. Armadilhas
 
@@ -124,6 +124,6 @@ N prompts → N jobs. Para que um tenant com 50 mil itens não monopolize os wor
 ## 8. Para aprofundar
 
 - BullMQ — documentação: https://docs.bullmq.io/
-- BullMQ — *Retrying failing jobs*: https://docs.bullmq.io/guide/retrying-failing-jobs
-- BullMQ — *Stalled jobs*: https://docs.bullmq.io/guide/jobs/stalled
+- BullMQ — _Retrying failing jobs_: https://docs.bullmq.io/guide/retrying-failing-jobs
+- BullMQ — _Stalled jobs_: https://docs.bullmq.io/guide/jobs/stalled
 - pg-boss (para comparar a abordagem só com Postgres): https://github.com/timgit/pg-boss

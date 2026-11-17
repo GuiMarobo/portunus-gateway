@@ -37,13 +37,13 @@ No projeto, TDD é obrigatório em **regras de negócio e contratos** (custo, ch
 
 ### 2.3 Dublês de teste (test doubles)
 
-| Tipo | O que é | Exemplo |
-|---|---|---|
-| **Dummy** | Preenche um parâmetro, nunca é usado | Um logger vazio |
-| **Stub** | Retorna respostas prontas | Port de preços que sempre devolve US$ 0,15/1M |
-| **Fake** | Implementação funcional simplificada | `InMemoryExactCache` com um `Map` |
-| **Spy** | Registra como foi chamado | Verificar que o evento foi publicado uma vez |
-| **Mock** | Expectativas pré-programadas sobre chamadas | Usar com moderação: acopla o teste à implementação |
+| Tipo      | O que é                                     | Exemplo                                            |
+| --------- | ------------------------------------------- | -------------------------------------------------- |
+| **Dummy** | Preenche um parâmetro, nunca é usado        | Um logger vazio                                    |
+| **Stub**  | Retorna respostas prontas                   | Port de preços que sempre devolve US$ 0,15/1M      |
+| **Fake**  | Implementação funcional simplificada        | `InMemoryExactCache` com um `Map`                  |
+| **Spy**   | Registra como foi chamado                   | Verificar que o evento foi publicado uma vez       |
+| **Mock**  | Expectativas pré-programadas sobre chamadas | Usar com moderação: acopla o teste à implementação |
 
 Prefira **fakes** dos ports a mocks de bibliotecas: testam comportamento, não detalhes.
 
@@ -51,7 +51,7 @@ Prefira **fakes** dos ports a mocks de bibliotecas: testam comportamento, não d
 
 Framework de testes moderno, com API compatível com a do Jest (`describe`, `it`, `expect`, `vi.fn()`):
 
-- Rápido (transformação com esbuild, execução paralela, *watch* inteligente).
+- Rápido (transformação com esbuild, execução paralela, _watch_ inteligente).
 - Suporte nativo a TypeScript.
 - **Por que o plugin SWC?** O NestJS depende de `emitDecoratorMetadata` (metadados de tipo dos decorators, usados pela DI). O esbuild não emite esses metadados; o SWC sim. Sem o plugin, a injeção de dependência quebra nos testes.
 - **Fake timers** (`vi.useFakeTimers()`): essenciais para testar backoff, TTL, janelas de rate limit e o circuit breaker sem esperar de verdade.
@@ -61,7 +61,7 @@ Framework de testes moderno, com API compatível com a do Jest (`describe`, `it`
 Biblioteca que **sobe containers Docker de verdade a partir do código do teste** e os destrói no fim:
 
 ```ts
-const postgres = await new PostgreSqlContainer("pgvector/pgvector:pg17").start();
+const postgres = await new PostgreSqlContainer('pgvector/pgvector:pg17').start();
 const db = createDb(postgres.getConnectionUri());
 await migrate(db);
 // ... testes contra um Postgres real com pgvector ...
@@ -86,17 +86,17 @@ await postgres.stop();
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Categoria | Diferença |
-|---|---|---|
-| **Vitest** | Test runner | Rápido, TS nativo, API Jest. **A escolha do projeto** |
-| **Jest** | Test runner | O mais usado historicamente; padrão do `nest new`; mais lento, configuração de TS mais trabalhosa |
-| **`node:test`** | Test runner nativo do Node | Zero dependências, ecossistema menor |
-| **Mocha + Chai** | Runner + asserções | Clássicos, mais montagem manual |
-| **Testcontainers** | Dependências reais em Docker | Programático, isolado. **A escolha do projeto** |
-| **Docker Compose para testes** | Dependências reais | Ambiente compartilhado entre testes, estado vaza entre execuções |
-| **Bancos em memória** (`pg-mem`, `ioredis-mock`) | Simulações | Rápidos, mas **não** se comportam como o real (extensões, Lua, locks) |
-| **Supertest / `app.inject()` do Fastify** | Testes HTTP | Chamar rotas sem subir uma porta real |
-| **Pact** | Testes de contrato | Verifica que consumidor e provedor concordam sobre a API |
+| Ferramenta                                       | Categoria                    | Diferença                                                                                         |
+| ------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Vitest**                                       | Test runner                  | Rápido, TS nativo, API Jest. **A escolha do projeto**                                             |
+| **Jest**                                         | Test runner                  | O mais usado historicamente; padrão do `nest new`; mais lento, configuração de TS mais trabalhosa |
+| **`node:test`**                                  | Test runner nativo do Node   | Zero dependências, ecossistema menor                                                              |
+| **Mocha + Chai**                                 | Runner + asserções           | Clássicos, mais montagem manual                                                                   |
+| **Testcontainers**                               | Dependências reais em Docker | Programático, isolado. **A escolha do projeto**                                                   |
+| **Docker Compose para testes**                   | Dependências reais           | Ambiente compartilhado entre testes, estado vaza entre execuções                                  |
+| **Bancos em memória** (`pg-mem`, `ioredis-mock`) | Simulações                   | Rápidos, mas **não** se comportam como o real (extensões, Lua, locks)                             |
+| **Supertest / `app.inject()` do Fastify**        | Testes HTTP                  | Chamar rotas sem subir uma porta real                                                             |
+| **Pact**                                         | Testes de contrato           | Verifica que consumidor e provedor concordam sobre a API                                          |
 
 ## 6. Armadilhas
 
@@ -117,7 +117,7 @@ await postgres.stop();
 ## 8. Para aprofundar
 
 - Vitest — documentação: https://vitest.dev/
-- NestJS — *Testing* (e a receita com SWC): https://docs.nestjs.com/recipes/swc
+- NestJS — _Testing_ (e a receita com SWC): https://docs.nestjs.com/recipes/swc
 - Testcontainers for Node.js: https://node.testcontainers.org/
-- Martin Fowler — *Mocks Aren't Stubs*: https://martinfowler.com/articles/mocksArentStubs.html
-- Livro: *Test-Driven Development: By Example* (Kent Beck)
+- Martin Fowler — _Mocks Aren't Stubs_: https://martinfowler.com/articles/mocksArentStubs.html
+- Livro: _Test-Driven Development: By Example_ (Kent Beck)

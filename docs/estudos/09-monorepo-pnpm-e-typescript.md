@@ -19,16 +19,16 @@ Um **monorepo** é um único repositório com vários pacotes que se referenciam
 
 O **pnpm** é um gerenciador de pacotes Node. Dois diferenciais:
 
-1. **Content-addressable store:** cada versão de cada pacote é baixada **uma vez** para um armazenamento global no disco, e os projetos recebem *hard links* para lá. Dez projetos usando o mesmo `zod` não guardam dez cópias.
-2. **`node_modules` estrito:** um pacote só enxerga as dependências que declarou. No npm/yarn clássicos, o `node_modules` "achatado" permite importar algo que você não declarou (uma *phantom dependency*), e isso funciona até o dia em que quebra. O pnpm impede.
+1. **Content-addressable store:** cada versão de cada pacote é baixada **uma vez** para um armazenamento global no disco, e os projetos recebem _hard links_ para lá. Dez projetos usando o mesmo `zod` não guardam dez cópias.
+2. **`node_modules` estrito:** um pacote só enxerga as dependências que declarou. No npm/yarn clássicos, o `node_modules` "achatado" permite importar algo que você não declarou (uma _phantom dependency_), e isso funciona até o dia em que quebra. O pnpm impede.
 
 **Workspaces** permitem declarar vários pacotes num repositório:
 
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - "apps/*"
-  - "libs/*"
+  - 'apps/*'
+  - 'libs/*'
 ```
 
 Um pacote depende de outro do workspace com o protocolo `workspace:`:
@@ -43,13 +43,13 @@ E comandos podem ser filtrados: `pnpm --filter @portunus/gateway dev`.
 
 TypeScript adiciona tipos estáticos ao JavaScript; o compilador (`tsc`) verifica e gera JavaScript. O modo `strict` liga um conjunto de verificações:
 
-| Flag | O que pega |
-|---|---|
-| `strictNullChecks` | Usar algo que pode ser `null`/`undefined` sem checar |
-| `noImplicitAny` | Variáveis sem tipo que viram `any` silenciosamente |
-| `strictFunctionTypes` | Funções com parâmetros incompatíveis |
-| `strictPropertyInitialization` | Propriedade de classe nunca inicializada |
-| `useUnknownInCatchVariables` | `catch (e)` vira `unknown`, obrigando a checar o tipo do erro |
+| Flag                           | O que pega                                                    |
+| ------------------------------ | ------------------------------------------------------------- |
+| `strictNullChecks`             | Usar algo que pode ser `null`/`undefined` sem checar          |
+| `noImplicitAny`                | Variáveis sem tipo que viram `any` silenciosamente            |
+| `strictFunctionTypes`          | Funções com parâmetros incompatíveis                          |
+| `strictPropertyInitialization` | Propriedade de classe nunca inicializada                      |
+| `useUnknownInCatchVariables`   | `catch (e)` vira `unknown`, obrigando a checar o tipo do erro |
 
 Flags além do strict que valem a pena: `noUncheckedIndexedAccess` (acessar `array[i]` pode ser `undefined`) e `exactOptionalPropertyTypes`.
 
@@ -78,20 +78,20 @@ Um tsconfig na raiz com as opções comuns; cada pacote o estende e só ajusta o
 
 ## 5. Ferramentas similares
 
-| Ferramenta | Categoria | Diferença principal |
-|---|---|---|
-| **npm workspaces** | Gerenciador + workspaces | Embutido no Node; `node_modules` achatado (permite dependências fantasma) |
-| **Yarn (v1 / Berry)** | Gerenciador + workspaces | Berry tem *Plug'n'Play* (sem `node_modules`), mais estrito, mas com mais atrito de compatibilidade |
-| **Bun** | Runtime + gerenciador | Muito rápido; ecossistema ainda amadurecendo para NestJS |
-| **Turborepo** | Orquestrador de tarefas | Roda tarefas em ordem de dependência com cache de resultados; usado **junto** com pnpm |
-| **Nx** | Orquestrador + geradores | Mais completo (grafo de projeto, `affected`, plugins); mais opinativo |
-| **Lerna, Rush** | Orquestradores | Lerna hoje é mantido pelo time do Nx; Rush é voltado para monorepos grandes |
+| Ferramenta            | Categoria                | Diferença principal                                                                                |
+| --------------------- | ------------------------ | -------------------------------------------------------------------------------------------------- |
+| **npm workspaces**    | Gerenciador + workspaces | Embutido no Node; `node_modules` achatado (permite dependências fantasma)                          |
+| **Yarn (v1 / Berry)** | Gerenciador + workspaces | Berry tem _Plug'n'Play_ (sem `node_modules`), mais estrito, mas com mais atrito de compatibilidade |
+| **Bun**               | Runtime + gerenciador    | Muito rápido; ecossistema ainda amadurecendo para NestJS                                           |
+| **Turborepo**         | Orquestrador de tarefas  | Roda tarefas em ordem de dependência com cache de resultados; usado **junto** com pnpm             |
+| **Nx**                | Orquestrador + geradores | Mais completo (grafo de projeto, `affected`, plugins); mais opinativo                              |
+| **Lerna, Rush**       | Orquestradores           | Lerna hoje é mantido pelo time do Nx; Rush é voltado para monorepos grandes                        |
 
 O projeto começa só com pnpm workspaces. Se os builds ficarem lentos, Turborepo ou Nx podem ser adicionados depois, numa decisão própria.
 
 ## 6. Armadilhas
 
-- **Resolução de módulos entre pacotes:** o TypeScript precisa encontrar os tipos de `@portunus/events` (via `paths`, *project references* ou o campo `exports`/`types` do `package.json`). Configurar errado gera "funciona no editor, quebra no build" ou o contrário.
+- **Resolução de módulos entre pacotes:** o TypeScript precisa encontrar os tipos de `@portunus/events` (via `paths`, _project references_ ou o campo `exports`/`types` do `package.json`). Configurar errado gera "funciona no editor, quebra no build" ou o contrário.
 - **Ciclos entre pacotes** (lib A importa lib B que importa lib A): proíba desde o início.
 - **Dependência na raiz por preguiça:** CLAUDE.md manda instalar no pacote que usa.
 - **`any` escondido:** tipos vindos de bibliotecas mal tipadas ou de `JSON.parse` são `any`; valide com Zod ([12](./12-validacao-com-zod.md)).
@@ -103,7 +103,7 @@ E0 monta a raiz à mão: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.j
 
 ## 8. Para aprofundar
 
-- pnpm — *Workspaces*: https://pnpm.io/workspaces
-- pnpm — *Motivation* (por que o store e o node_modules estrito): https://pnpm.io/motivation
-- TypeScript — *TSConfig reference* (`strict`): https://www.typescriptlang.org/tsconfig#strict
+- pnpm — _Workspaces_: https://pnpm.io/workspaces
+- pnpm — _Motivation_ (por que o store e o node_modules estrito): https://pnpm.io/motivation
+- TypeScript — _TSConfig reference_ (`strict`): https://www.typescriptlang.org/tsconfig#strict
 - monorepo.tools (comparação de ferramentas): https://monorepo.tools/

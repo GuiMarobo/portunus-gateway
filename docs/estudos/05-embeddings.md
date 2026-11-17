@@ -25,15 +25,15 @@ O modelo foi treinado (geralmente com **aprendizado contrastivo**: pares de text
 
 ### 2.2 Medindo proximidade
 
-| Medida | Fórmula (intuição) | Observação |
-|---|---|---|
-| **Similaridade de cosseno** | cos(θ) entre os vetores: 1 = mesma direção, 0 = sem relação | A mais usada para texto |
-| **Produto interno (dot product)** | Soma de aᵢ·bᵢ | Igual ao cosseno se os vetores forem normalizados (comprimento 1) |
-| **Distância euclidiana (L2)** | Comprimento de a − b | Para vetores normalizados, ordena igual ao cosseno |
+| Medida                            | Fórmula (intuição)                                          | Observação                                                        |
+| --------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Similaridade de cosseno**       | cos(θ) entre os vetores: 1 = mesma direção, 0 = sem relação | A mais usada para texto                                           |
+| **Produto interno (dot product)** | Soma de aᵢ·bᵢ                                               | Igual ao cosseno se os vetores forem normalizados (comprimento 1) |
+| **Distância euclidiana (L2)**     | Comprimento de a − b                                        | Para vetores normalizados, ordena igual ao cosseno                |
 
 Os embeddings da OpenAI vêm **normalizados**, então cosseno e produto interno dão o mesmo ranking, e o produto interno é mais barato de calcular.
 
-**Complexidade:** comparar dois vetores de dimensão *d* custa O(d). Comparar uma consulta com *n* vetores armazenados (força bruta) custa O(n·d). Com 1 milhão de entradas de 1536 dimensões, são ~1,5 bilhão de multiplicações por busca. É isso que motiva os índices aproximados ([06](./06-busca-vetorial-e-pgvector.md)).
+**Complexidade:** comparar dois vetores de dimensão _d_ custa O(d). Comparar uma consulta com _n_ vetores armazenados (força bruta) custa O(n·d). Com 1 milhão de entradas de 1536 dimensões, são ~1,5 bilhão de multiplicações por busca. É isso que motiva os índices aproximados ([06](./06-busca-vetorial-e-pgvector.md)).
 
 ### 2.3 Dimensão: trade-offs
 
@@ -60,15 +60,15 @@ Imagine uma **biblioteca onde os livros são posicionados por assunto num salão
 
 ## 5. Ferramentas similares (modelos e formas de gerar embeddings)
 
-| Opção | Tipo | Diferença principal |
-|---|---|---|
-| **OpenAI `text-embedding-3-small` / `-large`** | API paga | Baratos, multilíngues, 1536 / 3072 dimensões, dimensão reduzível |
-| **Voyage AI** | API paga | Recomendado pela Anthropic (que não tem modelo próprio de embeddings) |
-| **Cohere Embed** | API paga | Forte em multilíngue e em busca |
-| **Google (Gemini embeddings)** | API paga | Integração com o ecossistema Google |
-| **sentence-transformers** (ex.: `all-MiniLM-L6-v2`, 384 dims) | Open source, Python | Roda localmente, sem custo por chamada |
-| **Ollama** (ex.: `nomic-embed-text`) | Local, via HTTP | Fácil de subir em Docker |
-| **Transformers.js** | Local, em JavaScript | Roda dentro do próprio processo Node |
+| Opção                                                         | Tipo                 | Diferença principal                                                   |
+| ------------------------------------------------------------- | -------------------- | --------------------------------------------------------------------- |
+| **OpenAI `text-embedding-3-small` / `-large`**                | API paga             | Baratos, multilíngues, 1536 / 3072 dimensões, dimensão reduzível      |
+| **Voyage AI**                                                 | API paga             | Recomendado pela Anthropic (que não tem modelo próprio de embeddings) |
+| **Cohere Embed**                                              | API paga             | Forte em multilíngue e em busca                                       |
+| **Google (Gemini embeddings)**                                | API paga             | Integração com o ecossistema Google                                   |
+| **sentence-transformers** (ex.: `all-MiniLM-L6-v2`, 384 dims) | Open source, Python  | Roda localmente, sem custo por chamada                                |
+| **Ollama** (ex.: `nomic-embed-text`)                          | Local, via HTTP      | Fácil de subir em Docker                                              |
+| **Transformers.js**                                           | Local, em JavaScript | Roda dentro do próprio processo Node                                  |
 
 O ranking público **MTEB** (Massive Text Embedding Benchmark) compara modelos por tarefa e idioma.
 
@@ -88,7 +88,7 @@ O ranking público **MTEB** (Massive Text Embedding Benchmark) compara modelos p
 
 ## 8. Para aprofundar
 
-- OpenAI — *Embeddings guide*: https://platform.openai.com/docs/guides/embeddings
+- OpenAI — _Embeddings guide_: https://platform.openai.com/docs/guides/embeddings
 - MTEB leaderboard: https://huggingface.co/spaces/mteb/leaderboard
 - Sentence-Transformers: https://www.sbert.net/
-- Vicki Boykis — *What are embeddings?* (livro gratuito): https://vickiboykis.com/what_are_embeddings/
+- Vicki Boykis — _What are embeddings?_ (livro gratuito): https://vickiboykis.com/what_are_embeddings/

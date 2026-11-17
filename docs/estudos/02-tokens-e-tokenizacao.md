@@ -34,7 +34,7 @@ O algoritmo mais comum para montar o vocabulário:
 
 Resultado: sequências frequentes (palavras comuns em inglês, trechos de código) viram um token só; sequências raras viram vários tokens. Como os corpora de treino têm muito inglês, **português gasta mais tokens por palavra**. A regra de bolso da OpenAI é ~4 caracteres por token em inglês; em português, conte com menos caracteres por token.
 
-**Complexidade:** tokenizar um texto de *n* caracteres com BPE é aproximadamente O(n log n) nas implementações práticas, rápido o bastante para o caminho crítico, mas não de graça.
+**Complexidade:** tokenizar um texto de _n_ caracteres com BPE é aproximadamente O(n log n) nas implementações práticas, rápido o bastante para o caminho crítico, mas não de graça.
 
 ### 2.3 Cada modelo tem seu tokenizer
 
@@ -48,7 +48,7 @@ Ou seja, **o mesmo texto tem contagens diferentes em provedores diferentes**. Um
 
 - **Entrada (prompt tokens):** system + histórico + mensagem atual + definições de tools + formatação interna do chat (cada mensagem tem alguns tokens de "moldura").
 - **Saída (completion tokens):** o que o modelo gerou. Modelos de raciocínio também cobram tokens de "pensamento" que você não vê no texto.
-- **Tokens em cache do provedor:** OpenAI e Anthropic oferecem *prompt caching* (prefixos repetidos custam menos). É diferente do cache do gateway (ver [15](./15-cache-exato.md)), mas aparece no `usage`.
+- **Tokens em cache do provedor:** OpenAI e Anthropic oferecem _prompt caching_ (prefixos repetidos custam menos). É diferente do cache do gateway (ver [15](./15-cache-exato.md)), mas aparece no `usage`.
 
 ## 3. Analogia
 
@@ -56,22 +56,22 @@ Tokens são como **sílabas cobradas num telegrama**, só que o "dicionário de 
 
 ## 4. Por que está nesta arquitetura
 
-| Uso | Por que tokens importam |
-|---|---|
-| **Custo (E4)** | `custo = tokens_in × preço_in + tokens_out × preço_out` |
+| Uso                               | Por que tokens importam                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Custo (E4)**                    | `custo = tokens_in × preço_in + tokens_out × preço_out`                                                 |
 | **Rate limit de tokens/min (E8)** | É preciso **estimar antes** da chamada (entrada + `max_tokens`) e **ajustar depois** com o `usage` real |
-| **Streaming (E5)** | Se o provedor não mandar `usage` no fim do stream, o gateway precisa contar localmente |
-| **Cache** | Um hit economiza exatamente os tokens que a chamada teria gastado; é assim que a economia é medida |
+| **Streaming (E5)**                | Se o provedor não mandar `usage` no fim do stream, o gateway precisa contar localmente                  |
+| **Cache**                         | Um hit economiza exatamente os tokens que a chamada teria gastado; é assim que a economia é medida      |
 
 ## 5. Ferramentas similares (contagem de tokens)
 
-| Ferramenta | Diferença |
-|---|---|
-| `tiktoken` (Python, Rust) | Oficial da OpenAI; exato para modelos OpenAI |
+| Ferramenta                       | Diferença                                                                              |
+| -------------------------------- | -------------------------------------------------------------------------------------- |
+| `tiktoken` (Python, Rust)        | Oficial da OpenAI; exato para modelos OpenAI                                           |
 | `js-tiktoken` / `@dqbd/tiktoken` | Ports para JavaScript (puro JS vs. WASM: o WASM é mais rápido, o puro é mais portátil) |
-| `tokenizers` (Hugging Face) | Para modelos abertos |
-| API de contagem da Anthropic | Exata para Claude, mas é uma chamada de rede |
-| Heurística (caracteres ÷ 4) | Grátis e instantânea, imprecisa; pode servir para pré-checagem de rate limit |
+| `tokenizers` (Hugging Face)      | Para modelos abertos                                                                   |
+| API de contagem da Anthropic     | Exata para Claude, mas é uma chamada de rede                                           |
+| Heurística (caracteres ÷ 4)      | Grátis e instantânea, imprecisa; pode servir para pré-checagem de rate limit           |
 
 Adicionar um tokenizer é uma **dependência nova** e uma decisão registrada no ROADMAP (decisões em aberto).
 
@@ -93,5 +93,5 @@ Adicionar um tokenizer é uma **dependência nova** e uma decisão registrada no
 
 - OpenAI tokenizer (interativo): https://platform.openai.com/tokenizer
 - `tiktoken`: https://github.com/openai/tiktoken
-- Hugging Face — *Byte-Pair Encoding tokenization*: https://huggingface.co/learn/nlp-course/chapter6/5
-- Andrej Karpathy — *Let's build the GPT Tokenizer* (vídeo, YouTube)
+- Hugging Face — _Byte-Pair Encoding tokenization_: https://huggingface.co/learn/nlp-course/chapter6/5
+- Andrej Karpathy — _Let's build the GPT Tokenizer_ (vídeo, YouTube)
