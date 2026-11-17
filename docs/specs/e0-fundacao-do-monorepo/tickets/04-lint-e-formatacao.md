@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 02
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/11 — Clean Architecture e padrões](../../../estudos/11-clean-architecture-e-padroes.md)
 
