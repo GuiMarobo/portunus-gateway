@@ -34,7 +34,7 @@ function psql(container: StartedTestContainer, ...commands: string[]) {
 }
 
 describe('postgres image from compose', () => {
-  let postgres: StartedTestContainer;
+  let postgres: StartedTestContainer | undefined;
 
   beforeAll(async () => {
     postgres = await new GenericContainer(composeImage('POSTGRES_IMAGE'))
@@ -53,10 +53,13 @@ describe('postgres image from compose', () => {
   });
 
   afterAll(async () => {
-    await postgres.stop();
+    await postgres?.stop();
   });
 
   it('enables pgvector and computes vector distances', async () => {
+    if (!postgres) {
+      throw new Error('postgres container did not start');
+    }
     const result = await psql(
       postgres,
       'CREATE EXTENSION vector',
