@@ -12,6 +12,7 @@ const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'
 const DEFAULT_LOG_LEVEL = 'info';
 const BOOLEAN_FLAGS = { true: true, false: false } as const;
 const DEFAULT_LOG_PRETTY = false;
+const DEFAULT_SHUTDOWN_TIMEOUT_MS = 8_000;
 
 const booleanFlag = z.enum(['true', 'false']).transform((flag) => BOOLEAN_FLAGS[flag]);
 
@@ -22,6 +23,7 @@ export const gatewayConfigSchema = z
     PORT: z.coerce.number().int().min(MIN_TCP_PORT).max(MAX_TCP_PORT).default(DEFAULT_HTTP_PORT),
     LOG_LEVEL: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
     LOG_PRETTY: booleanFlag.default(DEFAULT_LOG_PRETTY),
+    SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(DEFAULT_SHUTDOWN_TIMEOUT_MS),
   })
   .refine((config) => !(config.NODE_ENV === 'production' && config.LOG_PRETTY), {
     path: ['LOG_PRETTY'],

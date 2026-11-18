@@ -4,16 +4,16 @@
 
 **Bloqueado por:** 09
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/10 — NestJS e Fastify](../../../estudos/10-nestjs-e-fastify.md) §6
 
 ## Critérios de aceite
 
-- [ ] `SHUTDOWN_TIMEOUT_MS` entra no contrato de configuração, com padrão e validação de número positivo.
-- [ ] Hooks de shutdown do Nest habilitados para SIGTERM e SIGINT.
-- [ ] Teste pelo seam: com uma requisição lenta em andamento (rota registrada só no teste), fechar a aplicação espera essa requisição terminar com sucesso.
-- [ ] Teste: se o fechamento passar do prazo, a saída forçada acontece e um log de aviso é emitido, sem esperar tempo real (prazo pequeno ou fake timers).
+- [x] `SHUTDOWN_TIMEOUT_MS` entra no contrato de configuração, com padrão e validação de número positivo.
+- [x] Hooks de shutdown do Nest habilitados para SIGTERM e SIGINT.
+- [x] Teste pelo seam: com uma requisição lenta em andamento (rota registrada só no teste), fechar a aplicação espera essa requisição terminar com sucesso.
+- [x] Teste: se o fechamento passar do prazo, a saída forçada acontece e um log de aviso é emitido, sem esperar tempo real (prazo pequeno ou fake timers).
 - [ ] Verificação manual com `Ctrl+C` no `pnpm dev` registrada no PR (log de encerramento e código de saída).
 
 ## Pontos de atenção

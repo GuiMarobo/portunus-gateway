@@ -4,6 +4,7 @@ import { createApp } from './app.factory';
 import { GatewayConfig } from './gateway-config';
 
 const INVALID_CONFIGURATION_EXIT_CODE = 1;
+const SHUTDOWN_SIGNALS = ['SIGTERM', 'SIGINT'];
 
 export interface StartupProcess {
   exitCode?: number | string | null | undefined;
@@ -16,6 +17,7 @@ export async function bootstrapGateway(
 ): Promise<void> {
   try {
     const app = await createApp(environment, destination());
+    app.enableShutdownHooks(SHUTDOWN_SIGNALS, { useProcessExit: true });
     const { PORT, HOST } = app.get(GatewayConfig);
     await app.listen(PORT, HOST);
   } catch (error) {
