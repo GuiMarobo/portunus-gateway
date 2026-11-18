@@ -1,4 +1,5 @@
 import { ConfigValidationError, type RawEnvironment } from '@portunus/common';
+import { destination } from 'pino';
 import { createApp } from './app.factory';
 import { GatewayConfig } from './gateway-config';
 
@@ -14,7 +15,7 @@ export async function bootstrapGateway(
   startupProcess: StartupProcess,
 ): Promise<void> {
   try {
-    const app = await createApp(environment);
+    const app = await createApp(environment, destination());
     const { PORT, HOST } = app.get(GatewayConfig);
     await app.listen(PORT, HOST);
   } catch (error) {

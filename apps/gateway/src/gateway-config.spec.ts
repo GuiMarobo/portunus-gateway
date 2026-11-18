@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createApp } from './app.factory';
 import { AppModule } from './app.module';
 import { GatewayConfig } from './gateway-config';
+import { MemoryLogDestination } from './testing/memory-log-destination';
 
 describe('gateway configuration', () => {
   let app: NestFastifyApplication | undefined;
@@ -16,25 +17,53 @@ describe('gateway configuration', () => {
   });
 
   it.each([
-    [{}, { NODE_ENV: 'development', HOST: '0.0.0.0', PORT: 3000 }],
     [
-      { NODE_ENV: 'production', HOST: '127.0.0.1', PORT: '8080' },
-      { NODE_ENV: 'production', HOST: '127.0.0.1', PORT: 8080 },
+      {},
+      {
+        NODE_ENV: 'development',
+        HOST: '0.0.0.0',
+        PORT: 3000,
+        LOG_LEVEL: 'info',
+        LOG_PRETTY: false,
+      },
     ],
-    [{ PORT: '1' }, { NODE_ENV: 'development', HOST: '0.0.0.0', PORT: 1 }],
-    [{ PORT: '65535' }, { NODE_ENV: 'development', HOST: '0.0.0.0', PORT: 65535 }],
+    [
+      {
+        NODE_ENV: 'production',
+        HOST: '127.0.0.1',
+        PORT: '8080',
+        LOG_LEVEL: 'warn',
+        LOG_PRETTY: 'false',
+      },
+      {
+        NODE_ENV: 'production',
+        HOST: '127.0.0.1',
+        PORT: 8080,
+        LOG_LEVEL: 'warn',
+        LOG_PRETTY: false,
+      },
+    ],
+    [{ PORT: '1' }, { PORT: 1 }],
+    [{ PORT: '65535' }, { PORT: 65535 }],
+    [
+      { LOG_LEVEL: 'silent', LOG_PRETTY: 'true' },
+      { LOG_LEVEL: 'silent', LOG_PRETTY: true },
+    ],
   ])(
     'provides the configuration parsed from %j to the container',
     async (environment, expected) => {
-      app = await createApp(environment);
+      app = await createApp(environment, new MemoryLogDestination());
 
-      expect(app.get(GatewayConfig)).toEqual(expected);
+      expect(app.get(GatewayConfig)).toMatchObject(expected);
     },
   );
 
   it('lists each invalid variable with its reason without echoing the received values', async () => {
     const error = await rejectionOf(
-      createApp({ NODE_ENV: 'secret-environment', PORT: 'secret-port' }),
+      createApp(
+        { NODE_ENV: 'secret-environment', PORT: 'secret-port' },
+        new MemoryLogDestination(),
+      ),
     );
 
     expect(error).toBeInstanceOf(ConfigValidationError);
@@ -54,11 +83,22 @@ describe('gateway configuration', () => {
     ['PORT', ''],
     ['NODE_ENV', 'staging'],
     ['HOST', ''],
+    ['LOG_LEVEL', 'verbose'],
+    ['LOG_PRETTY', 'yes'],
   ])('refuses to build the application when %s is %j', async (variable, value) => {
-    const error = await rejectionOf(createApp({ [variable]: value }));
+    const error = await rejectionOf(createApp({ [variable]: value }, new MemoryLogDestination()));
 
     expect(error).toBeInstanceOf(ConfigValidationError);
     expect(error.message).toMatch(new RegExp(`^ {2}${variable} → \\S`, 'm'));
+  });
+
+  it('refuses pretty logs in production', async () => {
+    const error = await rejectionOf(
+      createApp({ NODE_ENV: 'production', LOG_PRETTY: 'true' }, new MemoryLogDestination()),
+    );
+
+    expect(error).toBeInstanceOf(ConfigValidationError);
+    expect(error.message).toMatch(/^ {2}LOG_PRETTY → \S/m);
   });
 
   it('injects the typed configuration into a constructor by its type alone', async () => {
@@ -68,7 +108,9 @@ describe('gateway configuration', () => {
     }
 
     @Module({
-      imports: [AppModule.register(new GatewayConfig({ PORT: '8080' }))],
+      imports: [
+        AppModule.register(new GatewayConfig({ PORT: '8080' }), new MemoryLogDestination()),
+      ],
       providers: [ConfigConsumer],
     })
     class ConsumerModule {}
