@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 07
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/28 — Logs, pino e Loki](../../../estudos/28-logs-pino-e-loki.md)
 
