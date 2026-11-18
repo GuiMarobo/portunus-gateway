@@ -89,11 +89,13 @@ apps/gateway/src/modules/<modulo>/
 
 ## 2. Comandos
 
-> Já existem na raiz: `dev`, `build`, `typecheck`, `test`, `lint`, `format` e `format:check`. Os demais comandos são alvos, criados nos tickets seguintes. **Mantenha esta seção em sincronia com o `package.json` raiz.**
+> Já existem na raiz: `dev`, `build`, `typecheck`, `test`, `test:int`, `lint`, `format` e `format:check`. Os demais comandos são alvos, criados nos tickets seguintes. **Mantenha esta seção em sincronia com o `package.json` raiz.**
 
 ```bash
 pnpm install                                   # instalar dependências
-docker compose -f infra/docker-compose.yml --profile core up -d   # Postgres, Redis, RabbitMQ, mock
+docker compose -f infra/docker-compose.yml --profile core up -d --wait   # Postgres + pgvector e Redis (espera healthy); RabbitMQ e mock entram depois
+POSTGRES_HOST_PORT=55432 docker compose -f infra/docker-compose.yml --profile core up -d --wait   # se a porta 5432 (ou 6379, via REDIS_HOST_PORT) já estiver em uso
+# tags das imagens: infra/.env (fonte única, lida pelo Compose e pelo teste de integração)
 
 pnpm dev                                       # gateway em modo watch
 pnpm --filter @portunus/consumers dev       # consumidores e worker

@@ -11,5 +11,8 @@
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "testcontainers": "12.2.1"
   }
 }
