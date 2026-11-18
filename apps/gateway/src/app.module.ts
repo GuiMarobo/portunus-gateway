@@ -1,4 +1,4 @@
-import { type DynamicModule, Module } from '@nestjs/common';
+import { type DynamicModule, Module, type Type } from '@nestjs/common';
 import type { DestinationStream } from 'pino';
 import type { GatewayConfig } from './gateway-config';
 import { GatewayConfigModule } from './gateway-config.module';
@@ -9,12 +9,17 @@ import { LoggingModule } from './logging.module';
   controllers: [HealthController],
 })
 export class AppModule {
-  static register(config: GatewayConfig, logDestination: DestinationStream): DynamicModule {
+  static register(
+    config: GatewayConfig,
+    logDestination: DestinationStream,
+    additionalModules: Type[] = [],
+  ): DynamicModule {
     return {
       module: AppModule,
       imports: [
         GatewayConfigModule.register(config),
         LoggingModule.register(config, logDestination),
+        ...additionalModules,
       ],
     };
   }
