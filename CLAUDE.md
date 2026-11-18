@@ -220,7 +220,7 @@ Convenções lidas pelas skills `tdd`, `review-ticket`, `review-pr` e `implement
 
 - Specs: docs/specs/<feature>/spec.md
 - Tickets: docs/specs/<feature>/tickets/<NN>-<slug>.md
-- Reviews: .scratch/<feature>/reviews/
+- Reviews: .scratch/<feature>/reviews/ (versionado: os achados vão para o GitHub, porque trabalho em mais de um computador; commitar o arquivo de review junto do fechamento do ticket)
 - ADRs: docs/adr/
 - Glossary: CONTEXT.md
 - Language: pt-BR
