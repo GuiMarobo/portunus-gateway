@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 08
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/28 — Logs, pino e Loki](../../../estudos/28-logs-pino-e-loki.md), [estudos/25 — PII e privacidade](../../../estudos/25-pii-e-privacidade.md)
 
@@ -12,13 +12,13 @@
 
 ## Critérios de aceite
 
-- [ ] Sem header: a resposta traz um `x-request-id` no formato UUID v4.
-- [ ] Header válido: a resposta devolve exatamente o mesmo valor.
-- [ ] Header inválido (longo demais, com quebra de linha, com caracteres proibidos): é descartado e substituído por um UUID.
-- [ ] Rota inexistente (`404`) também devolve o `x-request-id`.
-- [ ] A linha de log da requisição contém o mesmo `request_id` devolvido no header.
-- [ ] Um log emitido dentro de um provider durante a requisição sai com o mesmo `request_id`, sem que o id seja passado manualmente (contexto propagado por `AsyncLocalStorage`).
-- [ ] `authorization`, `x-api-key`, `cookie` e `set-cookie` aparecem redigidos na linha de log (teste com valores reais nos headers).
+- [x] Sem header: a resposta traz um `x-request-id` no formato UUID v4.
+- [x] Header válido: a resposta devolve exatamente o mesmo valor.
+- [x] Header inválido (longo demais, com quebra de linha, com caracteres proibidos): é descartado e substituído por um UUID.
+- [x] Rota inexistente (`404`) também devolve o `x-request-id`.
+- [x] A linha de log da requisição contém o mesmo `request_id` devolvido no header.
+- [x] Um log emitido dentro de um provider durante a requisição sai com o mesmo `request_id`, sem que o id seja passado manualmente (contexto propagado por `AsyncLocalStorage`).
+- [x] `authorization`, `x-api-key`, `cookie` e `set-cookie` aparecem redigidos na linha de log (teste com valores reais nos headers).
 
 ## Pontos de atenção
 

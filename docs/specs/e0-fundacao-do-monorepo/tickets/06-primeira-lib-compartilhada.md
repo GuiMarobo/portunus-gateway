@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 03, 04
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/09](../../../estudos/09-monorepo-pnpm-e-typescript.md) §6, [estudos/12 — Validação com Zod](../../../estudos/12-validacao-com-zod.md)
 
@@ -12,13 +12,13 @@
 
 ## Critérios de aceite
 
-- [ ] `@portunus/common` é um pacote do workspace (`private`, escopo `@portunus/*`), consumido pelo gateway via `workspace:*`.
-- [ ] Utilitário de configuração genérico sobre o schema, com teste unitário escrito antes da implementação (TDD).
-- [ ] O gateway lê `PORT` e `HOST` pelo utilitário, com os padrões atuais; `PORT` inválida impede a aplicação de ser construída (teste pelo seam).
-- [ ] Libs compiladas com project references: o build respeita a ordem de dependência e uma referência circular entre pacotes falha o build.
-- [ ] `exports` com condição de código-fonte para typecheck e Vitest e `default` para o JavaScript compilado; sem `paths` no tsconfig.
-- [ ] `pnpm test` roda logo após `pnpm install`, sem build; `node` sobre o build do gateway resolve `@portunus/common` compilado.
-- [ ] ADR 011 (resolução de pacotes do workspace) registrado com as opções A, B e C e os trade-offs.
+- [x] `@portunus/common` é um pacote do workspace (`private`, escopo `@portunus/*`), consumido pelo gateway via `workspace:*`.
+- [x] Utilitário de configuração genérico sobre o schema, com teste unitário escrito antes da implementação (TDD).
+- [x] O gateway lê `PORT` e `HOST` pelo utilitário, com os padrões atuais; `PORT` inválida impede a aplicação de ser construída (teste pelo seam).
+- [x] Libs compiladas com project references: o build respeita a ordem de dependência e uma referência circular entre pacotes falha o build.
+- [x] `exports` com condição de código-fonte para typecheck e Vitest e `default` para o JavaScript compilado; sem `paths` no tsconfig.
+- [x] `pnpm test` roda logo após `pnpm install`, sem build; `node` sobre o build do gateway resolve `@portunus/common` compilado.
+- [x] ADR 011 (resolução de pacotes do workspace) registrado com as opções A, B e C e os trade-offs.
 
 ## Pontos de atenção
 

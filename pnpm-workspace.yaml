@@ -4,5 +4,8 @@ packages:
 
 allowBuilds:
   '@swc/core': false
+  cpu-features: false
+  protobufjs: false
+  ssh2: false
 
 engineStrict: true

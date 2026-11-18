@@ -4,18 +4,18 @@
 
 **Bloqueado por:** 06
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/12 — Validação com Zod](../../../estudos/12-validacao-com-zod.md)
 
 ## Critérios de aceite
 
-- [ ] Schema do gateway com `NODE_ENV` (`development` | `test` | `production`), `HOST` e `PORT`, com padrões de desenvolvimento, escrito em TDD (contrato de configuração).
-- [ ] Erro de configuração legível: uma linha `variável → motivo` por campo inválido, sem o valor recebido (teste prova que um valor "secreto" enviado não aparece na mensagem).
-- [ ] O ponto de entrada encerra o processo com código `1` quando a configuração é inválida.
-- [ ] A configuração validada é um provider tipado no container do Nest e é injetada onde é usada. Esse é o primeiro uso real de injeção por construtor, e o teste pelo seam prova que os metadados do SWC funcionam.
-- [ ] Ler `process.env` fora do ponto de carregamento da configuração é erro de lint (regra nativa do ESLint).
-- [ ] `.env` local carregado pelo próprio Node (`--env-file-if-exists`), sem `dotenv`; `.env.example` versionado com todas as variáveis aceitas.
+- [x] Schema do gateway com `NODE_ENV` (`development` | `test` | `production`), `HOST` e `PORT`, com padrões de desenvolvimento, escrito em TDD (contrato de configuração).
+- [x] Erro de configuração legível: uma linha `variável → motivo` por campo inválido, sem o valor recebido (teste prova que um valor "secreto" enviado não aparece na mensagem).
+- [x] O ponto de entrada encerra o processo com código `1` quando a configuração é inválida.
+- [x] A configuração validada é um provider tipado no container do Nest e é injetada onde é usada. Esse é o primeiro uso real de injeção por construtor, e o teste pelo seam prova que os metadados do SWC funcionam.
+- [x] Ler `process.env` fora do ponto de carregamento da configuração é erro de lint (regra nativa do ESLint).
+- [x] `.env` local carregado pelo próprio Node (`--env-file-if-exists`), sem `dotenv`; `.env.example` versionado com todas as variáveis aceitas.
 
 ## Pontos de atenção
 

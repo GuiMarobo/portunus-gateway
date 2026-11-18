@@ -10,6 +10,7 @@
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
+    "test:int": "vitest run --config vitest.int.config.mts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

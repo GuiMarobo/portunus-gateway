@@ -4,14 +4,14 @@
 
 **Bloqueado por:** 06
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Critérios de aceite
 
-- [ ] Os três pacotes seguem a mesma estrutura de `@portunus/common` (`private`, escopo `@portunus/*`, tsconfig estendendo a base, `exports` com a condição de código-fonte).
-- [ ] Ponto de entrada vazio em cada um, sem código especulativo.
-- [ ] Os três entram nas project references e em `typecheck`, `lint` e `build`.
-- [ ] Nenhum app depende deles ainda.
+- [x] Os três pacotes seguem a mesma estrutura de `@portunus/common` (`private`, escopo `@portunus/*`, tsconfig estendendo a base, `exports` com a condição de código-fonte).
+- [x] Ponto de entrada vazio em cada um, sem código especulativo.
+- [x] Os três entram nas project references e em `typecheck`, `lint` e `build`.
+- [x] Nenhum app depende deles ainda.
 
 ## Pontos de atenção
 

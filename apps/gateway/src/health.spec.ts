@@ -1,12 +1,13 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from './app.factory';
+import { MemoryLogDestination } from './testing/memory-log-destination';
 
 describe('GET /health', () => {
   let app: NestFastifyApplication;
 
   beforeEach(async () => {
-    app = await createApp();
+    app = await createApp({}, new MemoryLogDestination());
   });
 
   afterEach(async () => {

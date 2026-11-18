@@ -4,13 +4,13 @@
 
 **Bloqueado por:** 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Critérios de aceite
 
-- [ ] Demo executada num clone limpo, com a saída registrada no PR.
-- [ ] README mínimo: o que é o projeto (um parágrafo), pré-requisitos e "como rodar".
-- [ ] Seção de comandos do CLAUDE.md conferida contra os scripts do `package.json` raiz; os `db:*` ficam marcados como E2.
-- [ ] Os ADRs 008 e 011 constam na tabela do ARQUITETURA.md §14.
-- [ ] Status do E0 em `Concluído` na tabela do ROADMAP.md §3.
-- [ ] Resumo do épico: o que foi entregue, o que aprendemos, desvios em relação à spec e o que o E1 herda.
+- [x] Demo executada num clone limpo, com a saída registrada no PR.
+- [x] README mínimo: o que é o projeto (um parágrafo), pré-requisitos e "como rodar".
+- [x] Seção de comandos do CLAUDE.md conferida contra os scripts do `package.json` raiz; os `db:*` ficam marcados como E2.
+- [x] Os ADRs 008 e 011 constam na tabela do ARQUITETURA.md §14.
+- [x] Status do E0 em `Concluído` na tabela do ROADMAP.md §3.
+- [x] Resumo do épico: o que foi entregue, o que aprendemos, desvios em relação à spec e o que o E1 herda.
