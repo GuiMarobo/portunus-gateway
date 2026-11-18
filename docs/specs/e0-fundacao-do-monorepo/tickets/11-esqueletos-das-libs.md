@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 06
 
-**Status:** in-review
+**Status:** done
 
 ## Critérios de aceite
 
