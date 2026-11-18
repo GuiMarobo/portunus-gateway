@@ -4,21 +4,21 @@ Tickets do épico [E0 — Fundação do monorepo](../spec.md). Cada ticket é um
 
 ## Sequência
 
-| #   | Ticket                                                                               | Bloqueado por | Status    |
-| --- | ------------------------------------------------------------------------------------ | ------------- | --------- |
-| 01  | [Raiz do workspace com Node e pnpm fixados](./01-raiz-do-workspace.md)               | —             | done      |
-| 02  | [Gateway responde `GET /health`](./02-gateway-responde-health.md)                    | 01            | done      |
-| 03  | [Testes unitários pelo seam do app](./03-testes-unitarios-pelo-seam-do-app.md)       | 02            | done      |
-| 04  | [Lint e formatação com a regra de camadas](./04-lint-e-formatacao.md)                | 02            | done      |
-| 05  | [CI de qualidade e proteção da `main`](./05-ci-de-qualidade-e-protecao-da-main.md)   | 03, 04        | done      |
-| 06  | [Primeira lib compartilhada: `@portunus/common`](./06-primeira-lib-compartilhada.md) | 03, 04        | done      |
-| 07  | [Contrato de configuração do gateway](./07-contrato-de-configuracao.md)              | 06            | done      |
-| 08  | [Logs estruturados com pino](./08-logs-estruturados.md)                              | 07            | done      |
-| 09  | [`request_id` e redação de dados sensíveis](./09-request-id-e-redacao.md)            | 08            | done      |
-| 10  | [Graceful shutdown](./10-graceful-shutdown.md)                                       | 09            | done      |
-| 11  | [Esqueletos das libs restantes](./11-esqueletos-das-libs.md)                         | 06            | done      |
-| 12  | [Compose `core` e testes de integração](./12-compose-core-e-testes-de-integracao.md) | 05            | done      |
-| 13  | [Fechamento do épico](./13-fechamento-do-epico.md)                                   | 01–12         | done      |
+| #   | Ticket                                                                               | Bloqueado por | Status |
+| --- | ------------------------------------------------------------------------------------ | ------------- | ------ |
+| 01  | [Raiz do workspace com Node e pnpm fixados](./01-raiz-do-workspace.md)               | —             | done   |
+| 02  | [Gateway responde `GET /health`](./02-gateway-responde-health.md)                    | 01            | done   |
+| 03  | [Testes unitários pelo seam do app](./03-testes-unitarios-pelo-seam-do-app.md)       | 02            | done   |
+| 04  | [Lint e formatação com a regra de camadas](./04-lint-e-formatacao.md)                | 02            | done   |
+| 05  | [CI de qualidade e proteção da `main`](./05-ci-de-qualidade-e-protecao-da-main.md)   | 03, 04        | done   |
+| 06  | [Primeira lib compartilhada: `@portunus/common`](./06-primeira-lib-compartilhada.md) | 03, 04        | done   |
+| 07  | [Contrato de configuração do gateway](./07-contrato-de-configuracao.md)              | 06            | done   |
+| 08  | [Logs estruturados com pino](./08-logs-estruturados.md)                              | 07            | done   |
+| 09  | [`request_id` e redação de dados sensíveis](./09-request-id-e-redacao.md)            | 08            | done   |
+| 10  | [Graceful shutdown](./10-graceful-shutdown.md)                                       | 09            | done   |
+| 11  | [Esqueletos das libs restantes](./11-esqueletos-das-libs.md)                         | 06            | done   |
+| 12  | [Compose `core` e testes de integração](./12-compose-core-e-testes-de-integracao.md) | 05            | done   |
+| 13  | [Fechamento do épico](./13-fechamento-do-epico.md)                                   | 01–12         | done   |
 
 ## Dependências
 
