@@ -18,7 +18,7 @@
 - [x] `pnpm test:int` inclui só `*.int-spec.ts`, com timeout maior que o dos unitários.
 - [x] Teste de fumaça com Testcontainers: a imagem do Postgres sobe e `CREATE EXTENSION vector` funciona, via `psql` dentro do container (sem driver de Postgres no projeto).
 - [x] A tag da imagem tem uma única fonte usada pelo Compose e pelo teste, ou a duplicação é justificada no PR.
-- [ ] Job `integration` no CI rodando `test:int`, exigido na proteção da `main`.
+- [x] Job `integration` no CI rodando `test:int`, exigido na proteção da `main`.
 - [x] Seção de comandos do CLAUDE.md atualizada.
 
 ## Pontos de atenção
