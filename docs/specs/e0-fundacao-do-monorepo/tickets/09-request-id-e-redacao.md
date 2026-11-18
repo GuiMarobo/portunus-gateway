@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 08
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/28 — Logs, pino e Loki](../../../estudos/28-logs-pino-e-loki.md), [estudos/25 — PII e privacidade](../../../estudos/25-pii-e-privacidade.md)
 
