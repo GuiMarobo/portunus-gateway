@@ -18,7 +18,7 @@ Tickets do épico [E0 — Fundação do monorepo](../spec.md). Cada ticket é um
 | 10  | [Graceful shutdown](./10-graceful-shutdown.md)                                       | 09            | done      |
 | 11  | [Esqueletos das libs restantes](./11-esqueletos-das-libs.md)                         | 06            | done      |
 | 12  | [Compose `core` e testes de integração](./12-compose-core-e-testes-de-integracao.md) | 05            | done      |
-| 13  | [Fechamento do épico](./13-fechamento-do-epico.md)                                   | 01–12         | in-review |
+| 13  | [Fechamento do épico](./13-fechamento-do-epico.md)                                   | 01–12         | done      |
 
 ## Dependências
 
