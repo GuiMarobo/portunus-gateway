@@ -46,6 +46,14 @@ describe('request logging', () => {
     expect(typeof completed[0]?.responseTime).toBe('number');
   });
 
+  it('logs the route path without the query string', async () => {
+    await app.inject({ method: 'GET', url: '/health?token=secret-query-marker' });
+    await logs.waitForLine(isCompletedRequestLine);
+
+    expect(completedRequests(logs.entries())).toMatchObject([{ req: { url: '/health' } }]);
+    expect(logs.lines().filter((line) => line.includes('secret-query-marker'))).toEqual([]);
+  });
+
   it('never writes the request body to any log line', async () => {
     await app.inject({
       method: 'POST',
