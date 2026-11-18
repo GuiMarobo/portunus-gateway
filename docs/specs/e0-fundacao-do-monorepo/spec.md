@@ -294,3 +294,44 @@ Não há testes no repositório; esta spec estabelece o padrão. Referências: [
 A sequência de tickets, com dependências e definição de pronto, está em [tickets/README.md](./tickets/README.md).
 
 Ao abrir o épico, atualizar o status do E0 na tabela do [ROADMAP.md §3](../../../ROADMAP.md) para `Em andamento`.
+
+## Fechamento do épico
+
+Escrito no ticket [13](./tickets/13-fechamento-do-epico.md). A saída da demo num clone limpo está em [.scratch/e0-fundacao-do-monorepo/demo-clone-limpo.md](../../../.scratch/e0-fundacao-do-monorepo/demo-clone-limpo.md).
+
+### O que foi entregue
+
+- **Workspace:** pnpm workspaces com `apps/*` e `libs/*`, Node 22 e pnpm fixados (`.nvmrc`, `engines`, `packageManager`, `engineStrict`), `.gitattributes` e `.editorconfig`.
+- **Gateway (`@portunus/gateway`):** Nest + Fastify com montagem separada da escuta (`createApp` monta, `bootstrapGateway` valida o ambiente e escuta); `GET /health` (liveness, `{"status":"ok"}`); configuração validada com Zod que derruba o processo com código `1` sem ecoar valores; logs JSON com `nestjs-pino`; `x-request-id` validado, gerado quando ausente ou inválido e devolvido na resposta; redação de `authorization`, `x-api-key`, `cookie` e `set-cookie`; graceful shutdown com prazo de segurança.
+- **Libs:** `@portunus/common` com `loadConfig` e `ConfigValidationError`; `@portunus/telemetry`, `@portunus/events` e `@portunus/database` como esqueletos compiláveis.
+- **Qualidade:** TypeScript strict, ESLint typed com a regra de camadas via `no-restricted-imports`, Prettier, Vitest com SWC (48 testes unitários pelo seam do app) e um teste de integração com Testcontainers que cria a extensão `vector`.
+- **Infra e CI:** Compose com perfil `core` (Postgres + pgvector e Redis, com healthcheck e tags fixas em `infra/.env`); workflow `ci` com os jobs `quality` e `integration`.
+- **ADRs:** 008 (Fastify, a validar no E3) e 011 (resolução de pacotes, opção C).
+
+### O que aprendemos
+
+- **Cada ferramenta resolve módulos de um jeito.** `tsc`, Vitest, Node e ESLint precisaram, cada um, de um caminho até `@portunus/common`; a condição de export customizada (ADR 011) é o que deixa o código-fonte para as ferramentas e o `dist` para o runtime.
+- **Decorators precisam de metadados.** Sem o SWC, o Vitest compila com esbuild, que não emite `emitDecoratorMetadata`, e a injeção do Nest falha em silêncio.
+- **Separar montar de escutar** é o que torna o app testável sem porta: o `inject` do Fastify exercita a requisição inteira, logs incluídos, em memória.
+- **Entrada do cliente é não confiável até nos headers:** o `x-request-id` cru seria um vetor de injeção de log.
+- **`engineStrict` funciona:** na demo, o Node 24 do shell foi recusado no `pnpm install` até o `nvm use`. É o comportamento desejado, e o README agora diz isso.
+- **O nome do job de CI é contrato:** a proteção da `main` referencia o check pelo nome.
+
+### Desvios em relação à spec
+
+| Spec                                                        | O que aconteceu                                                                                                | Por quê                                                                                                                                |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `testcontainers` como dependência da raiz                   | Ficou em `libs/database`                                                                                       | O único teste de integração mora lá; o CLAUDE.md manda a dependência para o pacote que a usa                                           |
+| Job `quality` com typecheck, lint, format:check e test      | Também roda `pnpm build`                                                                                       | Pega erro de build (project references, `tsconfig.build.json`) que o typecheck sozinho não pega; já previsto no ticket 05              |
+| Configurações do pnpm em `pnpm-workspace.yaml`              | Além de `engineStrict`, entrou `allowBuilds` negando scripts de instalação                                     | O pnpm bloqueia scripts de pós-instalação por padrão e exige a decisão explícita por pacote; nenhum deles precisa rodar script         |
+| Branch curta por ticket (definição de pronto, item 5)       | Os tickets 06 a 13 foram feitos na mesma branch, `feat/config-contract`, e entram num único PR                 | Fluxo de revisão local ticket a ticket; o custo é um PR maior                                                                          |
+| Job `integration` exigido na proteção da `main` (ticket 12) | Ainda não exigido                                                                                              | O check só existe no GitHub depois que o job roda pela primeira vez; a proteção é ajustada na abertura do PR                           |
+| Redação de headers com credencial                           | Achado m1 da review do ticket 09 ficou aberto: `proxy-authorization`, `x-auth-token` e similares saem em claro | Minor; a lista fechada da spec foi implementada, a decisão entre ampliar a lista ou logar só uma allowlist de headers fica para depois |
+
+### O que o E1 herda
+
+- **Molde de app:** `apps/mock-provider` ganha `package.json`, `tsconfig.json` e `tsconfig.build.json` no mesmo formato do gateway (ADR 011) e entra no grafo do `tsc -b` e no `vitest.config.mts` raiz.
+- **Configuração:** `loadConfig` de `@portunus/common` para validar latência e taxa de falha do mock com Zod, com o mesmo erro legível.
+- **Seam de teste:** a função de montagem + `inject` do Fastify, sem porta real.
+- **Infra:** o serviço do mock entra no perfil `core` do Compose, com healthcheck e tag/porta parametrizadas como os demais.
+- **Pendências:** exigir o job `integration` na proteção da `main`; decidir o achado m1 da review 09 antes do E2, quando a primeira chave de API real passar pelos logs.

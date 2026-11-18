@@ -4,7 +4,7 @@
 
 **Bloqueado por:** nenhum (pode começar imediatamente).
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Leitura:** [estudos/09 — Monorepo, pnpm e TypeScript](../../../estudos/09-monorepo-pnpm-e-typescript.md)
 

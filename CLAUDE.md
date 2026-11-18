@@ -89,7 +89,7 @@ apps/gateway/src/modules/<modulo>/
 
 ## 2. Comandos
 
-> Já existem na raiz: `dev`, `build`, `typecheck`, `test`, `test:int`, `lint`, `format` e `format:check`. Os demais comandos são alvos, criados nos tickets seguintes. **Mantenha esta seção em sincronia com o `package.json` raiz.**
+> Já existem na raiz: `dev`, `build`, `typecheck`, `test`, `test:int`, `lint`, `format` e `format:check`. Os comandos marcados com o épico entre colchetes (ex.: `[E2]`) ainda não existem e são criados nele. **Mantenha esta seção em sincronia com o `package.json` raiz.**
 
 ```bash
 pnpm install                                   # instalar dependências
@@ -98,7 +98,7 @@ POSTGRES_HOST_PORT=55432 docker compose -f infra/docker-compose.yml --profile co
 # tags das imagens: infra/.env (fonte única, lida pelo Compose e pelo teste de integração)
 
 pnpm dev                                       # gateway em modo watch
-pnpm --filter @portunus/consumers dev       # consumidores e worker
+pnpm --filter @portunus/consumers dev          # [E11] consumidores e worker
 
 pnpm typecheck                                 # tsc --noEmit em todos os pacotes
 pnpm lint                                      # ESLint (typed, regras de camada) no monorepo inteiro
@@ -108,11 +108,11 @@ pnpm test                                      # unitários (Vitest: *.spec.ts d
 pnpm test:int                                  # integração (Vitest + Testcontainers, exige Docker)
 pnpm build                                     # build de produção de todos os apps
 
-pnpm db:generate                               # drizzle-kit generate (gera migration a partir do schema)
-pnpm db:migrate                                # aplica migrations
+pnpm db:generate                               # [E2] drizzle-kit generate (gera migration a partir do schema)
+pnpm db:migrate                                # [E2] aplica migrations
 
-pnpm --filter @portunus/evals-cli start -- run evals/<suite>.yaml
-k6 run load-tests/<cenario>.js
+pnpm --filter @portunus/evals-cli start -- run evals/<suite>.yaml   # [E15]
+k6 run load-tests/<cenario>.js                                      # [E3] primeiro cenário (medição do ADR 008)
 ```
 
 Para rodar só um pacote: `pnpm --filter <pacote> <script>`.
