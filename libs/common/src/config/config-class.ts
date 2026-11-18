@@ -11,6 +11,7 @@ export function configClass<TSchema extends z.ZodType<object>>(
   return class {
     constructor(environment: RawEnvironment) {
       Object.assign(this, loadConfig(schema, environment));
+      Object.freeze(this);
     }
   } as ConfigClass<TSchema>;
 }

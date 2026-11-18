@@ -47,6 +47,7 @@ describe('gateway configuration', () => {
     [{ PORT: '1' }, { PORT: 1 }],
     [{ PORT: '65535' }, { PORT: 65535 }],
     [{ SHUTDOWN_TIMEOUT_MS: '1' }, { SHUTDOWN_TIMEOUT_MS: 1 }],
+    [{ SHUTDOWN_TIMEOUT_MS: '300000' }, { SHUTDOWN_TIMEOUT_MS: 300_000 }],
     [
       { LOG_LEVEL: 'silent', LOG_PRETTY: 'true' },
       { LOG_LEVEL: 'silent', LOG_PRETTY: true },
@@ -80,6 +81,7 @@ describe('gateway configuration', () => {
   it.each([
     ['PORT', 'abc'],
     ['PORT', '8080.5'],
+    ['PORT', '0x1F90'],
     ['PORT', '0'],
     ['PORT', '65536'],
     ['PORT', ''],
@@ -90,6 +92,8 @@ describe('gateway configuration', () => {
     ['SHUTDOWN_TIMEOUT_MS', '0'],
     ['SHUTDOWN_TIMEOUT_MS', 'abc'],
     ['SHUTDOWN_TIMEOUT_MS', '2.5'],
+    ['SHUTDOWN_TIMEOUT_MS', '1e3'],
+    ['SHUTDOWN_TIMEOUT_MS', '300001'],
   ])('refuses to build the application when %s is %j', async (variable, value) => {
     const error = await rejectionOf(createApp({ [variable]: value }, new MemoryLogDestination()));
 
