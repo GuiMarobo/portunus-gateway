@@ -13,6 +13,7 @@ describe('mock configuration', () => {
         PORT: 3001,
         LOG_LEVEL: 'info',
         LOG_PRETTY: false,
+        MOCK_DEFAULT_COMPLETION_TOKENS: 16,
       },
     ],
     [
@@ -34,6 +35,8 @@ describe('mock configuration', () => {
     [{ PORT: '1' }, { PORT: 1 }],
     [{ PORT: '65535' }, { PORT: 65535 }],
     [{ LOG_PRETTY: 'true' }, { LOG_PRETTY: true }],
+    [{ MOCK_DEFAULT_COMPLETION_TOKENS: '1' }, { MOCK_DEFAULT_COMPLETION_TOKENS: 1 }],
+    [{ MOCK_DEFAULT_COMPLETION_TOKENS: '4096' }, { MOCK_DEFAULT_COMPLETION_TOKENS: 4096 }],
   ])('builds the app with the configuration parsed from %j', async (environment, expected) => {
     const app = await buildApp(environment);
 
@@ -63,6 +66,8 @@ describe('mock configuration', () => {
     ['HOST', ''],
     ['LOG_LEVEL', 'verbose'],
     ['LOG_PRETTY', 'yes'],
+    ['MOCK_DEFAULT_COMPLETION_TOKENS', '0'],
+    ['MOCK_DEFAULT_COMPLETION_TOKENS', '4097'],
   ])('refuses to build the app when %s is %j', async (variable, value) => {
     const error = await rejectionOf(buildApp({ [variable]: value }));
 

@@ -13,6 +13,9 @@ const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'
 const DEFAULT_LOG_LEVEL = 'info';
 const BOOLEAN_FLAGS = { true: true, false: false } as const;
 const DEFAULT_LOG_PRETTY = false;
+const DEFAULT_COMPLETION_TOKENS = 16;
+const MIN_COMPLETION_TOKENS = 1;
+const MAX_COMPLETION_TOKENS = 4096;
 
 const booleanFlag = z.enum(['true', 'false']).transform((flag) => BOOLEAN_FLAGS[flag]);
 
@@ -23,6 +26,9 @@ export const mockConfigSchema = z
     PORT: integerFromEnv(z.number().min(MIN_TCP_PORT).max(MAX_TCP_PORT)).default(DEFAULT_HTTP_PORT),
     LOG_LEVEL: z.enum(LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
     LOG_PRETTY: booleanFlag.default(DEFAULT_LOG_PRETTY),
+    MOCK_DEFAULT_COMPLETION_TOKENS: integerFromEnv(
+      z.number().min(MIN_COMPLETION_TOKENS).max(MAX_COMPLETION_TOKENS),
+    ).default(DEFAULT_COMPLETION_TOKENS),
   })
   .refine((config) => !(config.NODE_ENV === 'production' && config.LOG_PRETTY), {
     path: ['LOG_PRETTY'],

@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 01
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/01 — LLMs e a API de chat](../../../estudos/01-llms-e-a-api-de-chat.md), [estudos/02 — Tokens e tokenização](../../../estudos/02-tokens-e-tokenizacao.md)
 
@@ -12,16 +12,16 @@
 
 ## Critérios de aceite
 
-- [ ] Testes escritos antes do código (TDD) para a canonicalização com hash e para a regra de tokens.
-- [ ] `POST /v1/chat/completions` devolve `id` (prefixo `chatcmpl-`), `object: "chat.completion"`, `created` (do relógio injetado), `model` igual ao pedido, um item em `choices` com `message.role = "assistant"`, `message.content` e `finish_reason: "stop"`, e `usage`.
-- [ ] Qualquer nome de modelo é aceito. Campos não usados (`temperature`, `top_p`, `user`, `metadata`, `response_format` etc.) são aceitos e ignorados.
-- [ ] A mesma requisição gera o mesmo `content` e o mesmo `usage`, inclusive com as chaves do JSON em outra ordem.
-- [ ] Mudar uma mensagem, o modelo ou o limite de tokens muda o `content`. Mudar `temperature` não muda.
-- [ ] O conteúdo vem de um vocabulário fixo, sorteado por um PRNG semeado pelo hash, e nunca ecoa o prompt.
-- [ ] Regra de tokens: na resposta, 1 palavra = 1 token; no prompt, `ceil(caracteres/4)` de cada mensagem mais um custo fixo por mensagem. `total_tokens = prompt_tokens + completion_tokens`.
-- [ ] O tamanho padrão da resposta vem de `MOCK_DEFAULT_COMPLETION_TOKENS`.
-- [ ] `max_tokens` ou `max_completion_tokens` menor que o tamanho padrão corta a resposta e devolve `finish_reason: "length"`.
-- [ ] Os testes usam o SDK oficial com `maxRetries: 0`.
+- [x] Testes escritos antes do código (TDD) para a canonicalização com hash e para a regra de tokens.
+- [x] `POST /v1/chat/completions` devolve `id` (prefixo `chatcmpl-`), `object: "chat.completion"`, `created` (do relógio injetado), `model` igual ao pedido, um item em `choices` com `message.role = "assistant"`, `message.content` e `finish_reason: "stop"`, e `usage`.
+- [x] Qualquer nome de modelo é aceito. Campos não usados (`temperature`, `top_p`, `user`, `metadata`, `response_format` etc.) são aceitos e ignorados.
+- [x] A mesma requisição gera o mesmo `content` e o mesmo `usage`, inclusive com as chaves do JSON em outra ordem.
+- [x] Mudar uma mensagem, o modelo ou o limite de tokens muda o `content`. Mudar `temperature` não muda.
+- [x] O conteúdo vem de um vocabulário fixo, sorteado por um PRNG semeado pelo hash, e nunca ecoa o prompt.
+- [x] Regra de tokens: na resposta, 1 palavra = 1 token; no prompt, `ceil(caracteres/4)` de cada mensagem mais um custo fixo por mensagem. `total_tokens = prompt_tokens + completion_tokens`.
+- [x] O tamanho padrão da resposta vem de `MOCK_DEFAULT_COMPLETION_TOKENS`.
+- [x] `max_tokens` ou `max_completion_tokens` menor que o tamanho padrão corta a resposta e devolve `finish_reason: "length"`.
+- [x] Os testes usam o SDK oficial com `maxRetries: 0`.
 
 ## Pontos de atenção
 

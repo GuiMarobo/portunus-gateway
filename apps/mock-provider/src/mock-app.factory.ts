@@ -1,5 +1,6 @@
 import type { RawEnvironment } from '@portunus/common';
 import Fastify, { type FastifyInstance } from 'fastify';
+import { registerChatCompletionsRoute } from './chat/chat-completions.route';
 import { resolveLogDestination } from './log-destination';
 import { loadMockConfig, type MockConfig } from './mock-config';
 import { loggerOptions, SingleLineRequestLogController } from './request-logging';
@@ -26,6 +27,8 @@ export interface MockApp {
 export async function createMockApp({
   environment,
   logDestination,
+  random,
+  clock,
 }: MockAppDependencies): Promise<MockApp> {
   const config = loadMockConfig(environment);
   const server = Fastify({
@@ -33,6 +36,11 @@ export async function createMockApp({
     logController: new SingleLineRequestLogController(),
   });
   server.get('/health', () => ({ status: 'ok' }));
+  registerChatCompletionsRoute(server, {
+    defaultCompletionTokens: config.MOCK_DEFAULT_COMPLETION_TOKENS,
+    random,
+    clock,
+  });
   await server.ready();
   return { server, config };
 }
