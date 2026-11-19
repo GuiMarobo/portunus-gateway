@@ -9,7 +9,7 @@ Tickets do épico [E1 — Provedor mock](../spec.md). Cada ticket é uma fatia v
 | 01  | [Mock responde `GET /health`](./01-mock-responde-health.md)                                      | —             | done            |
 | 02  | [Chat completion normal e determinística pelo SDK](./02-chat-completion-deterministica.md)       | 01            | done            |
 | 03  | [Erros no formato da OpenAI na fronteira do mock](./03-erros-no-formato-da-openai.md)            | 02            | ready-for-agent |
-| 04  | [Cenário por header: latência e erros HTTP](./04-cenario-por-header.md)                          | 03            | ready-for-agent |
+| 04  | [Cenário por header: latência e erros HTTP](./04-cenario-por-header.md)                          | 03            | in-review       |
 | 05  | [Cenário pelo caminho e pelo ambiente, com precedência](./05-cenario-pelo-caminho-e-ambiente.md) | 04            | ready-for-agent |
 | 06  | [Streaming SSE](./06-streaming-sse.md)                                                           | 04            | ready-for-agent |
 | 07  | [Falhas no tempo: `timeout` e `stream-cut`](./07-timeout-e-stream-cut.md)                        | 06            | ready-for-agent |

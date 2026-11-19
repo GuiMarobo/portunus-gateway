@@ -14,6 +14,8 @@ describe('mock configuration', () => {
         LOG_LEVEL: 'info',
         LOG_PRETTY: false,
         MOCK_DEFAULT_COMPLETION_TOKENS: 16,
+        MOCK_MAX_DELAY_MS: 30000,
+        MOCK_DEFAULT_RETRY_AFTER_SECONDS: 1,
       },
     ],
     [
@@ -37,6 +39,10 @@ describe('mock configuration', () => {
     [{ LOG_PRETTY: 'true' }, { LOG_PRETTY: true }],
     [{ MOCK_DEFAULT_COMPLETION_TOKENS: '1' }, { MOCK_DEFAULT_COMPLETION_TOKENS: 1 }],
     [{ MOCK_DEFAULT_COMPLETION_TOKENS: '4096' }, { MOCK_DEFAULT_COMPLETION_TOKENS: 4096 }],
+    [{ MOCK_MAX_DELAY_MS: '1' }, { MOCK_MAX_DELAY_MS: 1 }],
+    [{ MOCK_MAX_DELAY_MS: '600000' }, { MOCK_MAX_DELAY_MS: 600000 }],
+    [{ MOCK_DEFAULT_RETRY_AFTER_SECONDS: '0' }, { MOCK_DEFAULT_RETRY_AFTER_SECONDS: 0 }],
+    [{ MOCK_DEFAULT_RETRY_AFTER_SECONDS: '3600' }, { MOCK_DEFAULT_RETRY_AFTER_SECONDS: 3600 }],
   ])('builds the app with the configuration parsed from %j', async (environment, expected) => {
     const app = await buildApp(environment);
 
@@ -68,6 +74,10 @@ describe('mock configuration', () => {
     ['LOG_PRETTY', 'yes'],
     ['MOCK_DEFAULT_COMPLETION_TOKENS', '0'],
     ['MOCK_DEFAULT_COMPLETION_TOKENS', '4097'],
+    ['MOCK_MAX_DELAY_MS', '0'],
+    ['MOCK_MAX_DELAY_MS', '600001'],
+    ['MOCK_DEFAULT_RETRY_AFTER_SECONDS', '-1'],
+    ['MOCK_DEFAULT_RETRY_AFTER_SECONDS', '3601'],
   ])('refuses to build the app when %s is %j', async (variable, value) => {
     const error = await rejectionOf(buildApp({ [variable]: value }));
 

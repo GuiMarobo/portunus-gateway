@@ -8,6 +8,7 @@ import { resolveLogDestination } from './log-destination';
 const HEALTH_PATH = '/health';
 import { loadMockConfig, type MockConfig } from './mock-config';
 import { loggerOptions, SingleLineRequestLogController } from './request-logging';
+import { scenarioPreHandler } from './scenario/scenario-pre-handler';
 
 export type RandomSource = () => number;
 export type Clock = () => number;
@@ -46,6 +47,11 @@ export async function createMockApp({
     defaultCompletionTokens: config.MOCK_DEFAULT_COMPLETION_TOKENS,
     random,
     clock,
+    applyScenario: scenarioPreHandler({
+      maxDelayMs: config.MOCK_MAX_DELAY_MS,
+      defaultRetryAfterSeconds: config.MOCK_DEFAULT_RETRY_AFTER_SECONDS,
+      random,
+    }),
   });
   await server.ready();
   return { server, config };

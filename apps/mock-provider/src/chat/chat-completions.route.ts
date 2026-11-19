@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { sendOpenAiError } from '../errors/openai-error';
 import type { Clock, RandomSource } from '../mock-app.factory';
+import type { ScenarioPreHandler } from '../scenario/scenario-pre-handler';
 import { createChatCompletion } from './chat-completion';
 
 const SUPPORTED_CHOICE_COUNT = 1;
@@ -28,13 +29,14 @@ export interface ChatCompletionsRouteDependencies {
   readonly defaultCompletionTokens: number;
   readonly random: RandomSource;
   readonly clock: Clock;
+  readonly applyScenario: ScenarioPreHandler;
 }
 
 export function registerChatCompletionsRoute(
   server: FastifyInstance,
-  { defaultCompletionTokens, random, clock }: ChatCompletionsRouteDependencies,
+  { defaultCompletionTokens, random, clock, applyScenario }: ChatCompletionsRouteDependencies,
 ): void {
-  server.post(CHAT_COMPLETIONS_PATH, (request, reply) => {
+  server.post(CHAT_COMPLETIONS_PATH, { preHandler: applyScenario }, (request, reply) => {
     const body = chatCompletionBodySchema.safeParse(request.body);
     if (!body.success) {
       return sendInvalidParameter(reply, body.error);
