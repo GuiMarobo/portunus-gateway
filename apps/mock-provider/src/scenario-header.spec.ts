@@ -111,21 +111,32 @@ describe('scenario in the x-mock-scenario header', () => {
       },
     );
 
+    const seeds = Array.from({ length: 10 }, (_unused, index) => index + 1);
+
+    async function statusesForSeeds(scenarioPrefix: string): Promise<number[]> {
+      const responses = await Promise.all(
+        seeds.map((seed) => postWithScenario(`${scenarioPrefix}seed=${String(seed)}`)),
+      );
+      return responses.map((response) => response.status);
+    }
+
     it('repeats the same mix of errors and answers for the same seeds', async () => {
       mock = await startMock();
-      const seeds = Array.from({ length: 10 }, (_unused, index) => index + 1);
-      const statusesFor = async () => {
-        const responses = await Promise.all(
-          seeds.map((seed) => postWithScenario(`error=503;error-rate=0.5;seed=${String(seed)}`)),
-        );
-        return responses.map((response) => response.status);
-      };
 
-      const firstRun = await statusesFor();
-      const secondRun = await statusesFor();
+      const firstRun = await statusesForSeeds('error=503;error-rate=0.5;');
+      const secondRun = await statusesForSeeds('error=503;error-rate=0.5;');
 
       expect(secondRun).toEqual(firstRun);
       expect(new Set(firstRun)).toEqual(new Set([200, 503]));
+    });
+
+    it('keeps the seeded outcome when a fixed latency is added', async () => {
+      mock = await startMock();
+
+      const withoutLatency = await statusesForSeeds('error=503;error-rate=0.5;');
+      const withFixedLatency = await statusesForSeeds('latency=1;error=503;error-rate=0.5;');
+
+      expect(withFixedLatency).toEqual(withoutLatency);
     });
   });
 

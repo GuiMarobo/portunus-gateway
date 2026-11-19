@@ -3,6 +3,7 @@ import { mulberry32 } from '../chat/seeded-random';
 import { sendOpenAiError } from '../errors/openai-error';
 import type { RandomSource } from '../mock-app.factory';
 import { type DelayRange, type Failure, parseScenario } from './scenario';
+import { waitUnlessClosed } from './wait-unless-closed';
 
 const SCENARIO_HEADER = 'x-mock-scenario';
 const EMPTY_SCENARIO = '';
@@ -39,7 +40,7 @@ export function scenarioPreHandler({
     const { scenario } = parsed;
     const draw = scenario.seed === undefined ? random : mulberry32(scenario.seed);
     if (scenario.latency !== undefined) {
-      const waited = await waitUnlessClosed(reply, pickDelayMs(scenario.latency, draw));
+      const waited = await waitUnlessClosed(reply.raw, pickDelayMs(scenario.latency, draw));
       if (!waited) {
         reply.hijack();
         return;
@@ -107,19 +108,8 @@ function sendRateLimitError(reply: FastifyReply, retryAfterSeconds: number): Fas
 }
 
 function pickDelayMs({ min, max }: DelayRange, draw: RandomSource): number {
+  if (min === max) {
+    return min;
+  }
   return min + Math.floor(draw() * (max - min + INCLUSIVE_RANGE_OFFSET));
-}
-
-function waitUnlessClosed(reply: FastifyReply, delayMs: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const onClose = () => {
-      clearTimeout(timer);
-      resolve(false);
-    };
-    const timer = setTimeout(() => {
-      reply.raw.off('close', onClose);
-      resolve(true);
-    }, delayMs);
-    reply.raw.once('close', onClose);
-  });
 }
