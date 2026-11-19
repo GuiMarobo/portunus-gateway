@@ -17,24 +17,50 @@ export interface EventStreamResponse extends Writable {
   flushHeaders(): void;
 }
 
+export type StreamEnding = 'done' | 'cut';
+
 export async function sendServerSentEvents(
   response: EventStreamResponse,
   chunks: readonly object[],
   { ttfbMs, chunkDelayMs }: StreamPacing,
+  ending: StreamEnding = 'done',
 ): Promise<void> {
   response.writeHead(OK_STATUS, SSE_HEADERS);
   response.flushHeaders();
-  const events = [...chunks.map((chunk) => JSON.stringify(chunk)), DONE_DATA];
+  const chunkData = chunks.map((chunk) => JSON.stringify(chunk));
+  const events = ending === 'done' ? [...chunkData, DONE_DATA] : chunkData;
   for (const [position, data] of events.entries()) {
     const delayMs = position === 0 ? ttfbMs : chunkDelayMs;
     if (delayMs > NO_DELAY_MS && !(await waitUnlessClosed(response, delayMs))) {
       return;
     }
-    if (!response.write(sseEvent(data)) && !(await drainUnlessClosed(response))) {
+    const isLast = position === events.length - 1;
+    const written =
+      ending === 'cut' && isLast
+        ? await writeFlushedUnlessClosed(response, sseEvent(data))
+        : response.write(sseEvent(data)) || (await drainUnlessClosed(response));
+    if (!written) {
       return;
     }
   }
+  if (ending === 'cut') {
+    response.destroy();
+    return;
+  }
   response.end();
+}
+
+function writeFlushedUnlessClosed(response: Writable, data: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const onClose = () => {
+      resolve(false);
+    };
+    response.once('close', onClose);
+    response.write(data, () => {
+      response.off('close', onClose);
+      resolve(!response.destroyed);
+    });
+  });
 }
 
 function sseEvent(data: string): string {

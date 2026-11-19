@@ -17,7 +17,8 @@ const INTERNAL_ERROR_STATUS = 500;
 const SERVICE_UNAVAILABLE_STATUS = 503;
 const RETRY_AFTER_HEADER = 'retry-after';
 const NO_DELAY_MS = 0;
-const IMMEDIATE_PACING: StreamPacing = { ttfbMs: NO_DELAY_MS, chunkDelayMs: NO_DELAY_MS };
+const DEFAULT_CUT_AFTER_CHUNKS = 0;
+const IMMEDIATE_STREAM: StreamPlan = { ttfbMs: NO_DELAY_MS, chunkDelayMs: NO_DELAY_MS };
 
 export interface ScenarioPreHandlerDependencies {
   readonly maxDelayMs: number;
@@ -33,6 +34,7 @@ interface ScenarioSource {
 }
 
 const scenarioPathParamsSchema = z.object({ [SCENARIO_PATH_PARAM]: z.string() });
+const streamingBodySchema = z.looseObject({ stream: z.literal(true) });
 
 export type ScenarioPreHandler = (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 
@@ -41,9 +43,13 @@ export interface StreamPacing {
   readonly chunkDelayMs: number;
 }
 
+export interface StreamPlan extends StreamPacing {
+  readonly cutAfterContentChunks?: number | undefined;
+}
+
 export interface ScenarioHandling {
   readonly apply: ScenarioPreHandler;
-  pacingOf(request: FastifyRequest): StreamPacing;
+  streamPlanOf(request: FastifyRequest): StreamPlan;
 }
 
 export function scenarioHandling({
@@ -52,7 +58,7 @@ export function scenarioHandling({
   defaultScenario,
   random,
 }: ScenarioPreHandlerDependencies): ScenarioHandling {
-  const pacingByRequest = new WeakMap<FastifyRequest, StreamPacing>();
+  const streamPlanByRequest = new WeakMap<FastifyRequest, StreamPlan>();
   const apply: ScenarioPreHandler = async (request, reply) => {
     const resolved = resolveScenario(request, defaultScenario, maxDelayMs);
     if (!resolved.ok) {
@@ -60,6 +66,10 @@ export function scenarioHandling({
       return;
     }
     const { scenario } = resolved;
+    if (scenario.failure?.kind === 'stream-cut' && !isStreamingRequest(request)) {
+      await sendStreamCutWithoutStream(reply);
+      return;
+    }
     const draw = scenario.seed === undefined ? random : mulberry32(scenario.seed);
     if (scenario.latency !== undefined) {
       const waited = await waitUnlessClosed(reply.raw, pickDelayMs(scenario.latency, draw));
@@ -69,18 +79,27 @@ export function scenarioHandling({
       }
     }
     const { failure } = scenario;
-    if (failure !== undefined && draw() < failure.rate) {
-      await sendSimulatedFailure(reply, failure, defaultRetryAfterSeconds);
+    const firedFailure = failure !== undefined && draw() < failure.rate ? failure : undefined;
+    if (firedFailure?.kind === 'timeout') {
+      await hangUntilCeiling(reply, maxDelayMs);
       return;
     }
-    pacingByRequest.set(request, {
+    if (firedFailure !== undefined && firedFailure.kind !== 'stream-cut') {
+      await sendSimulatedFailure(reply, firedFailure, defaultRetryAfterSeconds);
+      return;
+    }
+    streamPlanByRequest.set(request, {
       ttfbMs: scenario.ttfb === undefined ? NO_DELAY_MS : pickDelayMs(scenario.ttfb, draw),
       chunkDelayMs: scenario.chunkDelayMs ?? NO_DELAY_MS,
+      cutAfterContentChunks:
+        firedFailure === undefined
+          ? undefined
+          : (firedFailure.cutAfterChunks ?? DEFAULT_CUT_AFTER_CHUNKS),
     });
   };
   return {
     apply,
-    pacingOf: (request) => pacingByRequest.get(request) ?? IMMEDIATE_PACING,
+    streamPlanOf: (request) => streamPlanByRequest.get(request) ?? IMMEDIATE_STREAM,
   };
 }
 
@@ -163,6 +182,26 @@ async function sendSimulatedFailure(
       return;
     default:
       return;
+  }
+}
+
+function isStreamingRequest(request: FastifyRequest): boolean {
+  return streamingBodySchema.safeParse(request.body).success;
+}
+
+function sendStreamCutWithoutStream(reply: FastifyReply): FastifyReply {
+  return sendOpenAiError(reply, BAD_REQUEST_STATUS, {
+    message: 'error=stream-cut only applies to streaming requests (stream: true).',
+    type: 'invalid_request_error',
+    param: 'stream',
+    code: null,
+  });
+}
+
+async function hangUntilCeiling(reply: FastifyReply, maxDelayMs: number): Promise<void> {
+  reply.hijack();
+  if (await waitUnlessClosed(reply.raw, maxDelayMs)) {
+    reply.raw.destroy();
   }
 }
 

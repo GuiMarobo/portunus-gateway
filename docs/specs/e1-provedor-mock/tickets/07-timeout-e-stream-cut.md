@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 06
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/04 — Streaming e SSE](../../../estudos/04-streaming-e-sse.md), [estudos/18 — Resiliência](../../../estudos/18-resiliencia.md)
 
@@ -12,12 +12,12 @@
 
 ## Critérios de aceite
 
-- [ ] `error=timeout` (normal ou em stream) não envia nada até `MOCK_MAX_DELAY_MS`. Ao atingir o teto, a conexão é encerrada.
-- [ ] Um SDK com `timeout` curto recebe o erro de timeout dele (`APIConnectionTimeoutError`), e o mock libera o timer quando o cliente desiste.
-- [ ] `error=stream-cut;cut-after=N` envia os headers `200`, o chunk de `role`, N chunks de conteúdo e destrói o socket, sem `finish_reason` e sem `[DONE]`.
-- [ ] O SDK, iterando o stream, recebe os N chunks e depois lança um erro de conexão, sem ficar pendurado.
-- [ ] `error-rate` vale para os dois modos, com `seed` reproduzível.
-- [ ] `stream-cut` numa requisição sem stream recebe `400` explicando que o modo só vale em stream.
+- [x] `error=timeout` (normal ou em stream) não envia nada até `MOCK_MAX_DELAY_MS`. Ao atingir o teto, a conexão é encerrada.
+- [x] Um SDK com `timeout` curto recebe o erro de timeout dele (`APIConnectionTimeoutError`), e o mock libera o timer quando o cliente desiste.
+- [x] `error=stream-cut;cut-after=N` envia os headers `200`, o chunk de `role`, N chunks de conteúdo e destrói o socket, sem `finish_reason` e sem `[DONE]`.
+- [x] O SDK, iterando o stream, recebe os N chunks e depois lança um erro de conexão, sem ficar pendurado.
+- [x] `error-rate` vale para os dois modos, com `seed` reproduzível.
+- [x] `stream-cut` numa requisição sem stream recebe `400` explicando que o modo só vale em stream.
 
 ## Pontos de atenção
 

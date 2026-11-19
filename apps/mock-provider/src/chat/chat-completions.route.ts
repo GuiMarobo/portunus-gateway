@@ -20,6 +20,7 @@ const COMPLETION_ID_PREFIX = 'chatcmpl-';
 const COMPLETION_ID_LENGTH = 24;
 const COMPLETION_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const MILLISECONDS_PER_SECOND = 1000;
+const ROLE_CHUNK_COUNT = 1;
 
 const tokenLimitSchema = z.int().positive().nullish();
 
@@ -58,13 +59,21 @@ export function registerChatCompletionsRoute(
       if (body.data.stream !== true) {
         return completion;
       }
+      const chunks = chatCompletionChunks(completion, {
+        includeUsage: body.data.stream_options?.include_usage === true,
+      });
+      const { cutAfterContentChunks, ...pacing } = scenario.streamPlanOf(request);
       reply.hijack();
+      if (cutAfterContentChunks === undefined) {
+        await sendServerSentEvents(reply.raw, chunks, pacing);
+        return reply;
+      }
+      const contentChunks = Math.min(cutAfterContentChunks, completion.usage.completion_tokens);
       await sendServerSentEvents(
         reply.raw,
-        chatCompletionChunks(completion, {
-          includeUsage: body.data.stream_options?.include_usage === true,
-        }),
-        scenario.pacingOf(request),
+        chunks.slice(0, ROLE_CHUNK_COUNT + contentChunks),
+        pacing,
+        'cut',
       );
       return reply;
     });
