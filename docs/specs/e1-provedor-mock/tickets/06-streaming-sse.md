@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 04
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/04 — Streaming e SSE](../../../estudos/04-streaming-e-sse.md)
 
