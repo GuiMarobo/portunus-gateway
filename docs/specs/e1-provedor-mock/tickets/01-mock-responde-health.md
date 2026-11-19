@@ -4,7 +4,7 @@
 
 **Bloqueado por:** nenhum (pode começar imediatamente)
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/10 — NestJS e Fastify](../../../estudos/10-nestjs-e-fastify.md), [estudos/12 — Validação com Zod](../../../estudos/12-validacao-com-zod.md), [estudos/28 — Logs, pino e Loki](../../../estudos/28-logs-pino-e-loki.md)
 
