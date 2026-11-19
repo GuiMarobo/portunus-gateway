@@ -4,19 +4,19 @@
 
 **Bloqueado por:** 04
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/18 — Resiliência](../../../estudos/18-resiliencia.md)
 
 ## Critérios de aceite
 
-- [ ] `POST /scenarios/{cenário}/v1/chat/completions` aplica o cenário do caminho, com a mesma gramática do header (escapada para caber num segmento de URL).
-- [ ] O SDK oficial, configurado com `baseURL` terminando em `/scenarios/{cenário}/v1`, recebe o comportamento do cenário.
-- [ ] `MOCK_DEFAULT_SCENARIO` vale para toda requisição sem header e sem prefixo. Vazio significa resposta normal e imediata.
-- [ ] Um `MOCK_DEFAULT_SCENARIO` inválido impede o mock de subir, com o erro de configuração legível.
-- [ ] Precedência por cenário inteiro (não chave a chave): header > caminho > ambiente. Há um teste para cada combinação.
-- [ ] Um cenário inválido no caminho recebe `400` com `param` indicando o caminho.
-- [ ] `GET /health` não é afetado pelo cenário padrão.
+- [x] `POST /scenarios/{cenário}/v1/chat/completions` aplica o cenário do caminho, com a mesma gramática do header (escapada para caber num segmento de URL).
+- [x] O SDK oficial, configurado com `baseURL` terminando em `/scenarios/{cenário}/v1`, recebe o comportamento do cenário.
+- [x] `MOCK_DEFAULT_SCENARIO` vale para toda requisição sem header e sem prefixo. Vazio significa resposta normal e imediata.
+- [x] Um `MOCK_DEFAULT_SCENARIO` inválido impede o mock de subir, com o erro de configuração legível.
+- [x] Precedência por cenário inteiro (não chave a chave): header > caminho > ambiente. Há um teste para cada combinação.
+- [x] Um cenário inválido no caminho recebe `400` com `param` indicando o caminho.
+- [x] `GET /health` não é afetado pelo cenário padrão.
 
 ## Pontos de atenção
 

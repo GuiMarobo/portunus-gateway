@@ -162,6 +162,8 @@ Um único formato, usado igual nas três origens: pares `chave=valor` separados 
 | `seed`        | inteiro                                      | Semente da aleatoriedade (latência em intervalo e `error-rate`) desta requisição                       |
 
 - **Origens e precedência:** header `x-mock-scenario` > prefixo de caminho `/scenarios/{cenário}/v1/...` > variável `MOCK_DEFAULT_SCENARIO`. A precedência é por cenário inteiro, não chave a chave, para o resultado ser fácil de prever.
+- **Cenário no caminho:** a gramática é a mesma do header. `;` e `=` podem ir crus (`/scenarios/error=429;retry-after=4/v1`): o Fastify 5 vem com `useSemicolonDelimiter: false` e não corta a URL no `;`. A forma escapada (`/scenarios/error%3D429%3Bretry-after%3D4/v1`) também funciona, porque o roteador decodifica o parâmetro. O segmento aceita até 1024 caracteres (o padrão do Fastify, 100, não comporta um cenário com todas as chaves). Cenário inválido no caminho → `400` com `error.param = "/scenarios/{scenario}"`.
+- **Cenário padrão:** `MOCK_DEFAULT_SCENARIO` é validado na subida, contra o mesmo teto `MOCK_MAX_DELAY_MS`. Inválido, o mock não sobe e o erro de configuração lista o problema sem ecoar o valor.
 - **Validação:** chave desconhecida, valor inválido, intervalo invertido ou valor acima do teto configurado → `400` no formato da OpenAI com `error.param = "x-mock-scenario"` (ou o caminho), listando o problema.
 - **Sem estado entre requisições:** nada de "falhe as 3 primeiras e depois funcione". Isso exigiria estado compartilhado e quebraria o isolamento entre testes paralelos. Se o E7 precisar, ele decide como (ver Notas).
 

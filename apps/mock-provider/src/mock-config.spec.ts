@@ -85,6 +85,29 @@ describe('mock configuration', () => {
     expect(error.message).toMatch(new RegExp(`^ {2}${variable} → \\S`, 'm'));
   });
 
+  it.each([
+    [
+      'has an unknown key',
+      { MOCK_DEFAULT_SCENARIO: 'secret-key=1' },
+      'unknown key; allowed keys are latency',
+    ],
+    [
+      'waits above MOCK_MAX_DELAY_MS',
+      { MOCK_DEFAULT_SCENARIO: 'latency=101', MOCK_MAX_DELAY_MS: '100' },
+      'latency: above the 100 ms ceiling',
+    ],
+  ])(
+    'refuses to build the app when MOCK_DEFAULT_SCENARIO %s, saying why without echoing it',
+    async (_case, environment, problem) => {
+      const error = await rejectionOf(buildApp(environment));
+
+      expect(error).toBeInstanceOf(ConfigValidationError);
+      expect(error.message).toMatch(/^ {2}MOCK_DEFAULT_SCENARIO → \S/m);
+      expect(error.message).toContain(problem);
+      expect(error.message).not.toContain('secret');
+    },
+  );
+
   it('refuses pretty logs in production', async () => {
     const error = await rejectionOf(buildApp({ NODE_ENV: 'production', LOG_PRETTY: 'true' }));
 

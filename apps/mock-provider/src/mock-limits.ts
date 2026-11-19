@@ -1,0 +1,2 @@
+export const MAX_COMPLETION_TOKENS = 4096;
+export const MAX_RETRY_AFTER_SECONDS = 3600;

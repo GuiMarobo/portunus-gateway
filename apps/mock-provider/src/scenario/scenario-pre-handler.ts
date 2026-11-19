@@ -1,12 +1,14 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { z } from 'zod';
 import { mulberry32 } from '../chat/seeded-random';
 import { sendOpenAiError } from '../errors/openai-error';
 import type { RandomSource } from '../mock-app.factory';
-import { type DelayRange, type Failure, parseScenario } from './scenario';
+import { type DelayRange, type Failure, parseScenario, type Scenario } from './scenario';
 import { waitUnlessClosed } from './wait-unless-closed';
 
 const SCENARIO_HEADER = 'x-mock-scenario';
-const EMPTY_SCENARIO = '';
+export const SCENARIO_PATH_PARAM = 'scenario';
+const SCENARIO_PATH_LABEL = `/scenarios/{${SCENARIO_PATH_PARAM}}`;
 const INCLUSIVE_RANGE_OFFSET = 1;
 const BAD_REQUEST_STATUS = 400;
 const RATE_LIMIT_STATUS = 429;
@@ -18,26 +20,33 @@ const RETRY_AFTER_HEADER = 'retry-after';
 export interface ScenarioPreHandlerDependencies {
   readonly maxDelayMs: number;
   readonly defaultRetryAfterSeconds: number;
+  readonly defaultScenario: Scenario;
   readonly random: RandomSource;
 }
+
+interface ScenarioSource {
+  readonly raw: string;
+  readonly param: string;
+  readonly description: string;
+}
+
+const scenarioPathParamsSchema = z.object({ [SCENARIO_PATH_PARAM]: z.string() });
 
 export type ScenarioPreHandler = (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 
 export function scenarioPreHandler({
   maxDelayMs,
   defaultRetryAfterSeconds,
+  defaultScenario,
   random,
 }: ScenarioPreHandlerDependencies): ScenarioPreHandler {
   return async (request, reply) => {
-    const header = request.headers[SCENARIO_HEADER];
-    const parsed = parseScenario(typeof header === 'string' ? header : EMPTY_SCENARIO, {
-      maxDelayMs,
-    });
-    if (!parsed.ok) {
-      await sendInvalidScenario(reply, parsed.problems);
+    const resolved = resolveScenario(request, defaultScenario, maxDelayMs);
+    if (!resolved.ok) {
+      await sendInvalidScenario(reply, resolved.source, resolved.problems);
       return;
     }
-    const { scenario } = parsed;
+    const { scenario } = resolved;
     const draw = scenario.seed === undefined ? random : mulberry32(scenario.seed);
     if (scenario.latency !== undefined) {
       const waited = await waitUnlessClosed(reply.raw, pickDelayMs(scenario.latency, draw));
@@ -53,11 +62,52 @@ export function scenarioPreHandler({
   };
 }
 
-function sendInvalidScenario(reply: FastifyReply, problems: readonly string[]): FastifyReply {
+type ScenarioResolution =
+  | { readonly ok: true; readonly scenario: Scenario }
+  | {
+      readonly ok: false;
+      readonly source: ScenarioSource;
+      readonly problems: readonly string[];
+    };
+
+function resolveScenario(
+  request: FastifyRequest,
+  defaultScenario: Scenario,
+  maxDelayMs: number,
+): ScenarioResolution {
+  const source = scenarioSourceOf(request);
+  if (source === undefined) {
+    return { ok: true, scenario: defaultScenario };
+  }
+  const parsed = parseScenario(source.raw, { maxDelayMs });
+  return parsed.ok ? parsed : { ok: false, source, problems: parsed.problems };
+}
+
+function scenarioSourceOf(request: FastifyRequest): ScenarioSource | undefined {
+  const header = request.headers[SCENARIO_HEADER];
+  if (typeof header === 'string') {
+    return { raw: header, param: SCENARIO_HEADER, description: `${SCENARIO_HEADER} header` };
+  }
+  const pathParams = scenarioPathParamsSchema.safeParse(request.params);
+  if (pathParams.success) {
+    return {
+      raw: pathParams.data[SCENARIO_PATH_PARAM],
+      param: SCENARIO_PATH_LABEL,
+      description: `scenario in the ${SCENARIO_PATH_LABEL} path`,
+    };
+  }
+  return undefined;
+}
+
+function sendInvalidScenario(
+  reply: FastifyReply,
+  source: ScenarioSource,
+  problems: readonly string[],
+): FastifyReply {
   return sendOpenAiError(reply, BAD_REQUEST_STATUS, {
-    message: `Invalid ${SCENARIO_HEADER} header: ${problems.join(PROBLEM_SEPARATOR)}.`,
+    message: `Invalid ${source.description}: ${problems.join(PROBLEM_SEPARATOR)}.`,
     type: 'invalid_request_error',
-    param: SCENARIO_HEADER,
+    param: source.param,
     code: null,
   });
 }

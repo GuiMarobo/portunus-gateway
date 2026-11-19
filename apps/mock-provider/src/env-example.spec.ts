@@ -11,7 +11,7 @@ const example = parseEnv(readFileSync(ENV_EXAMPLE_FILE, 'utf8'));
 
 describe('.env.example', () => {
   it('declares exactly the variables the mock configuration accepts', () => {
-    expect(Object.keys(example).sort()).toEqual(Object.keys(mockConfigSchema.shape).sort());
+    expect(Object.keys(example).sort()).toEqual(Object.keys(mockConfigSchema.in.shape).sort());
   });
 
   it('holds values the mock configuration accepts', () => {

@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { sendOpenAiError } from '../errors/openai-error';
 import type { Clock, RandomSource } from '../mock-app.factory';
-import type { ScenarioPreHandler } from '../scenario/scenario-pre-handler';
+import { SCENARIO_PATH_PARAM, type ScenarioPreHandler } from '../scenario/scenario-pre-handler';
 import { createChatCompletion } from './chat-completion';
 
 const SUPPORTED_CHOICE_COUNT = 1;
@@ -10,6 +10,10 @@ const BAD_REQUEST_STATUS = 400;
 const PARAM_PATH_SEPARATOR = '.';
 
 const CHAT_COMPLETIONS_PATH = '/v1/chat/completions';
+const CHAT_COMPLETIONS_PATHS = [
+  CHAT_COMPLETIONS_PATH,
+  `/scenarios/:${SCENARIO_PATH_PARAM}${CHAT_COMPLETIONS_PATH}`,
+];
 const COMPLETION_ID_PREFIX = 'chatcmpl-';
 const COMPLETION_ID_LENGTH = 24;
 const COMPLETION_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -36,15 +40,17 @@ export function registerChatCompletionsRoute(
   server: FastifyInstance,
   { defaultCompletionTokens, random, clock, applyScenario }: ChatCompletionsRouteDependencies,
 ): void {
-  server.post(CHAT_COMPLETIONS_PATH, { preHandler: applyScenario }, (request, reply) => {
-    const body = chatCompletionBodySchema.safeParse(request.body);
-    if (!body.success) {
-      return sendInvalidParameter(reply, body.error);
-    }
-    return createChatCompletion(body.data, {
-      id: completionId(random),
-      createdAtSeconds: Math.floor(clock() / MILLISECONDS_PER_SECOND),
-      defaultCompletionTokens,
+  CHAT_COMPLETIONS_PATHS.forEach((path) => {
+    server.post(path, { preHandler: applyScenario }, (request, reply) => {
+      const body = chatCompletionBodySchema.safeParse(request.body);
+      if (!body.success) {
+        return sendInvalidParameter(reply, body.error);
+      }
+      return createChatCompletion(body.data, {
+        id: completionId(random),
+        createdAtSeconds: Math.floor(clock() / MILLISECONDS_PER_SECOND),
+        defaultCompletionTokens,
+      });
     });
   });
 }

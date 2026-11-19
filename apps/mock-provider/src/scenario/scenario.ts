@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_COMPLETION_TOKENS, MAX_RETRY_AFTER_SECONDS } from '../mock-config.schema';
+import { MAX_COMPLETION_TOKENS, MAX_RETRY_AFTER_SECONDS } from '../mock-limits';
 
 const ENTRY_SEPARATOR = ';';
 const KEY_VALUE_SEPARATOR = '=';

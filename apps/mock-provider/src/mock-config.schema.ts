@@ -6,6 +6,8 @@ import {
   MAX_TCP_PORT,
   MIN_TCP_PORT,
 } from './http-server.constants';
+import { MAX_COMPLETION_TOKENS, MAX_RETRY_AFTER_SECONDS } from './mock-limits';
+import { parseScenario } from './scenario/scenario';
 
 const NODE_ENVIRONMENTS = ['development', 'test', 'production'] as const;
 const DEFAULT_NODE_ENVIRONMENT = 'development';
@@ -15,13 +17,13 @@ const BOOLEAN_FLAGS = { true: true, false: false } as const;
 const DEFAULT_LOG_PRETTY = false;
 const DEFAULT_COMPLETION_TOKENS = 16;
 const MIN_COMPLETION_TOKENS = 1;
-export const MAX_COMPLETION_TOKENS = 4096;
 const DEFAULT_MAX_DELAY_MS = 30_000;
 const MIN_MAX_DELAY_MS = 1;
 const MAX_MAX_DELAY_MS = 600_000;
 const DEFAULT_RETRY_AFTER_SECONDS = 1;
 const MIN_RETRY_AFTER_SECONDS = 0;
-export const MAX_RETRY_AFTER_SECONDS = 3600;
+const NO_DEFAULT_SCENARIO = '';
+const PROBLEM_SEPARATOR = '; ';
 
 const booleanFlag = z.enum(['true', 'false']).transform((flag) => BOOLEAN_FLAGS[flag]);
 
@@ -41,8 +43,23 @@ export const mockConfigSchema = z
     MOCK_DEFAULT_RETRY_AFTER_SECONDS: integerFromEnv(
       z.number().min(MIN_RETRY_AFTER_SECONDS).max(MAX_RETRY_AFTER_SECONDS),
     ).default(DEFAULT_RETRY_AFTER_SECONDS),
+    MOCK_DEFAULT_SCENARIO: z.string().default(NO_DEFAULT_SCENARIO),
   })
   .refine((config) => !(config.NODE_ENV === 'production' && config.LOG_PRETTY), {
     path: ['LOG_PRETTY'],
     message: 'pretty logs are not allowed in production',
+  })
+  .transform((config, context) => {
+    const defaultScenario = parseScenario(config.MOCK_DEFAULT_SCENARIO, {
+      maxDelayMs: config.MOCK_MAX_DELAY_MS,
+    });
+    if (!defaultScenario.ok) {
+      context.addIssue({
+        code: 'custom',
+        path: ['MOCK_DEFAULT_SCENARIO'],
+        message: defaultScenario.problems.join(PROBLEM_SEPARATOR),
+      });
+      return z.NEVER;
+    }
+    return { ...config, MOCK_DEFAULT_SCENARIO: defaultScenario.scenario };
   });

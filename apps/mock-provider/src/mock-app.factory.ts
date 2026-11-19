@@ -5,10 +5,12 @@ import { requireBearerAuthorization } from './errors/bearer-authorization';
 import { answerErrorsInOpenAiFormat } from './errors/openai-error-handlers';
 import { resolveLogDestination } from './log-destination';
 
-const HEALTH_PATH = '/health';
 import { loadMockConfig, type MockConfig } from './mock-config';
 import { loggerOptions, SingleLineRequestLogController } from './request-logging';
 import { scenarioPreHandler } from './scenario/scenario-pre-handler';
+
+const HEALTH_PATH = '/health';
+const MAX_SCENARIO_PATH_SEGMENT_LENGTH = 1024;
 
 export type RandomSource = () => number;
 export type Clock = () => number;
@@ -39,6 +41,7 @@ export async function createMockApp({
   const server = Fastify({
     logger: loggerOptions(config, await resolveLogDestination(config, logDestination)),
     logController: new SingleLineRequestLogController(),
+    routerOptions: { maxParamLength: MAX_SCENARIO_PATH_SEGMENT_LENGTH },
   });
   answerErrorsInOpenAiFormat(server);
   requireBearerAuthorization(server, [HEALTH_PATH]);
@@ -50,6 +53,7 @@ export async function createMockApp({
     applyScenario: scenarioPreHandler({
       maxDelayMs: config.MOCK_MAX_DELAY_MS,
       defaultRetryAfterSeconds: config.MOCK_DEFAULT_RETRY_AFTER_SECONDS,
+      defaultScenario: config.MOCK_DEFAULT_SCENARIO,
       random,
     }),
   });
