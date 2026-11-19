@@ -243,6 +243,22 @@ importers:
         specifier: 13.2.0
         version: 13.2.0
 
+  apps/mock-provider:
+    dependencies:
+      '@portunus/common':
+        specifier: workspace:*
+        version: link:../../libs/common
+      fastify:
+        specifier: 5.11.3
+        version: 5.11.3
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+    devDependencies:
+      pino-pretty:
+        specifier: 13.2.0
+        version: 13.2.0
+
   libs/common:
     dependencies:
       zod:
