@@ -16,6 +16,8 @@ const PROBLEM_SEPARATOR = '; ';
 const INTERNAL_ERROR_STATUS = 500;
 const SERVICE_UNAVAILABLE_STATUS = 503;
 const RETRY_AFTER_HEADER = 'retry-after';
+const NO_DELAY_MS = 0;
+const IMMEDIATE_PACING: StreamPacing = { ttfbMs: NO_DELAY_MS, chunkDelayMs: NO_DELAY_MS };
 
 export interface ScenarioPreHandlerDependencies {
   readonly maxDelayMs: number;
@@ -34,13 +36,24 @@ const scenarioPathParamsSchema = z.object({ [SCENARIO_PATH_PARAM]: z.string() })
 
 export type ScenarioPreHandler = (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 
-export function scenarioPreHandler({
+export interface StreamPacing {
+  readonly ttfbMs: number;
+  readonly chunkDelayMs: number;
+}
+
+export interface ScenarioHandling {
+  readonly apply: ScenarioPreHandler;
+  pacingOf(request: FastifyRequest): StreamPacing;
+}
+
+export function scenarioHandling({
   maxDelayMs,
   defaultRetryAfterSeconds,
   defaultScenario,
   random,
-}: ScenarioPreHandlerDependencies): ScenarioPreHandler {
-  return async (request, reply) => {
+}: ScenarioPreHandlerDependencies): ScenarioHandling {
+  const pacingByRequest = new WeakMap<FastifyRequest, StreamPacing>();
+  const apply: ScenarioPreHandler = async (request, reply) => {
     const resolved = resolveScenario(request, defaultScenario, maxDelayMs);
     if (!resolved.ok) {
       await sendInvalidScenario(reply, resolved.source, resolved.problems);
@@ -58,7 +71,16 @@ export function scenarioPreHandler({
     const { failure } = scenario;
     if (failure !== undefined && draw() < failure.rate) {
       await sendSimulatedFailure(reply, failure, defaultRetryAfterSeconds);
+      return;
     }
+    pacingByRequest.set(request, {
+      ttfbMs: scenario.ttfb === undefined ? NO_DELAY_MS : pickDelayMs(scenario.ttfb, draw),
+      chunkDelayMs: scenario.chunkDelayMs ?? NO_DELAY_MS,
+    });
+  };
+  return {
+    apply,
+    pacingOf: (request) => pacingByRequest.get(request) ?? IMMEDIATE_PACING,
   };
 }
 

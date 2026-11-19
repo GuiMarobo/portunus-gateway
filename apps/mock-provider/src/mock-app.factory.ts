@@ -7,7 +7,7 @@ import { resolveLogDestination } from './log-destination';
 
 import { loadMockConfig, type MockConfig } from './mock-config';
 import { loggerOptions, SingleLineRequestLogController } from './request-logging';
-import { scenarioPreHandler } from './scenario/scenario-pre-handler';
+import { scenarioHandling } from './scenario/scenario-pre-handler';
 
 const HEALTH_PATH = '/health';
 const MAX_SCENARIO_PATH_SEGMENT_LENGTH = 1024;
@@ -50,7 +50,7 @@ export async function createMockApp({
     defaultCompletionTokens: config.MOCK_DEFAULT_COMPLETION_TOKENS,
     random,
     clock,
-    applyScenario: scenarioPreHandler({
+    scenario: scenarioHandling({
       maxDelayMs: config.MOCK_MAX_DELAY_MS,
       defaultRetryAfterSeconds: config.MOCK_DEFAULT_RETRY_AFTER_SECONDS,
       defaultScenario: config.MOCK_DEFAULT_SCENARIO,

@@ -2,8 +2,10 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { sendOpenAiError } from '../errors/openai-error';
 import type { Clock, RandomSource } from '../mock-app.factory';
-import { SCENARIO_PATH_PARAM, type ScenarioPreHandler } from '../scenario/scenario-pre-handler';
+import { SCENARIO_PATH_PARAM, type ScenarioHandling } from '../scenario/scenario-pre-handler';
 import { createChatCompletion } from './chat-completion';
+import { chatCompletionChunks } from './chat-completion-chunks';
+import { sendServerSentEvents } from './server-sent-events';
 
 const SUPPORTED_CHOICE_COUNT = 1;
 const BAD_REQUEST_STATUS = 400;
@@ -27,30 +29,44 @@ const chatCompletionBodySchema = z.looseObject({
   max_tokens: tokenLimitSchema,
   max_completion_tokens: tokenLimitSchema,
   n: z.literal(SUPPORTED_CHOICE_COUNT).nullish(),
+  stream: z.boolean().nullish(),
+  stream_options: z.looseObject({ include_usage: z.boolean().nullish() }).nullish(),
 });
 
 export interface ChatCompletionsRouteDependencies {
   readonly defaultCompletionTokens: number;
   readonly random: RandomSource;
   readonly clock: Clock;
-  readonly applyScenario: ScenarioPreHandler;
+  readonly scenario: ScenarioHandling;
 }
 
 export function registerChatCompletionsRoute(
   server: FastifyInstance,
-  { defaultCompletionTokens, random, clock, applyScenario }: ChatCompletionsRouteDependencies,
+  { defaultCompletionTokens, random, clock, scenario }: ChatCompletionsRouteDependencies,
 ): void {
   CHAT_COMPLETIONS_PATHS.forEach((path) => {
-    server.post(path, { preHandler: applyScenario }, (request, reply) => {
+    server.post(path, { preHandler: scenario.apply }, async (request, reply) => {
       const body = chatCompletionBodySchema.safeParse(request.body);
       if (!body.success) {
         return sendInvalidParameter(reply, body.error);
       }
-      return createChatCompletion(body.data, {
+      const completion = createChatCompletion(body.data, {
         id: completionId(random),
         createdAtSeconds: Math.floor(clock() / MILLISECONDS_PER_SECOND),
         defaultCompletionTokens,
       });
+      if (body.data.stream !== true) {
+        return completion;
+      }
+      reply.hijack();
+      await sendServerSentEvents(
+        reply.raw,
+        chatCompletionChunks(completion, {
+          includeUsage: body.data.stream_options?.include_usage === true,
+        }),
+        scenario.pacingOf(request),
+      );
+      return reply;
     });
   });
 }

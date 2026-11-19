@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 04
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/04 — Streaming e SSE](../../../estudos/04-streaming-e-sse.md)
 
@@ -12,15 +12,15 @@
 
 ## Critérios de aceite
 
-- [ ] A resposta tem `Content-Type: text/event-stream`, `Cache-Control: no-cache` e eventos `data: <json>\n\n` com `object: "chat.completion.chunk"`.
-- [ ] Sequência: um chunk com `delta.role = "assistant"`, um chunk por token com `delta.content`, um chunk com `delta` vazio e `finish_reason`, depois `data: [DONE]`.
-- [ ] Com `stream_options.include_usage: true`, sai antes do `[DONE]` um chunk com `choices: []` e `usage`. Sem isso, nenhum chunk de `usage`.
-- [ ] A concatenação dos `delta.content` é idêntica ao `content` da mesma requisição sem stream, e `finish_reason` também bate (inclusive `"length"` com `max_tokens`).
-- [ ] `ttfb=N` atrasa o primeiro chunk em pelo menos N ms depois dos headers. `chunk-delay=N` espaça os chunks. `latency` atrasa os headers.
-- [ ] `error=429`, `500` e `503` em stream acontecem antes dos headers, com o mesmo status e corpo do ticket 04.
-- [ ] A escrita respeita backpressure: quando `write` devolve `false`, espera o `drain`.
-- [ ] Se o cliente aborta no meio do stream (`AbortController` no SDK), o mock para de escrever e cancela os timers daquela requisição. Há um teste que observa isso.
-- [ ] Os testes usam o SDK para a sequência e `fetch` para conferir o enquadramento SSE cru.
+- [x] A resposta tem `Content-Type: text/event-stream`, `Cache-Control: no-cache` e eventos `data: <json>\n\n` com `object: "chat.completion.chunk"`.
+- [x] Sequência: um chunk com `delta.role = "assistant"`, um chunk por token com `delta.content`, um chunk com `delta` vazio e `finish_reason`, depois `data: [DONE]`.
+- [x] Com `stream_options.include_usage: true`, sai antes do `[DONE]` um chunk com `choices: []` e `usage`. Sem isso, nenhum chunk de `usage`.
+- [x] A concatenação dos `delta.content` é idêntica ao `content` da mesma requisição sem stream, e `finish_reason` também bate (inclusive `"length"` com `max_tokens`).
+- [x] `ttfb=N` atrasa o primeiro chunk em pelo menos N ms depois dos headers. `chunk-delay=N` espaça os chunks. `latency` atrasa os headers.
+- [x] `error=429`, `500` e `503` em stream acontecem antes dos headers, com o mesmo status e corpo do ticket 04.
+- [x] A escrita respeita backpressure: quando `write` devolve `false`, espera o `drain`.
+- [x] Se o cliente aborta no meio do stream (`AbortController` no SDK), o mock para de escrever e cancela os timers daquela requisição. Há um teste que observa isso.
+- [x] Os testes usam o SDK para a sequência e `fetch` para conferir o enquadramento SSE cru.
 
 ## Pontos de atenção
 

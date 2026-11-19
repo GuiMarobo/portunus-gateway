@@ -21,10 +21,31 @@ export interface ChatCompletionContext {
   readonly defaultCompletionTokens: number;
 }
 
+export interface ChatCompletionUsage {
+  readonly prompt_tokens: number;
+  readonly completion_tokens: number;
+  readonly total_tokens: number;
+}
+
+export interface ChatCompletionChoice {
+  readonly index: number;
+  readonly message: { readonly role: string; readonly content: string };
+  readonly finish_reason: string;
+}
+
+export interface ChatCompletion {
+  readonly id: string;
+  readonly object: string;
+  readonly created: number;
+  readonly model: string;
+  readonly choices: readonly [ChatCompletionChoice];
+  readonly usage: ChatCompletionUsage;
+}
+
 export function createChatCompletion(
   request: ChatCompletionRequest,
   { id, createdAtSeconds, defaultCompletionTokens }: ChatCompletionContext,
-) {
+): ChatCompletion {
   const limit = requestedTokenLimit(request);
   const isCutByLimit = limit !== null && limit < defaultCompletionTokens;
   const words = generateCompletionWords(
