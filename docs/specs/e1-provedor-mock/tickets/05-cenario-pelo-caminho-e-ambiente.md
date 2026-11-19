@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 04
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/18 — Resiliência](../../../estudos/18-resiliencia.md)
 
