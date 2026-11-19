@@ -1,7 +1,11 @@
 import type { RawEnvironment } from '@portunus/common';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registerChatCompletionsRoute } from './chat/chat-completions.route';
+import { requireBearerAuthorization } from './errors/bearer-authorization';
+import { answerErrorsInOpenAiFormat } from './errors/openai-error-handlers';
 import { resolveLogDestination } from './log-destination';
+
+const HEALTH_PATH = '/health';
 import { loadMockConfig, type MockConfig } from './mock-config';
 import { loggerOptions, SingleLineRequestLogController } from './request-logging';
 
@@ -35,7 +39,9 @@ export async function createMockApp({
     logger: loggerOptions(config, await resolveLogDestination(config, logDestination)),
     logController: new SingleLineRequestLogController(),
   });
-  server.get('/health', () => ({ status: 'ok' }));
+  answerErrorsInOpenAiFormat(server);
+  requireBearerAuthorization(server, [HEALTH_PATH]);
+  server.get(HEALTH_PATH, () => ({ status: 'ok' }));
   registerChatCompletionsRoute(server, {
     defaultCompletionTokens: config.MOCK_DEFAULT_COMPLETION_TOKENS,
     random,

@@ -4,20 +4,20 @@
 
 **Bloqueado por:** 02
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/01 — LLMs e a API de chat](../../../estudos/01-llms-e-a-api-de-chat.md)
 
 ## Critérios de aceite
 
-- [ ] Uma requisição sem `Authorization: Bearer <token não vazio>` recebe `401` com `type: "invalid_request_error"` e `code: "invalid_api_key"`. Qualquer token não vazio é aceito.
-- [ ] Uma requisição sem `model`, sem `messages` ou com `messages` vazio recebe `400` com `param` apontando o campo.
-- [ ] Um corpo que não é JSON válido recebe `400` no mesmo formato.
-- [ ] `n > 1` recebe `400`.
-- [ ] Uma rota desconhecida recebe `404` no formato da OpenAI.
-- [ ] `GET /health` continua sem exigir `Authorization`.
-- [ ] Nos testes, o SDK lança o erro tipado esperado para cada caso. Onde o SDK esconde detalhes (corpo cru, header), o teste usa `fetch`.
-- [ ] Nenhum valor enviado pelo cliente é refletido cru na mensagem de erro nem no log.
+- [x] Uma requisição sem `Authorization: Bearer <token não vazio>` recebe `401` com `type: "invalid_request_error"` e `code: "invalid_api_key"`. Qualquer token não vazio é aceito.
+- [x] Uma requisição sem `model`, sem `messages` ou com `messages` vazio recebe `400` com `param` apontando o campo.
+- [x] Um corpo que não é JSON válido recebe `400` no mesmo formato.
+- [x] `n > 1` recebe `400`.
+- [x] Uma rota desconhecida recebe `404` no formato da OpenAI.
+- [x] `GET /health` continua sem exigir `Authorization`.
+- [x] Nos testes, o SDK lança o erro tipado esperado para cada caso. Onde o SDK esconde detalhes (corpo cru, header), o teste usa `fetch`.
+- [x] Nenhum valor enviado pelo cliente é refletido cru na mensagem de erro nem no log.
 
 ## Pontos de atenção
 
