@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 02
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/01 — LLMs e a API de chat](../../../estudos/01-llms-e-a-api-de-chat.md)
 
