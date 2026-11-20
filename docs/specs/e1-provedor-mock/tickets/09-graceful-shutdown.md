@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 07
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/33 — Docker e Compose](../../../estudos/33-docker-e-compose.md)
 
