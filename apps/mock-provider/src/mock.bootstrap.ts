@@ -1,6 +1,6 @@
 import { ConfigValidationError, type RawEnvironment } from '@portunus/common';
 import type { FastifyInstance } from 'fastify';
-import { createMockApp, type LogDestination } from './mock-app.factory';
+import { createMockApp, type LogDestination, type MockApp } from './mock-app.factory';
 
 const INVALID_CONFIGURATION_EXIT_CODE = 1;
 const SHUTDOWN_SIGNALS = ['SIGTERM', 'SIGINT'] as const;
@@ -18,9 +18,9 @@ export interface StartupProcess {
 export async function bootstrapMock(
   environment: RawEnvironment,
   startupProcess: StartupProcess,
-): Promise<void> {
+): Promise<MockApp | undefined> {
   try {
-    const { server, config } = await createMockApp({
+    const app = await createMockApp({
       environment,
       logDestination: startupProcess.stdout,
       random: Math.random,
@@ -29,10 +29,12 @@ export async function bootstrapMock(
         startupProcess.exit(code);
       },
     });
-    closeOnShutdownSignals(server, startupProcess);
-    await server.listen({ host: config.HOST, port: config.PORT });
+    closeOnShutdownSignals(app.server, startupProcess);
+    await app.server.listen({ host: app.config.HOST, port: app.config.PORT });
+    return app;
   } catch (error) {
     reportStartupFailure(error, startupProcess);
+    return undefined;
   }
 }
 

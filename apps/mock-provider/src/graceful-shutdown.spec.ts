@@ -1,8 +1,9 @@
-import { type ClientRequest, type IncomingMessage, request } from 'node:http';
+import type { IncomingMessage } from 'node:http';
 import { setImmediate as nextTurn } from 'node:timers/promises';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryLogDestination } from './testing/memory-log-destination';
 import { type RunningMock, startMock } from './testing/running-mock';
+import { type PartialUpload, startUploadingSlowly } from './testing/slow-upload';
 
 const CHAT_COMPLETIONS_PATH = '/v1/chat/completions';
 const BASE_REQUEST = {
@@ -11,12 +12,7 @@ const BASE_REQUEST = {
 };
 const LONG_WAIT_MS = 20_000;
 const WARN_LEVEL = 40;
-
-interface PartialUpload {
-  readonly request: ClientRequest;
-  readonly response: Promise<IncomingMessage>;
-  finish(): void;
-}
+const SHORT_SHUTDOWN_TIMEOUT_MS = 20;
 
 function pendingTimers(): number {
   return process.getActiveResourcesInfo().filter((resource) => resource === 'Timeout').length;
@@ -37,6 +33,7 @@ describe('graceful shutdown', () => {
   let mock: RunningMock;
 
   afterEach(async () => {
+    vi.useRealTimers();
     await mock.close();
   });
 
@@ -52,30 +49,13 @@ describe('graceful shutdown', () => {
     });
   }
 
-  async function startUploadingSlowly(body: object): Promise<PartialUpload> {
-    const payload = JSON.stringify(body);
-    const splitAt = Math.floor(payload.length / 2);
-    const upload = request(`${mock.baseUrl}${CHAT_COMPLETIONS_PATH}`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'content-length': String(Buffer.byteLength(payload)),
-        authorization: 'Bearer test-key',
-      },
-    });
-    const response = new Promise<IncomingMessage>((resolve, reject) => {
-      upload.once('response', resolve);
-      upload.once('error', reject);
-    });
-    const received = new Promise((resolve) => mock.app.server.server.once('request', resolve));
-    upload.write(payload.slice(0, splitAt));
-    await received;
-    return { request: upload, response, finish: () => upload.end(payload.slice(splitAt)) };
+  function uploadSlowly(body: object): Promise<PartialUpload> {
+    return startUploadingSlowly(mock.app.server, mock.baseUrl, body);
   }
 
   it('lets a normal request in flight finish with its full response while closing', async () => {
     mock = await startMock();
-    const upload = await startUploadingSlowly(BASE_REQUEST);
+    const upload = await uploadSlowly(BASE_REQUEST);
 
     const closing = mock.close();
     upload.finish();
@@ -119,7 +99,7 @@ describe('graceful shutdown', () => {
     const exitCode = new Promise<number>((resolve) => (reportExit = resolve));
     const logs = new MemoryLogDestination();
     mock = await startMock({ SHUTDOWN_TIMEOUT_MS: '20' }, logs, reportExit);
-    const neverFinishedUpload = await startUploadingSlowly(BASE_REQUEST);
+    const neverFinishedUpload = await uploadSlowly(BASE_REQUEST);
 
     const closing = mock.close();
 
@@ -130,6 +110,23 @@ describe('graceful shutdown', () => {
     neverFinishedUpload.request.destroy();
     await expect(neverFinishedUpload.response).rejects.toThrow('socket hang up');
     await closing;
+  });
+
+  it('never forces an exit after a clean close, even once SHUTDOWN_TIMEOUT_MS has passed', async () => {
+    const exitCodes: number[] = [];
+    const logs = new MemoryLogDestination();
+    mock = await startMock(
+      { SHUTDOWN_TIMEOUT_MS: String(SHORT_SHUTDOWN_TIMEOUT_MS) },
+      logs,
+      (code) => exitCodes.push(code),
+    );
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    await mock.close();
+    vi.advanceTimersByTime(SHORT_SHUTDOWN_TIMEOUT_MS * 2);
+
+    expect(exitCodes).toEqual([]);
+    expect(logs.entries().filter((entry) => entry.level === WARN_LEVEL)).toEqual([]);
   });
 
   it('refuses new connections once the app is closed', async () => {

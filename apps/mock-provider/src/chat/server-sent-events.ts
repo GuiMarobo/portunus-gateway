@@ -39,7 +39,7 @@ export async function sendServerSentEvents(
     const written =
       ending === 'cut' && isLast
         ? await writeFlushedUnlessClosed(response, sseEvent(data))
-        : response.write(sseEvent(data)) || (await drainUnlessClosed(response));
+        : response.write(sseEvent(data)) || (await drainUnlessClosed(response, shutdown));
     if (!written) {
       return;
     }
@@ -68,20 +68,29 @@ function sseEvent(data: string): string {
   return `data: ${data}\n\n`;
 }
 
-function drainUnlessClosed(response: Writable): Promise<boolean> {
+function drainUnlessClosed(response: Writable, shutdown: AbortSignal): Promise<boolean> {
+  if (shutdown.aborted) {
+    response.destroy();
+  }
   if (response.destroyed) {
     return Promise.resolve(false);
   }
   return new Promise((resolve) => {
+    const dropConnection = () => {
+      response.destroy();
+    };
     const onDrain = () => {
       response.off('close', onClose);
+      shutdown.removeEventListener('abort', dropConnection);
       resolve(true);
     };
     const onClose = () => {
       response.off('drain', onDrain);
+      shutdown.removeEventListener('abort', dropConnection);
       resolve(false);
     };
     response.once('drain', onDrain);
     response.once('close', onClose);
+    shutdown.addEventListener('abort', dropConnection, { once: true });
   });
 }
