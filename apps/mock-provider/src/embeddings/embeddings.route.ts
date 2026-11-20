@@ -29,7 +29,7 @@ export function registerEmbeddingsRoute(
 ): void {
   const bodySchema = embeddingsBodySchema(maxDimensions);
   EMBEDDINGS_PATHS.forEach((path) => {
-    server.post(path, { preHandler: scenario.apply }, (request, reply) => {
+    server.post(path, { preHandler: scenario.applyWithoutStreaming }, (request, reply) => {
       const body = bodySchema.safeParse(request.body);
       if (!body.success) {
         return sendInvalidParameter(reply, body.error);

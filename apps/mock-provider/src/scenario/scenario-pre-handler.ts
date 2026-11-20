@@ -49,6 +49,7 @@ export interface StreamPlan extends StreamPacing {
 
 export interface ScenarioHandling {
   readonly apply: ScenarioPreHandler;
+  readonly applyWithoutStreaming: ScenarioPreHandler;
   streamPlanOf(request: FastifyRequest): StreamPlan;
 }
 
@@ -59,46 +60,49 @@ export function scenarioHandling({
   random,
 }: ScenarioPreHandlerDependencies): ScenarioHandling {
   const streamPlanByRequest = new WeakMap<FastifyRequest, StreamPlan>();
-  const apply: ScenarioPreHandler = async (request, reply) => {
-    const resolved = resolveScenario(request, defaultScenario, maxDelayMs);
-    if (!resolved.ok) {
-      await sendInvalidScenario(reply, resolved.source, resolved.problems);
-      return;
-    }
-    const { scenario } = resolved;
-    if (scenario.failure?.kind === 'stream-cut' && !isStreamingRequest(request)) {
-      await sendStreamCutWithoutStream(reply);
-      return;
-    }
-    const draw = scenario.seed === undefined ? random : mulberry32(scenario.seed);
-    if (scenario.latency !== undefined) {
-      const waited = await waitUnlessClosed(reply.raw, pickDelayMs(scenario.latency, draw));
-      if (!waited) {
-        reply.hijack();
+  const preHandlerFor =
+    (isStreaming: (request: FastifyRequest) => boolean): ScenarioPreHandler =>
+    async (request, reply) => {
+      const resolved = resolveScenario(request, defaultScenario, maxDelayMs);
+      if (!resolved.ok) {
+        await sendInvalidScenario(reply, resolved.source, resolved.problems);
         return;
       }
-    }
-    const { failure } = scenario;
-    const firedFailure = failure !== undefined && draw() < failure.rate ? failure : undefined;
-    if (firedFailure?.kind === 'timeout') {
-      await hangUntilCeiling(reply, maxDelayMs);
-      return;
-    }
-    if (firedFailure !== undefined && firedFailure.kind !== 'stream-cut') {
-      await sendSimulatedFailure(reply, firedFailure, defaultRetryAfterSeconds);
-      return;
-    }
-    streamPlanByRequest.set(request, {
-      ttfbMs: scenario.ttfb === undefined ? NO_DELAY_MS : pickDelayMs(scenario.ttfb, draw),
-      chunkDelayMs: scenario.chunkDelayMs ?? NO_DELAY_MS,
-      cutAfterContentChunks:
-        firedFailure === undefined
-          ? undefined
-          : (firedFailure.cutAfterChunks ?? DEFAULT_CUT_AFTER_CHUNKS),
-    });
-  };
+      const { scenario } = resolved;
+      if (scenario.failure?.kind === 'stream-cut' && !isStreaming(request)) {
+        await sendStreamCutWithoutStream(reply);
+        return;
+      }
+      const draw = scenario.seed === undefined ? random : mulberry32(scenario.seed);
+      if (scenario.latency !== undefined) {
+        const waited = await waitUnlessClosed(reply.raw, pickDelayMs(scenario.latency, draw));
+        if (!waited) {
+          reply.hijack();
+          return;
+        }
+      }
+      const { failure } = scenario;
+      const firedFailure = failure !== undefined && draw() < failure.rate ? failure : undefined;
+      if (firedFailure?.kind === 'timeout') {
+        await hangUntilCeiling(reply, maxDelayMs);
+        return;
+      }
+      if (firedFailure !== undefined && firedFailure.kind !== 'stream-cut') {
+        await sendSimulatedFailure(reply, firedFailure, defaultRetryAfterSeconds);
+        return;
+      }
+      streamPlanByRequest.set(request, {
+        ttfbMs: scenario.ttfb === undefined ? NO_DELAY_MS : pickDelayMs(scenario.ttfb, draw),
+        chunkDelayMs: scenario.chunkDelayMs ?? NO_DELAY_MS,
+        cutAfterContentChunks:
+          firedFailure === undefined
+            ? undefined
+            : (firedFailure.cutAfterChunks ?? DEFAULT_CUT_AFTER_CHUNKS),
+      });
+    };
   return {
-    apply,
+    apply: preHandlerFor(isStreamingRequest),
+    applyWithoutStreaming: preHandlerFor(neverStreaming),
     streamPlanOf: (request) => streamPlanByRequest.get(request) ?? IMMEDIATE_STREAM,
   };
 }
@@ -183,6 +187,10 @@ async function sendSimulatedFailure(
     default:
       return;
   }
+}
+
+function neverStreaming(): boolean {
+  return false;
 }
 
 function isStreamingRequest(request: FastifyRequest): boolean {

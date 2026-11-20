@@ -176,6 +176,20 @@ describe('POST /v1/embeddings', () => {
       expect(performance.now() - startedAt).toBeGreaterThanOrEqual(50);
     });
 
+    it('answers 400 to error=stream-cut even when the body asks for stream', async () => {
+      mock = await startMock();
+
+      const response = await postEmbeddings(
+        { ...VALID_BODY, stream: true },
+        { 'x-mock-scenario': 'error=stream-cut' },
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.body).toMatchObject({
+        error: { type: 'invalid_request_error', param: 'stream' },
+      });
+    });
+
     it('drops the connection without an answer on error=timeout', async () => {
       mock = await startMock({ MOCK_MAX_DELAY_MS: '50' });
 
