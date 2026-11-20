@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 02
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/33 — Docker e Compose](../../../estudos/33-docker-e-compose.md), [estudos/31 — Testes, Vitest e Testcontainers](../../../estudos/31-testes-vitest-e-testcontainers.md)
 
