@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 04
 
-**Status:** in-review
+**Status:** done
 
 **Leitura:** [estudos/05 — Embeddings](../../../estudos/05-embeddings.md), [estudos/06 — Busca vetorial e pgvector](../../../estudos/06-busca-vetorial-e-pgvector.md)
 
