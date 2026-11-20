@@ -19,6 +19,8 @@ function fakeStartupProcess(): StartupProcess & { stderr: { text(): string } } {
   return {
     exitCode: undefined,
     stdout: { write: () => undefined },
+    once: () => undefined,
+    exit: () => undefined,
     stderr: {
       write: (chunk: string) => written.push(chunk) > 0,
       text: () => written.join(''),

@@ -4,6 +4,7 @@ import { registerChatCompletionsRoute } from './chat/chat-completions.route';
 import { registerEmbeddingsRoute } from './embeddings/embeddings.route';
 import { requireBearerAuthorization } from './errors/bearer-authorization';
 import { answerErrorsInOpenAiFormat } from './errors/openai-error-handlers';
+import { enableGracefulShutdown, type ExitProcess } from './graceful-shutdown';
 import { resolveLogDestination } from './log-destination';
 
 import { loadMockConfig, type MockConfig } from './mock-config';
@@ -25,6 +26,7 @@ export interface MockAppDependencies {
   readonly logDestination: LogDestination;
   readonly random: RandomSource;
   readonly clock: Clock;
+  readonly exitProcess: ExitProcess;
 }
 
 export interface MockApp {
@@ -37,12 +39,17 @@ export async function createMockApp({
   logDestination,
   random,
   clock,
+  exitProcess,
 }: MockAppDependencies): Promise<MockApp> {
   const config = loadMockConfig(environment);
   const server = Fastify({
     logger: loggerOptions(config, await resolveLogDestination(config, logDestination)),
     logController: new SingleLineRequestLogController(),
     routerOptions: { maxParamLength: MAX_SCENARIO_PATH_SEGMENT_LENGTH },
+  });
+  const shutdown = enableGracefulShutdown(server, {
+    timeoutMs: config.SHUTDOWN_TIMEOUT_MS,
+    exitProcess,
   });
   answerErrorsInOpenAiFormat(server);
   requireBearerAuthorization(server, [HEALTH_PATH]);
@@ -52,12 +59,14 @@ export async function createMockApp({
     defaultRetryAfterSeconds: config.MOCK_DEFAULT_RETRY_AFTER_SECONDS,
     defaultScenario: config.MOCK_DEFAULT_SCENARIO,
     random,
+    shutdown,
   });
   registerChatCompletionsRoute(server, {
     defaultCompletionTokens: config.MOCK_DEFAULT_COMPLETION_TOKENS,
     random,
     clock,
     scenario,
+    shutdown,
   });
   registerEmbeddingsRoute(server, {
     defaultDimensions: config.MOCK_EMBEDDING_DIMENSIONS,

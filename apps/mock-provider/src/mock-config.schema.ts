@@ -30,6 +30,9 @@ const NO_DEFAULT_SCENARIO = '';
 const DEFAULT_EMBEDDING_DIMENSIONS = 1536;
 const DEFAULT_MAX_EMBEDDING_DIMENSIONS = 3072;
 const MIN_EMBEDDING_DIMENSIONS = 1;
+const DEFAULT_SHUTDOWN_TIMEOUT_MS = 8_000;
+const MIN_SHUTDOWN_TIMEOUT_MS = 1;
+const MAX_SHUTDOWN_TIMEOUT_MS = 300_000;
 const PROBLEM_SEPARATOR = '; ';
 
 const embeddingDimensions = integerFromEnv(
@@ -57,6 +60,9 @@ export const mockConfigSchema = z
     MOCK_DEFAULT_SCENARIO: z.string().default(NO_DEFAULT_SCENARIO),
     MOCK_EMBEDDING_DIMENSIONS: embeddingDimensions.default(DEFAULT_EMBEDDING_DIMENSIONS),
     MOCK_MAX_EMBEDDING_DIMENSIONS: embeddingDimensions.default(DEFAULT_MAX_EMBEDDING_DIMENSIONS),
+    SHUTDOWN_TIMEOUT_MS: integerFromEnv(
+      z.number().min(MIN_SHUTDOWN_TIMEOUT_MS).max(MAX_SHUTDOWN_TIMEOUT_MS),
+    ).default(DEFAULT_SHUTDOWN_TIMEOUT_MS),
   })
   .refine((config) => !(config.NODE_ENV === 'production' && config.LOG_PRETTY), {
     path: ['LOG_PRETTY'],

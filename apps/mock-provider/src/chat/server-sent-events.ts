@@ -23,6 +23,7 @@ export async function sendServerSentEvents(
   response: EventStreamResponse,
   chunks: readonly object[],
   { ttfbMs, chunkDelayMs }: StreamPacing,
+  shutdown: AbortSignal,
   ending: StreamEnding = 'done',
 ): Promise<void> {
   response.writeHead(OK_STATUS, SSE_HEADERS);
@@ -31,7 +32,7 @@ export async function sendServerSentEvents(
   const events = ending === 'done' ? [...chunkData, DONE_DATA] : chunkData;
   for (const [position, data] of events.entries()) {
     const delayMs = position === 0 ? ttfbMs : chunkDelayMs;
-    if (delayMs > NO_DELAY_MS && !(await waitUnlessClosed(response, delayMs))) {
+    if (delayMs > NO_DELAY_MS && !(await waitUnlessClosed(response, delayMs, shutdown))) {
       return;
     }
     const isLast = position === events.length - 1;

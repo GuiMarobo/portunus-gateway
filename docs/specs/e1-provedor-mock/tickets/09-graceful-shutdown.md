@@ -4,17 +4,17 @@
 
 **Bloqueado por:** 07
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/33 — Docker e Compose](../../../estudos/33-docker-e-compose.md)
 
 ## Critérios de aceite
 
-- [ ] Ao fechar o app, novas conexões são recusadas.
-- [ ] Requisições normais sem espera em andamento terminam com a resposta completa.
-- [ ] Streams, latências e `timeout` simulados em andamento são interrompidos: os timers são cancelados e as conexões encerradas.
-- [ ] Se o fechamento travar, um temporizador de segurança (`SHUTDOWN_TIMEOUT_MS`) força a saída com um log de aviso.
-- [ ] Testes pelo seam de montagem, sem sinal real, com prazo pequeno ou fake timers.
+- [x] Ao fechar o app, novas conexões são recusadas.
+- [x] Requisições normais sem espera em andamento terminam com a resposta completa.
+- [x] Streams, latências e `timeout` simulados em andamento são interrompidos: os timers são cancelados e as conexões encerradas.
+- [x] Se o fechamento travar, um temporizador de segurança (`SHUTDOWN_TIMEOUT_MS`) força a saída com um log de aviso.
+- [x] Testes pelo seam de montagem, sem sinal real, com prazo pequeno ou fake timers.
 - [ ] Verificação manual com `Ctrl+C` no host e `docker stop` (SIGTERM) no container (depois do ticket 10).
 
 ## Pontos de atenção

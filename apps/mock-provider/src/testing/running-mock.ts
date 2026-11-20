@@ -1,4 +1,5 @@
 import type { RawEnvironment } from '@portunus/common';
+import type { ExitProcess } from '../graceful-shutdown';
 import { createMockApp, type MockApp } from '../mock-app.factory';
 import { MemoryLogDestination } from './memory-log-destination';
 
@@ -16,12 +17,14 @@ export interface RunningMock {
 export async function startMock(
   environment: RawEnvironment = {},
   logDestination: MemoryLogDestination = new MemoryLogDestination(),
+  exitProcess: ExitProcess = () => undefined,
 ): Promise<RunningMock> {
   const app = await createMockApp({
     environment,
     logDestination,
     random: () => FIXED_RANDOM_VALUE,
     clock: () => FIXED_EPOCH_MS,
+    exitProcess,
   });
   const baseUrl = await app.server.listen({ host: LOOPBACK_HOST, port: EPHEMERAL_PORT });
   return { baseUrl, app, close: () => app.server.close() };

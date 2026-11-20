@@ -37,11 +37,12 @@ export interface ChatCompletionsRouteDependencies {
   readonly random: RandomSource;
   readonly clock: Clock;
   readonly scenario: ScenarioHandling;
+  readonly shutdown: AbortSignal;
 }
 
 export function registerChatCompletionsRoute(
   server: FastifyInstance,
-  { defaultCompletionTokens, random, clock, scenario }: ChatCompletionsRouteDependencies,
+  { defaultCompletionTokens, random, clock, scenario, shutdown }: ChatCompletionsRouteDependencies,
 ): void {
   CHAT_COMPLETIONS_PATHS.forEach((path) => {
     server.post(path, { preHandler: scenario.apply }, async (request, reply) => {
@@ -63,7 +64,7 @@ export function registerChatCompletionsRoute(
       const { cutAfterContentChunks, ...pacing } = scenario.streamPlanOf(request);
       reply.hijack();
       if (cutAfterContentChunks === undefined) {
-        await sendServerSentEvents(reply.raw, chunks, pacing);
+        await sendServerSentEvents(reply.raw, chunks, pacing, shutdown);
         return reply;
       }
       const contentChunks = Math.min(cutAfterContentChunks, completion.usage.completion_tokens);
@@ -71,6 +72,7 @@ export function registerChatCompletionsRoute(
         reply.raw,
         chunks.slice(0, ROLE_CHUNK_COUNT + contentChunks),
         pacing,
+        shutdown,
         'cut',
       );
       return reply;

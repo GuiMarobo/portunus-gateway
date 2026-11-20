@@ -18,6 +18,7 @@ describe('mock configuration', () => {
         MOCK_DEFAULT_RETRY_AFTER_SECONDS: 1,
         MOCK_EMBEDDING_DIMENSIONS: 1536,
         MOCK_MAX_EMBEDDING_DIMENSIONS: 3072,
+        SHUTDOWN_TIMEOUT_MS: 8000,
       },
     ],
     [
@@ -50,6 +51,8 @@ describe('mock configuration', () => {
       { MOCK_EMBEDDING_DIMENSIONS: '16000', MOCK_MAX_EMBEDDING_DIMENSIONS: '16000' },
       { MOCK_EMBEDDING_DIMENSIONS: 16000, MOCK_MAX_EMBEDDING_DIMENSIONS: 16000 },
     ],
+    [{ SHUTDOWN_TIMEOUT_MS: '1' }, { SHUTDOWN_TIMEOUT_MS: 1 }],
+    [{ SHUTDOWN_TIMEOUT_MS: '300000' }, { SHUTDOWN_TIMEOUT_MS: 300000 }],
   ])('builds the app with the configuration parsed from %j', async (environment, expected) => {
     const app = await buildApp(environment);
 
@@ -89,6 +92,8 @@ describe('mock configuration', () => {
     ['MOCK_EMBEDDING_DIMENSIONS', '3073'],
     ['MOCK_MAX_EMBEDDING_DIMENSIONS', '0'],
     ['MOCK_MAX_EMBEDDING_DIMENSIONS', '16001'],
+    ['SHUTDOWN_TIMEOUT_MS', '0'],
+    ['SHUTDOWN_TIMEOUT_MS', '300001'],
   ])('refuses to build the app when %s is %j', async (variable, value) => {
     const error = await rejectionOf(buildApp({ [variable]: value }));
 
@@ -133,6 +138,7 @@ function buildApp(environment: RawEnvironment): Promise<MockApp> {
     logDestination: new MemoryLogDestination(),
     random: Math.random,
     clock: Date.now,
+    exitProcess: () => undefined,
   });
 }
 

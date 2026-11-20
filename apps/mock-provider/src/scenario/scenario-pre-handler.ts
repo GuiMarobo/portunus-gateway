@@ -25,6 +25,7 @@ export interface ScenarioPreHandlerDependencies {
   readonly defaultRetryAfterSeconds: number;
   readonly defaultScenario: Scenario;
   readonly random: RandomSource;
+  readonly shutdown: AbortSignal;
 }
 
 interface ScenarioSource {
@@ -58,6 +59,7 @@ export function scenarioHandling({
   defaultRetryAfterSeconds,
   defaultScenario,
   random,
+  shutdown,
 }: ScenarioPreHandlerDependencies): ScenarioHandling {
   const streamPlanByRequest = new WeakMap<FastifyRequest, StreamPlan>();
   const preHandlerFor =
@@ -75,7 +77,11 @@ export function scenarioHandling({
       }
       const draw = scenario.seed === undefined ? random : mulberry32(scenario.seed);
       if (scenario.latency !== undefined) {
-        const waited = await waitUnlessClosed(reply.raw, pickDelayMs(scenario.latency, draw));
+        const waited = await waitUnlessClosed(
+          reply.raw,
+          pickDelayMs(scenario.latency, draw),
+          shutdown,
+        );
         if (!waited) {
           reply.hijack();
           return;
@@ -84,7 +90,7 @@ export function scenarioHandling({
       const { failure } = scenario;
       const firedFailure = failure !== undefined && draw() < failure.rate ? failure : undefined;
       if (firedFailure?.kind === 'timeout') {
-        await hangUntilCeiling(reply, maxDelayMs);
+        await hangUntilCeiling(reply, maxDelayMs, shutdown);
         return;
       }
       if (firedFailure !== undefined && firedFailure.kind !== 'stream-cut') {
@@ -206,9 +212,13 @@ function sendStreamCutWithoutStream(reply: FastifyReply): FastifyReply {
   });
 }
 
-async function hangUntilCeiling(reply: FastifyReply, maxDelayMs: number): Promise<void> {
+async function hangUntilCeiling(
+  reply: FastifyReply,
+  maxDelayMs: number,
+  shutdown: AbortSignal,
+): Promise<void> {
   reply.hijack();
-  if (await waitUnlessClosed(reply.raw, maxDelayMs)) {
+  if (await waitUnlessClosed(reply.raw, maxDelayMs, shutdown)) {
     reply.raw.destroy();
   }
 }

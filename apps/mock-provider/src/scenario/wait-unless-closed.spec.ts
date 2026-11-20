@@ -5,6 +5,7 @@ import { waitUnlessClosed } from './wait-unless-closed';
 
 const DELAY_MS = 1000;
 const STILL_WAITING = 'still waiting';
+const NO_SHUTDOWN = new AbortController().signal;
 
 describe('wait unless the response is closed', () => {
   beforeEach(() => {
@@ -20,7 +21,7 @@ describe('wait unless the response is closed', () => {
   }
 
   it('completes the wait when the response stays open', async () => {
-    const wait = waitUnlessClosed(new PassThrough(), DELAY_MS);
+    const wait = waitUnlessClosed(new PassThrough(), DELAY_MS, NO_SHUTDOWN);
 
     await vi.advanceTimersByTimeAsync(DELAY_MS);
 
@@ -29,7 +30,7 @@ describe('wait unless the response is closed', () => {
 
   it('gives up when the response closes during the wait', async () => {
     const response = new PassThrough();
-    const wait = waitUnlessClosed(response, DELAY_MS);
+    const wait = waitUnlessClosed(response, DELAY_MS, NO_SHUTDOWN);
 
     response.destroy();
     await vi.advanceTimersByTimeAsync(0);
@@ -42,7 +43,7 @@ describe('wait unless the response is closed', () => {
     response.destroy();
     await once(response, 'close');
 
-    const wait = waitUnlessClosed(response, DELAY_MS);
+    const wait = waitUnlessClosed(response, DELAY_MS, NO_SHUTDOWN);
     await vi.advanceTimersByTimeAsync(0);
 
     expect(await settledBeforeTheDelay(wait)).toBe(false);

@@ -42,7 +42,12 @@ describe('sendServerSentEvents', () => {
   it('waits for drain before writing the next event when the socket buffer is full', async () => {
     const socket = new SlowSocket();
 
-    const sending = sendServerSentEvents(socket, [{ n: 1 }, { n: 2 }], IMMEDIATE);
+    const sending = sendServerSentEvents(
+      socket,
+      [{ n: 1 }, { n: 2 }],
+      IMMEDIATE,
+      new AbortController().signal,
+    );
     await nextTurn();
 
     expect(socket.writableLength).toBe('data: {"n":1}\n\n'.length);
