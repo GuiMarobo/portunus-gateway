@@ -6,9 +6,16 @@ export interface PromptMessage {
 }
 
 export function countPromptTokens(messages: readonly PromptMessage[]): number {
-  return messages.reduce((total, message) => total + countMessageTokens(message), 0);
+  return messages.reduce(
+    (total, { content }) => total + countTextTokens(content) + TOKENS_PER_MESSAGE,
+    0,
+  );
 }
 
-function countMessageTokens({ content }: PromptMessage): number {
-  return Math.ceil(content.length / CHARACTERS_PER_TOKEN) + TOKENS_PER_MESSAGE;
+export function countEmbeddingInputTokens(inputs: readonly string[]): number {
+  return inputs.reduce((total, input) => total + countTextTokens(input), 0);
+}
+
+function countTextTokens(text: string): number {
+  return Math.ceil(text.length / CHARACTERS_PER_TOKEN);
 }

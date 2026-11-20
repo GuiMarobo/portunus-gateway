@@ -16,6 +16,8 @@ describe('mock configuration', () => {
         MOCK_DEFAULT_COMPLETION_TOKENS: 16,
         MOCK_MAX_DELAY_MS: 30000,
         MOCK_DEFAULT_RETRY_AFTER_SECONDS: 1,
+        MOCK_EMBEDDING_DIMENSIONS: 1536,
+        MOCK_MAX_EMBEDDING_DIMENSIONS: 3072,
       },
     ],
     [
@@ -43,6 +45,11 @@ describe('mock configuration', () => {
     [{ MOCK_MAX_DELAY_MS: '600000' }, { MOCK_MAX_DELAY_MS: 600000 }],
     [{ MOCK_DEFAULT_RETRY_AFTER_SECONDS: '0' }, { MOCK_DEFAULT_RETRY_AFTER_SECONDS: 0 }],
     [{ MOCK_DEFAULT_RETRY_AFTER_SECONDS: '3600' }, { MOCK_DEFAULT_RETRY_AFTER_SECONDS: 3600 }],
+    [{ MOCK_EMBEDDING_DIMENSIONS: '1' }, { MOCK_EMBEDDING_DIMENSIONS: 1 }],
+    [
+      { MOCK_EMBEDDING_DIMENSIONS: '16000', MOCK_MAX_EMBEDDING_DIMENSIONS: '16000' },
+      { MOCK_EMBEDDING_DIMENSIONS: 16000, MOCK_MAX_EMBEDDING_DIMENSIONS: 16000 },
+    ],
   ])('builds the app with the configuration parsed from %j', async (environment, expected) => {
     const app = await buildApp(environment);
 
@@ -78,6 +85,10 @@ describe('mock configuration', () => {
     ['MOCK_MAX_DELAY_MS', '600001'],
     ['MOCK_DEFAULT_RETRY_AFTER_SECONDS', '-1'],
     ['MOCK_DEFAULT_RETRY_AFTER_SECONDS', '3601'],
+    ['MOCK_EMBEDDING_DIMENSIONS', '0'],
+    ['MOCK_EMBEDDING_DIMENSIONS', '3073'],
+    ['MOCK_MAX_EMBEDDING_DIMENSIONS', '0'],
+    ['MOCK_MAX_EMBEDDING_DIMENSIONS', '16001'],
   ])('refuses to build the app when %s is %j', async (variable, value) => {
     const error = await rejectionOf(buildApp({ [variable]: value }));
 

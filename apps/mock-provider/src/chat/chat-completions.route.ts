@@ -1,6 +1,6 @@
-import type { FastifyInstance, FastifyReply } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { sendOpenAiError } from '../errors/openai-error';
+import { sendInvalidParameter } from '../errors/openai-error';
 import type { Clock, RandomSource } from '../mock-app.factory';
 import { SCENARIO_PATH_PARAM, type ScenarioHandling } from '../scenario/scenario-pre-handler';
 import { createChatCompletion } from './chat-completion';
@@ -8,8 +8,6 @@ import { chatCompletionChunks } from './chat-completion-chunks';
 import { sendServerSentEvents } from './server-sent-events';
 
 const SUPPORTED_CHOICE_COUNT = 1;
-const BAD_REQUEST_STATUS = 400;
-const PARAM_PATH_SEPARATOR = '.';
 
 const CHAT_COMPLETIONS_PATH = '/v1/chat/completions';
 const CHAT_COMPLETIONS_PATHS = [
@@ -77,16 +75,6 @@ export function registerChatCompletionsRoute(
       );
       return reply;
     });
-  });
-}
-
-function sendInvalidParameter(reply: FastifyReply, error: z.ZodError): FastifyReply {
-  const param = error.issues[0]?.path.join(PARAM_PATH_SEPARATOR) ?? null;
-  return sendOpenAiError(reply, BAD_REQUEST_STATUS, {
-    message: `Missing or invalid value for parameter '${param ?? ''}'.`,
-    type: 'invalid_request_error',
-    param,
-    code: null,
   });
 }
 

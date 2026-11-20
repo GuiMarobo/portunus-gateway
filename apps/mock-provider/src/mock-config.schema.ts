@@ -6,7 +6,11 @@ import {
   MAX_TCP_PORT,
   MIN_TCP_PORT,
 } from './http-server.constants';
-import { MAX_COMPLETION_TOKENS, MAX_RETRY_AFTER_SECONDS } from './mock-limits';
+import {
+  MAX_COMPLETION_TOKENS,
+  MAX_EMBEDDING_DIMENSIONS,
+  MAX_RETRY_AFTER_SECONDS,
+} from './mock-limits';
 import { parseScenario } from './scenario/scenario';
 
 const NODE_ENVIRONMENTS = ['development', 'test', 'production'] as const;
@@ -23,7 +27,14 @@ const MAX_MAX_DELAY_MS = 600_000;
 const DEFAULT_RETRY_AFTER_SECONDS = 1;
 const MIN_RETRY_AFTER_SECONDS = 0;
 const NO_DEFAULT_SCENARIO = '';
+const DEFAULT_EMBEDDING_DIMENSIONS = 1536;
+const DEFAULT_MAX_EMBEDDING_DIMENSIONS = 3072;
+const MIN_EMBEDDING_DIMENSIONS = 1;
 const PROBLEM_SEPARATOR = '; ';
+
+const embeddingDimensions = integerFromEnv(
+  z.number().min(MIN_EMBEDDING_DIMENSIONS).max(MAX_EMBEDDING_DIMENSIONS),
+);
 
 const booleanFlag = z.enum(['true', 'false']).transform((flag) => BOOLEAN_FLAGS[flag]);
 
@@ -44,10 +55,16 @@ export const mockConfigSchema = z
       z.number().min(MIN_RETRY_AFTER_SECONDS).max(MAX_RETRY_AFTER_SECONDS),
     ).default(DEFAULT_RETRY_AFTER_SECONDS),
     MOCK_DEFAULT_SCENARIO: z.string().default(NO_DEFAULT_SCENARIO),
+    MOCK_EMBEDDING_DIMENSIONS: embeddingDimensions.default(DEFAULT_EMBEDDING_DIMENSIONS),
+    MOCK_MAX_EMBEDDING_DIMENSIONS: embeddingDimensions.default(DEFAULT_MAX_EMBEDDING_DIMENSIONS),
   })
   .refine((config) => !(config.NODE_ENV === 'production' && config.LOG_PRETTY), {
     path: ['LOG_PRETTY'],
     message: 'pretty logs are not allowed in production',
+  })
+  .refine((config) => config.MOCK_EMBEDDING_DIMENSIONS <= config.MOCK_MAX_EMBEDDING_DIMENSIONS, {
+    path: ['MOCK_EMBEDDING_DIMENSIONS'],
+    message: 'must not exceed MOCK_MAX_EMBEDDING_DIMENSIONS',
   })
   .transform((config, context) => {
     const defaultScenario = parseScenario(config.MOCK_DEFAULT_SCENARIO, {

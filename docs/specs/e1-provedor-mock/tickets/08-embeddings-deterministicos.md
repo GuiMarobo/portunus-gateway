@@ -4,21 +4,21 @@
 
 **Bloqueado por:** 04
 
-**Status:** ready-for-agent
+**Status:** in-review
 
 **Leitura:** [estudos/05 — Embeddings](../../../estudos/05-embeddings.md), [estudos/06 — Busca vetorial e pgvector](../../../estudos/06-busca-vetorial-e-pgvector.md)
 
 ## Critérios de aceite
 
-- [ ] Testes escritos antes do código (TDD) para o gerador de vetores: determinismo, norma 1 (com tolerância de ponto flutuante) e dimensões.
-- [ ] `POST /v1/embeddings` devolve `object: "list"`, um item `{object: "embedding", index, embedding}` por entrada, `model` e `usage` (`prompt_tokens`, `total_tokens`).
-- [ ] `input` aceita uma string ou uma lista de strings. Lista vazia ou ausente recebe `400` no formato da OpenAI.
-- [ ] O vetor depende de (`model`, texto). Mudar qualquer um dos dois muda o vetor.
-- [ ] As dimensões padrão vêm de `MOCK_EMBEDDING_DIMENSIONS` (1536). `dimensions` na requisição é respeitado até `MOCK_MAX_EMBEDDING_DIMENSIONS`; acima disso, `400`.
-- [ ] `encoding_format: "float"` devolve uma lista de números. `encoding_format: "base64"` devolve Float32 little-endian em base64.
-- [ ] O SDK, sem `encoding_format` explícito (ele pede base64), devolve o mesmo vetor que a requisição com `float`.
-- [ ] Os tokens seguem a regra do prompt do ticket 02, somados sobre os itens de `input`.
-- [ ] `latency`, `429`, `500`, `503`, `timeout` e `error-rate` valem para embeddings. `stream-cut` recebe `400`.
+- [x] Testes escritos antes do código (TDD) para o gerador de vetores: determinismo, norma 1 (com tolerância de ponto flutuante) e dimensões.
+- [x] `POST /v1/embeddings` devolve `object: "list"`, um item `{object: "embedding", index, embedding}` por entrada, `model` e `usage` (`prompt_tokens`, `total_tokens`).
+- [x] `input` aceita uma string ou uma lista de strings. Lista vazia ou ausente recebe `400` no formato da OpenAI.
+- [x] O vetor depende de (`model`, texto). Mudar qualquer um dos dois muda o vetor.
+- [x] As dimensões padrão vêm de `MOCK_EMBEDDING_DIMENSIONS` (1536). `dimensions` na requisição é respeitado até `MOCK_MAX_EMBEDDING_DIMENSIONS`; acima disso, `400`.
+- [x] `encoding_format: "float"` devolve uma lista de números. `encoding_format: "base64"` devolve Float32 little-endian em base64.
+- [x] O SDK, sem `encoding_format` explícito (ele pede base64), devolve o mesmo vetor que a requisição com `float`.
+- [x] Os tokens seguem a regra do prompt do ticket 02, somados sobre os itens de `input`.
+- [x] `latency`, `429`, `500`, `503`, `timeout` e `error-rate` valem para embeddings. `stream-cut` recebe `400`.
 
 ## Pontos de atenção
 
