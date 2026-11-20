@@ -93,9 +93,10 @@ apps/gateway/src/modules/<modulo>/
 
 ```bash
 pnpm install                                   # instalar dependências
-docker compose -f infra/docker-compose.yml --profile core up -d --wait   # Postgres + pgvector e Redis (espera healthy); RabbitMQ e mock entram depois
-POSTGRES_HOST_PORT=55432 docker compose -f infra/docker-compose.yml --profile core up -d --wait   # se a porta 5432 (ou 6379, via REDIS_HOST_PORT) já estiver em uso
-# tags das imagens: infra/.env (fonte única, lida pelo Compose e pelo teste de integração)
+docker compose -f infra/docker-compose.yml --profile core up -d --wait   # Postgres + pgvector, Redis e mock-provider (espera healthy); RabbitMQ entra depois
+POSTGRES_HOST_PORT=55432 docker compose -f infra/docker-compose.yml --profile core up -d --wait   # se a porta 5432 já estiver em uso (6379: REDIS_HOST_PORT; 3001: MOCK_HOST_PORT)
+docker compose -f infra/docker-compose.yml --profile core up -d --wait --build   # reconstrói a imagem do mock depois de mudar o código dele
+# tags das imagens (inclusive a base Node do Dockerfile do mock): infra/.env (fonte única, lida pelo Compose e pelos testes de integração)
 
 pnpm dev                                       # gateway em modo watch
 pnpm --filter @portunus/consumers dev          # [E11] consumidores e worker

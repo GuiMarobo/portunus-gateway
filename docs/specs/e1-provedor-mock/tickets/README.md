@@ -15,7 +15,7 @@ Tickets do épico [E1 — Provedor mock](../spec.md). Cada ticket é uma fatia v
 | 07  | [Falhas no tempo: `timeout` e `stream-cut`](./07-timeout-e-stream-cut.md)                        | 06            | ready-for-agent |
 | 08  | [Embeddings determinísticos](./08-embeddings-deterministicos.md)                                 | 04            | ready-for-agent |
 | 09  | [Graceful shutdown com esperas simuladas em andamento](./09-graceful-shutdown.md)                | 07            | ready-for-agent |
-| 10  | [Imagem do mock, Compose `core` e teste de integração](./10-imagem-compose-e-integracao.md)      | 02            | ready-for-agent |
+| 10  | [Imagem do mock, Compose `core` e teste de integração](./10-imagem-compose-e-integracao.md)      | 02            | in-review       |
 | 11  | [Fechamento do épico](./11-fechamento-do-epico.md)                                               | 01–10         | ready-for-agent |
 
 ## Dependências

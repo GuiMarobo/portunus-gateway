@@ -34,6 +34,20 @@ services:
       retries: 10
       start_period: 5s
 
+  mock-provider:
+    build:
+      context: ..
+      dockerfile: apps/mock-provider/Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:?NODE_IMAGE must be set in infra/.env}
+    image: portunus/mock-provider:dev
+    profiles: [core, full]
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3001
+    ports:
+      - '127.0.0.1:${MOCK_HOST_PORT:-3001}:3001'
+
 volumes:
   postgres-data:
   redis-data:
