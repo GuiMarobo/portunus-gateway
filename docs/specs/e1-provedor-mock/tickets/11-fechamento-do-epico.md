@@ -9,12 +9,12 @@
 ## Critérios de aceite
 
 - [x] Um script de demo com o SDK oficial cobre todos os casos do critério de pronto e imprime o resultado de cada um.
-- [ ] A demo é executada num clone limpo, e a saída fica registrada em `.scratch/e1-provedor-mock/`.
+- [x] A demo é executada num clone limpo, e a saída fica registrada em `.scratch/e1-provedor-mock/`.
 - [x] README do mock com: o que é, como rodar (host e Compose), as variáveis de ambiente, a gramática do cenário com exemplos de `curl` e do SDK, a regra de tokens e a escolha de Fastify puro com a justificativa.
 - [x] README raiz e seção de comandos do CLAUDE.md atualizados.
 - [x] Status do E1 na tabela do ROADMAP.md §3 como `Concluído`.
 - [x] Seção "Fechamento do épico" na spec: o que foi entregue, o que aprendemos, os desvios em relação à spec e o que o E3 herda.
-- [ ] Verificação completa: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm test:int` e a demo, todos com o resultado real reportado.
+- [x] Verificação completa: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm test:int` e a demo, todos com o resultado real reportado.
 
 ## Pontos de atenção
 
