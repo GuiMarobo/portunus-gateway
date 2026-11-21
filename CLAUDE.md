@@ -99,6 +99,8 @@ docker compose -f infra/docker-compose.yml --profile core up -d --wait --build  
 # tags das imagens (inclusive a base Node do Dockerfile do mock): infra/.env (fonte única, lida pelo Compose e pelos testes de integração)
 
 pnpm dev                                       # gateway em modo watch
+pnpm --filter @portunus/mock-provider dev      # mock no host em modo watch (lê apps/mock-provider/.env se existir)
+pnpm --filter @portunus/mock-provider demo [baseURL]   # demo do E1: SDK oficial contra o mock de pé (padrão http://localhost:3001/v1)
 pnpm --filter @portunus/consumers dev          # [E11] consumidores e worker
 
 pnpm typecheck                                 # tsc --noEmit em todos os pacotes

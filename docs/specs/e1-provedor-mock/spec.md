@@ -313,3 +313,54 @@ Um único formato, usado igual nas três origens: pares `chave=valor` separados 
 A sequência de tickets, com dependências e definição de pronto, fica em `tickets/README.md` desta pasta, criada no próximo passo.
 
 Ao abrir o épico, atualizar o status do E1 na tabela do [ROADMAP.md §3](../../../ROADMAP.md) para `Em andamento`.
+
+## Fechamento do épico
+
+Escrito no ticket [11](./tickets/11-fechamento-do-epico.md). A saída da demo num clone limpo está em [.scratch/e1-provedor-mock/demo-clone-limpo.md](../../../.scratch/e1-provedor-mock/demo-clone-limpo.md).
+
+### O que foi entregue
+
+- **App `@portunus/mock-provider`** em Fastify puro: `POST /v1/chat/completions` (normal e SSE), `POST /v1/embeddings` e `GET /health`, com `Authorization: Bearer` obrigatório e erros sempre no formato da OpenAI (inclusive `404`, JSON inválido e corpo inválido).
+- **Determinismo:** SHA-256 da forma canônica de (`model`, `messages`, limite de tokens) semeando um PRNG mulberry32; texto de vocabulário fixo, sem eco do prompt; regra de tokens documentada (1 palavra = 1 token = 1 chunk; `ceil(chars/4)` + 3 por mensagem no prompt).
+- **Cenário por requisição**, sem estado: gramática `chave=valor;...` validada com Zod, com teto, vinda do header `x-mock-scenario`, do prefixo `/scenarios/{cenário}/v1` ou de `MOCK_DEFAULT_SCENARIO`, com precedência por cenário inteiro. Falhas: `429` + `Retry-After`, `500`, `503`, `timeout`, `stream-cut` (socket destruído), `error-rate` com `seed`.
+- **Streaming SSE** fiel à OpenAI: chunk de `role`, um por token, `finish_reason`, `usage` só com `include_usage`, `[DONE]`; backpressure respeitada e timers cancelados no `close`.
+- **Embeddings** de norma 1 em O(d), `dimensions` com teto, `float` e `base64` (o padrão do SDK).
+- **Operação:** configuração validada que derruba o processo sem ecoar valores, log JSON sem corpo e com `authorization` redigido, graceful shutdown que interrompe esperas e streams simulados.
+- **Infra:** primeiro Dockerfile do repositório (multi-stage, `pnpm deploy`, Node 22 slim, usuário não root), serviço `mock-provider` no perfil `core` com healthcheck em Node e porta `MOCK_HOST_PORT`.
+- **Testes:** 262 unitários no monorepo (o mock testado pelo app escutando numa porta efêmera, com o SDK oficial e `fetch`) e um teste de integração que constrói a imagem e chama o chat pelo SDK.
+- **Demo de pronto:** `pnpm --filter @portunus/mock-provider demo` cobre os 8 casos do critério de pronto com o SDK oficial.
+
+### O que aprendemos
+
+- **Testar pelo socket real, não pelo `inject`:** corte de conexão, cliente abortando e o SDK lendo o stream só existem com uma porta de verdade.
+- **Corte ≠ fim:** `end()` sem `[DONE]` é um fim limpo; o SDK só vê a falha (`TypeError: terminated`) quando o socket é destruído.
+- **O SDK esconde comportamento:** faz retry sozinho em `429`/`5xx` (por isso `maxRetries: 0`) e pede embeddings em `base64` sem avisar.
+- **Canonicalizar antes do hash:** sem ordenar as chaves, o determinismo seria falso; é a mesma armadilha da chave do cache exato (E9).
+- **Toda espera é um recurso:** cada `setTimeout` precisa ser cancelado no `close` e no shutdown, senão o mock acumula timers sob carga e um `timeout` segura o fechamento do processo.
+- **Sorteios com `seed` precisam ser estáveis:** uma `latency` fixa não pode consumir um sorteio e deslocar o `error-rate` (achado da review 04).
+- **Genéricos + `instanceof` viram `any`:** `error instanceof APIError` estreita para `APIError<any, any, any>`; um type guard com o tipo declarado resolve sem cast.
+
+### Desvios em relação à spec
+
+| Spec                                          | O que aconteceu                                                                               | Por quê                                                                                                     |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `@types/node` alinhado ao runtime (implícito) | `overrides` em `pnpm-workspace.yaml` fixa `@types/node@26.6.6`                                | O `@types/node@18` do `testcontainers` (via `@types/ssh2`) quebrava os tipos de `Response.body` (ticket 10) |
+| Corpo de chat aceito como na OpenAI           | `content` só como string; partes (`[{type:"text"}]`) e `null` são recusados com `400`         | Achado m1 da review 02, adiado: o gateway ainda não manda esses formatos                                    |
+| Demo como "um script" sem lugar definido      | `src/demo/ready-demo.mts`, rodado com o type stripping do Node 22 e fora do build de produção | Entra no typecheck e no lint sem dependência nova (`tsx`/`ts-node`) e sem ir para a imagem                  |
+| Ordem de verificação da rota desconhecida     | `GET /v1/nope` sem chave responde `401`, não `404`                                            | Auth antes do roteamento, como a OpenAI; decisão explícita do ticket 03, sem teste que a fixe               |
+
+### O que o E3 herda
+
+- **Alvo do adapter:** o `MockAdapter` aponta para o serviço `mock-provider` do Compose (`http://localhost:3001/v1` no host); o primeiro cenário k6 mede o mock sozinho e o gateway na frente dele (ADR 008).
+- **Contrato a respeitar no adapter:** `maxRetries: 0` no SDK (retry é do gateway, E7), `include_usage` pedido explicitamente no stream (E5) e `Retry-After` lido do header.
+- **Falhas para o E7:** o prefixo `/scenarios/{cenário}/v1` permite configurar "provedores" diferentes no mesmo processo trocando só a URL base.
+
+### Pendências para épicos futuros
+
+- **`@types/node` alinhado ao Node 22:** remover o `overrides` que fixa `26.6.6` quando o `testcontainers` deixar de trazer o `@types/node@18`, ou fixar a linha 22 e resolver os tipos de `Response.body` de outro jeito.
+- **Mensagens em partes e `content: null`** (review 02 m1): aceitar e definir a regra de tokens antes de o gateway repassar mensagens multimodais ou com `tool_calls`.
+- **`mock-image.int-spec.ts` compilado no `dist`** (review 10 m1): o `exclude` do `tsconfig.build.json` pega `*.spec.ts`, não `*.int-spec.ts`.
+- **Header ou segmento de cenário vazio** (review 05 m1): decidir se conta como ausente; hoje suprime o cenário de menor prioridade.
+- **Cenário no caminho acima de 1024 caracteres** responde `404`, não `400` (review 05 m2).
+- **`pino-pretty` como devDependency** importado sob demanda (review 01 m2): funciona porque `LOG_PRETTY` é recusado em produção; ligar `LOG_PRETTY=true` na imagem quebraria.
+- **Testes sensíveis a tempo e a timers globais** (reviews 06 e 07): candidatos a oscilar na CI.
