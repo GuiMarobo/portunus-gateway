@@ -4,20 +4,20 @@ Tickets do épico [E1 — Provedor mock](../spec.md). Cada ticket é uma fatia v
 
 ## Sequência
 
-| #   | Ticket                                                                                           | Bloqueado por | Status          |
-| --- | ------------------------------------------------------------------------------------------------ | ------------- | --------------- |
-| 01  | [Mock responde `GET /health`](./01-mock-responde-health.md)                                      | —             | done            |
-| 02  | [Chat completion normal e determinística pelo SDK](./02-chat-completion-deterministica.md)       | 01            | done            |
-| 03  | [Erros no formato da OpenAI na fronteira do mock](./03-erros-no-formato-da-openai.md)            | 02            | done            |
-| 04  | [Cenário por header: latência e erros HTTP](./04-cenario-por-header.md)                          | 03            | done            |
-| 05  | [Cenário pelo caminho e pelo ambiente, com precedência](./05-cenario-pelo-caminho-e-ambiente.md) | 04            | done            |
-| 06  | [Streaming SSE](./06-streaming-sse.md)                                                           | 04            | done            |
-| 07  | [Falhas no tempo: `timeout` e `stream-cut`](./07-timeout-e-stream-cut.md)                        | 06            | done            |
-| 08  | [Embeddings determinísticos](./08-embeddings-deterministicos.md)                                 | 04            | done            |
-| 09  | [Graceful shutdown com esperas simuladas em andamento](./09-graceful-shutdown.md)                | 07            | done            |
-| 10  | [Imagem do mock, Compose `core` e teste de integração](./10-imagem-compose-e-integracao.md)      | 02            | done            |
-| 11  | [Fechamento do épico](./11-fechamento-do-epico.md)                                               | 01–10         | in-review       |
-| 12  | [Achados da review do PR do épico](./12-achados-da-review-do-pr.md)                              | 11            | done            |
+| #   | Ticket                                                                                           | Bloqueado por | Status |
+| --- | ------------------------------------------------------------------------------------------------ | ------------- | ------ |
+| 01  | [Mock responde `GET /health`](./01-mock-responde-health.md)                                      | —             | done   |
+| 02  | [Chat completion normal e determinística pelo SDK](./02-chat-completion-deterministica.md)       | 01            | done   |
+| 03  | [Erros no formato da OpenAI na fronteira do mock](./03-erros-no-formato-da-openai.md)            | 02            | done   |
+| 04  | [Cenário por header: latência e erros HTTP](./04-cenario-por-header.md)                          | 03            | done   |
+| 05  | [Cenário pelo caminho e pelo ambiente, com precedência](./05-cenario-pelo-caminho-e-ambiente.md) | 04            | done   |
+| 06  | [Streaming SSE](./06-streaming-sse.md)                                                           | 04            | done   |
+| 07  | [Falhas no tempo: `timeout` e `stream-cut`](./07-timeout-e-stream-cut.md)                        | 06            | done   |
+| 08  | [Embeddings determinísticos](./08-embeddings-deterministicos.md)                                 | 04            | done   |
+| 09  | [Graceful shutdown com esperas simuladas em andamento](./09-graceful-shutdown.md)                | 07            | done   |
+| 10  | [Imagem do mock, Compose `core` e teste de integração](./10-imagem-compose-e-integracao.md)      | 02            | done   |
+| 11  | [Fechamento do épico](./11-fechamento-do-epico.md)                                               | 01–10         | done   |
+| 12  | [Achados da review do PR do épico](./12-achados-da-review-do-pr.md)                              | 11            | done   |
 
 ## Dependências
 
