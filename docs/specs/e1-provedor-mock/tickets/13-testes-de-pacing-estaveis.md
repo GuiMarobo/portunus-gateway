@@ -36,7 +36,7 @@ Cliente e servidor rodam no mesmo processo e no mesmo event loop, então um runn
 ### Verificação
 
 - [x] `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test` e `pnpm test:int` verdes.
-- [ ] CI do PR #4 verde (confirmar depois do push).
+- [x] CI do PR #4 verde (`quality` e `integration`).
 
 ## Pontos de atenção
 
