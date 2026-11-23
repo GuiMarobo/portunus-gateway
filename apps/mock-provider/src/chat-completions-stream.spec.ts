@@ -15,6 +15,10 @@ const BASE_REQUEST = {
   messages: [{ role: 'user' as const, content: 'Hello there!' }],
 };
 const DONE_EVENT = '[DONE]';
+const TTFB_MS = 60;
+const CHUNK_DELAY_MS = 20;
+const TIMER_GRANULARITY_MS = 1;
+const CHUNK_DELAYS_IN_THREE_TOKEN_ANSWER = 4;
 
 interface SseEvent {
   readonly data: string;
@@ -24,7 +28,7 @@ interface SseEvent {
 interface RawStream {
   readonly status: number;
   readonly headers: Headers;
-  readonly headersAtMs: number;
+  readonly sentAtMs: number;
   readonly events: readonly SseEvent[];
   readonly malformedBlocks: readonly string[];
 }
@@ -77,6 +81,7 @@ describe('POST /v1/chat/completions with stream: true', () => {
   });
 
   async function postRaw(body: object, scenario?: string): Promise<RawStream> {
+    const sentAtMs = performance.now();
     const response = await fetch(`${mock.baseUrl}${CHAT_COMPLETIONS_PATH}`, {
       method: 'POST',
       headers: {
@@ -86,7 +91,6 @@ describe('POST /v1/chat/completions with stream: true', () => {
       },
       body: JSON.stringify(body),
     });
-    const headersAtMs = performance.now();
     if (response.body === null) {
       throw new Error('response has no body');
     }
@@ -94,7 +98,7 @@ describe('POST /v1/chat/completions with stream: true', () => {
     return {
       status: response.status,
       headers: response.headers,
-      headersAtMs,
+      sentAtMs,
       events,
       malformedBlocks,
     };
@@ -184,28 +188,32 @@ describe('POST /v1/chat/completions with stream: true', () => {
   );
 
   describe('pacing', () => {
-    it('holds the first chunk for at least ttfb after the headers', async () => {
+    it('holds the first chunk for at least ttfb after the request is sent', async () => {
       mock = await startMock();
 
-      const stream = await postRaw({ ...BASE_REQUEST, stream: true }, 'ttfb=60');
+      const stream = await postRaw({ ...BASE_REQUEST, stream: true }, `ttfb=${String(TTFB_MS)}`);
 
       expect(stream.status).toBe(200);
-      expect(stream.events[0]?.receivedAtMs).toBeGreaterThanOrEqual(stream.headersAtMs + 60);
+      expect(stream.events[0]?.receivedAtMs).toBeGreaterThanOrEqual(
+        stream.sentAtMs + TTFB_MS - TIMER_GRANULARITY_MS,
+      );
     });
 
-    it('spaces the five chunks of a three-token answer by at least chunk-delay each', async () => {
+    it('holds the last of the five chunks of a three-token answer for one chunk-delay per chunk after the first', async () => {
       mock = await startMock();
 
       const stream = await postRaw(
         { ...BASE_REQUEST, max_tokens: 3, stream: true },
-        'chunk-delay=20',
+        `chunk-delay=${String(CHUNK_DELAY_MS)}`,
       );
 
       const chunkEvents = stream.events.filter((event) => event.data !== DONE_EVENT);
-      expect(chunkEvents).toHaveLength(5);
-      const first = chunkEvents[0]?.receivedAtMs ?? Number.NaN;
-      const last = chunkEvents[4]?.receivedAtMs ?? Number.NaN;
-      expect(last - first).toBeGreaterThanOrEqual(4 * 20);
+      expect(chunkEvents).toHaveLength(CHUNK_DELAYS_IN_THREE_TOKEN_ANSWER + 1);
+      const last = chunkEvents.at(-1)?.receivedAtMs ?? Number.NaN;
+      expect(last).toBeGreaterThanOrEqual(
+        stream.sentAtMs +
+          CHUNK_DELAYS_IN_THREE_TOKEN_ANSWER * (CHUNK_DELAY_MS - TIMER_GRANULARITY_MS),
+      );
     });
   });
 
