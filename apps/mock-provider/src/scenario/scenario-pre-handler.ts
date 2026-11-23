@@ -52,6 +52,7 @@ export interface ScenarioHandling {
   readonly apply: ScenarioPreHandler;
   readonly applyWithoutStreaming: ScenarioPreHandler;
   streamPlanOf(request: FastifyRequest): StreamPlan;
+  completionTokensOf(request: FastifyRequest): number | undefined;
 }
 
 export function scenarioHandling({
@@ -62,6 +63,7 @@ export function scenarioHandling({
   shutdown,
 }: ScenarioPreHandlerDependencies): ScenarioHandling {
   const streamPlanByRequest = new WeakMap<FastifyRequest, StreamPlan>();
+  const completionTokensByRequest = new WeakMap<FastifyRequest, number>();
   const preHandlerFor =
     (isStreaming: (request: FastifyRequest) => boolean): ScenarioPreHandler =>
     async (request, reply) => {
@@ -97,6 +99,9 @@ export function scenarioHandling({
         await sendSimulatedFailure(reply, firedFailure, defaultRetryAfterSeconds);
         return;
       }
+      if (scenario.tokens !== undefined) {
+        completionTokensByRequest.set(request, scenario.tokens);
+      }
       streamPlanByRequest.set(request, {
         ttfbMs: scenario.ttfb === undefined ? NO_DELAY_MS : pickDelayMs(scenario.ttfb, draw),
         chunkDelayMs: scenario.chunkDelayMs ?? NO_DELAY_MS,
@@ -110,6 +115,7 @@ export function scenarioHandling({
     apply: preHandlerFor(isStreamingRequest),
     applyWithoutStreaming: preHandlerFor(neverStreaming),
     streamPlanOf: (request) => streamPlanByRequest.get(request) ?? IMMEDIATE_STREAM,
+    completionTokensOf: (request) => completionTokensByRequest.get(request),
   };
 }
 

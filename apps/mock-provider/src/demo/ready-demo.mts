@@ -9,8 +9,20 @@ const CLIENT_TIMEOUT_MS = 1_000;
 const RETRY_AFTER_SECONDS = '4';
 const CUT_AFTER_CHUNKS = 3;
 const ROLE_CHUNK_COUNT = 1;
+const FINISH_AND_USAGE_CHUNK_COUNT = 2;
 const NORM_DECIMALS = 6;
+const UNIT_NORM = 1;
+const NORM_TOLERANCE = 1e-4;
+const CUT_ERROR_NAME = 'TypeError';
+const CUT_ERROR_MESSAGE = 'terminated';
 const EXIT_FAILURE = 1;
+
+interface ExpectedApiError {
+  readonly status: number;
+  readonly type: string;
+  readonly code?: string;
+  readonly retryAfter?: string;
+}
 
 interface DemoResult {
   readonly name: string;
@@ -55,7 +67,10 @@ async function streamWithUsage(client: OpenAI): Promise<DemoResult> {
   }
   return {
     name: 'stream with usage chunk',
-    ok: finishReason === 'stop' && usage !== null && usage !== undefined,
+    ok:
+      finishReason === 'stop' &&
+      content.length > 0 &&
+      usage?.completion_tokens === chunks - ROLE_CHUNK_COUNT - FINISH_AND_USAGE_CHUNK_COUNT,
     detail: `chunks=${String(chunks)} finish_reason=${String(finishReason)} final usage=${JSON.stringify(usage)} content="${content}"`,
   };
 }
@@ -66,12 +81,12 @@ async function embedding(client: OpenAI): Promise<DemoResult> {
   const norm = Math.sqrt(vector.reduce((sum, component) => sum + component * component, 0));
   return {
     name: 'embedding',
-    ok: vector.length > 0,
+    ok: vector.length > 0 && Math.abs(norm - UNIT_NORM) < NORM_TOLERANCE,
     detail: `dimensions=${String(vector.length)} norm=${norm.toFixed(NORM_DECIMALS)} usage=${JSON.stringify(response.usage)}`,
   };
 }
 
-function httpError(name: string, scenario: string, expectedStatus: number): DemoCase {
+function httpError(name: string, scenario: string, expected: ExpectedApiError): DemoCase {
   return async (client) => {
     try {
       await client.chat.completions.create({ model: DEMO_MODEL, messages }, withScenario(scenario));
@@ -85,7 +100,11 @@ function httpError(name: string, scenario: string, expectedStatus: number): Demo
         retryAfter === null || retryAfter === undefined ? '' : ` retry-after=${retryAfter}`;
       return {
         name,
-        ok: error.status === expectedStatus,
+        ok:
+          error.status === expected.status &&
+          error.type === expected.type &&
+          (expected.code === undefined || error.code === expected.code) &&
+          (expected.retryAfter === undefined || retryAfter === expected.retryAfter),
         detail: `${error.constructor.name} status=${String(error.status)}${retryAfterDetail} code=${String(error.code)} type=${String(error.type)}`,
       };
     }
@@ -128,7 +147,11 @@ async function streamCut(client: OpenAI): Promise<DemoResult> {
   } catch (error) {
     return {
       name: 'stream cut',
-      ok: chunks === ROLE_CHUNK_COUNT + CUT_AFTER_CHUNKS,
+      ok:
+        chunks === ROLE_CHUNK_COUNT + CUT_AFTER_CHUNKS &&
+        error instanceof Error &&
+        error.name === CUT_ERROR_NAME &&
+        error.message === CUT_ERROR_MESSAGE,
       detail: `${errorName(error)} after ${String(chunks)} chunks (role + ${String(CUT_AFTER_CHUNKS)} content), no finish_reason nor [DONE]`,
     };
   }
@@ -146,9 +169,14 @@ const DEMO_CASES: readonly DemoCase[] = [
   normalCompletion,
   streamWithUsage,
   embedding,
-  httpError('429 with Retry-After', `error=429;retry-after=${RETRY_AFTER_SECONDS}`, 429),
-  httpError('500', 'error=500', 500),
-  httpError('503', 'error=503', 503),
+  httpError('429 with Retry-After', `error=429;retry-after=${RETRY_AFTER_SECONDS}`, {
+    status: 429,
+    type: 'requests',
+    code: 'rate_limit_exceeded',
+    retryAfter: RETRY_AFTER_SECONDS,
+  }),
+  httpError('500', 'error=500', { status: 500, type: 'server_error' }),
+  httpError('503', 'error=503', { status: 503, type: 'server_error' }),
   timeout,
   streamCut,
 ];

@@ -30,7 +30,7 @@ cp apps/mock-provider/.env.example apps/mock-provider/.env   # opcional: sem .en
 pnpm --filter @portunus/mock-provider dev
 ```
 
-**Demo do critério de pronto** (SDK oficial contra um mock de pé; imprime `PASS`/`FAIL` por caso e sai com código `1` se algum falhar):
+**Demo do critério de pronto** (SDK oficial contra um mock de pé; imprime `PASS`/`FAIL` por caso e sai com código `1` se algum falhar). Roda o TypeScript direto com o _type stripping_ do Node, ligado por padrão a partir do **Node 22.18** (`nvm install` instala a última 22):
 
 ```bash
 pnpm --filter @portunus/mock-provider demo                              # http://localhost:3001/v1
@@ -41,35 +41,35 @@ pnpm --filter @portunus/mock-provider demo http://localhost:3101/v1     # outra 
 
 Validadas com Zod na subida (`loadConfig` de `@portunus/common`). Inválidas, o processo sai com código `1` listando os campos, sem ecoar os valores. A lista completa está em [.env.example](./.env.example).
 
-| Variável                           | Padrão             | Efeito                                                                                  |
-| ---------------------------------- | ------------------ | --------------------------------------------------------------------------------------- |
-| `NODE_ENV`                         | `development`      | `development`, `test` ou `production`                                                   |
-| `HOST` / `PORT`                    | `0.0.0.0` / `3001` | Endereço de escuta. A porta difere da do gateway (`3000`) para os dois rodarem juntos   |
-| `LOG_LEVEL`                        | `info`             | Nível do pino (`silent` desliga o log por requisição em testes de carga)                |
-| `LOG_PRETTY`                       | `false`            | Log legível no terminal; recusado em `production`                                       |
-| `MOCK_DEFAULT_SCENARIO`            | vazio              | Cenário da instância (vazio = resposta normal e imediata)                               |
-| `MOCK_MAX_DELAY_MS`                | `30000`            | Teto de qualquer espera (`latency`, `ttfb`, `chunk-delay`) e duração do `timeout`       |
-| `MOCK_DEFAULT_COMPLETION_TOKENS`   | `16`               | Tamanho da resposta quando nem o cenário (`tokens`) nem a requisição definem            |
-| `MOCK_DEFAULT_RETRY_AFTER_SECONDS` | `1`                | `Retry-After` do `429` quando o cenário não traz `retry-after`                          |
-| `MOCK_EMBEDDING_DIMENSIONS`        | `1536`             | Dimensões do vetor sem `dimensions` na requisição (tamanho do `text-embedding-3-small`) |
-| `MOCK_MAX_EMBEDDING_DIMENSIONS`    | `3072`             | Teto de `dimensions` aceito na requisição                                               |
-| `SHUTDOWN_TIMEOUT_MS`              | `8000`             | Prazo do graceful shutdown; estourado, o processo sai com código `1`                    |
+| Variável                           | Padrão             | Efeito                                                                                         |
+| ---------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                         | `development`      | `development`, `test` ou `production`                                                          |
+| `HOST` / `PORT`                    | `0.0.0.0` / `3001` | Endereço de escuta. A porta difere da do gateway (`3000`) para os dois rodarem juntos          |
+| `LOG_LEVEL`                        | `info`             | Nível do pino (`silent` desliga o log por requisição em testes de carga)                       |
+| `LOG_PRETTY`                       | `false`            | Log legível no terminal; recusado em `production`                                              |
+| `MOCK_DEFAULT_SCENARIO`            | vazio              | Cenário da instância (vazio = resposta normal e imediata)                                      |
+| `MOCK_MAX_DELAY_MS`                | `30000`            | Teto de qualquer espera (`latency`, `ttfb`, `chunk-delay`) e duração do `timeout`              |
+| `MOCK_DEFAULT_COMPLETION_TOKENS`   | `16`               | Tamanho da resposta quando o cenário não traz `tokens` (o `max_tokens` da requisição só corta) |
+| `MOCK_DEFAULT_RETRY_AFTER_SECONDS` | `1`                | `Retry-After` do `429` quando o cenário não traz `retry-after`                                 |
+| `MOCK_EMBEDDING_DIMENSIONS`        | `1536`             | Dimensões do vetor sem `dimensions` na requisição (tamanho do `text-embedding-3-small`)        |
+| `MOCK_MAX_EMBEDDING_DIMENSIONS`    | `3072`             | Teto de `dimensions` aceito na requisição                                                      |
+| `SHUTDOWN_TIMEOUT_MS`              | `8000`             | Prazo do graceful shutdown; estourado, o processo sai com código `1`                           |
 
 ## Cenário: como mandar o mock se comportar mal
 
 Um cenário é uma lista de pares `chave=valor` separados por `;`. O mock não guarda estado entre requisições: cada chamada traz o seu cenário, e testes em paralelo não interferem entre si.
 
-| Chave         | Valor                                        | Efeito                                                                                   |
-| ------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `latency`     | `N` ou `MIN-MAX` (ms)                        | Espera antes da resposta (ou antes dos headers, em stream). Intervalo = sorteio uniforme |
-| `ttfb`        | `N` ou `MIN-MAX` (ms)                        | Só em stream: espera entre os headers `200` e o primeiro chunk                           |
-| `chunk-delay` | `N` (ms)                                     | Só em stream: intervalo entre chunks                                                     |
-| `tokens`      | `N` (até 4096)                               | Tamanho da resposta em tokens, antes do corte por `max_tokens`                           |
-| `error`       | `429`, `500`, `503`, `timeout`, `stream-cut` | Falha a simular                                                                          |
-| `error-rate`  | `0` a `1`                                    | Probabilidade de aplicar o `error` (padrão `1`)                                          |
-| `retry-after` | `N` (s, até 3600)                            | Header `Retry-After` do `429`                                                            |
-| `cut-after`   | `N` (chunks)                                 | Com `stream-cut`: quantos chunks de conteúdo saem antes do corte (padrão `0`)            |
-| `seed`        | inteiro de `0` a `2³²−1`                     | Semente do sorteio de latência em intervalo e de `error-rate` desta requisição           |
+| Chave         | Valor                                        | Efeito                                                                                                                         |
+| ------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `latency`     | `N` ou `MIN-MAX` (ms)                        | Espera antes da resposta (ou antes dos headers, em stream). Intervalo = sorteio uniforme                                       |
+| `ttfb`        | `N` ou `MIN-MAX` (ms)                        | Só em stream: espera entre os headers `200` e o primeiro chunk                                                                 |
+| `chunk-delay` | `N` (ms)                                     | Só em stream: intervalo entre chunks                                                                                           |
+| `tokens`      | `N` (até 4096)                               | Tamanho da resposta em tokens (também em stream), no lugar de `MOCK_DEFAULT_COMPLETION_TOKENS`; `max_tokens` menor ainda corta |
+| `error`       | `429`, `500`, `503`, `timeout`, `stream-cut` | Falha a simular                                                                                                                |
+| `error-rate`  | `0` a `1`                                    | Probabilidade de aplicar o `error` (padrão `1`)                                                                                |
+| `retry-after` | `N` (s, até 3600)                            | Header `Retry-After` do `429`                                                                                                  |
+| `cut-after`   | `N` (chunks)                                 | Com `stream-cut`: quantos chunks de conteúdo saem antes do corte (padrão `0`)                                                  |
+| `seed`        | inteiro de `0` a `2³²−1`                     | Semente dos sorteios desta requisição: `latency` e `ttfb` em intervalo e `error-rate`                                          |
 
 O que cada falha faz:
 

@@ -53,7 +53,7 @@ export function registerChatCompletionsRoute(
       const completion = createChatCompletion(body.data, {
         id: completionId(random),
         createdAtSeconds: Math.floor(clock() / MILLISECONDS_PER_SECOND),
-        defaultCompletionTokens,
+        defaultCompletionTokens: scenario.completionTokensOf(request) ?? defaultCompletionTokens,
       });
       if (body.data.stream !== true) {
         return completion;
