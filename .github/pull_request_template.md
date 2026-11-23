@@ -5,7 +5,7 @@ O corpo é em português. Comentários como este não aparecem no PR renderizado
 Seções que não se aplicam: escreva "Não se aplica" em vez de apagar.
 -->
 
-Implementa o ticket [NN — título](docs/specs/<feature>/tickets/NN-slug.md) do épico [EX — título](docs/specs/<feature>/spec.md).
+Implementa o ticket [NN — título](https://github.com/GuiMarobo/portunus-gateway-setup/blob/main/docs/specs/<feature>/tickets/NN-slug.md) do épico [EX — título](https://github.com/GuiMarobo/portunus-gateway-setup/blob/main/docs/specs/<feature>/spec.md).
 
 ## Resumo
 
