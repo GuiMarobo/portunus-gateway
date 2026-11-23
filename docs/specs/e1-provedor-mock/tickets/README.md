@@ -17,7 +17,7 @@ Tickets do épico [E1 — Provedor mock](../spec.md). Cada ticket é uma fatia v
 | 09  | [Graceful shutdown com esperas simuladas em andamento](./09-graceful-shutdown.md)                | 07            | done            |
 | 10  | [Imagem do mock, Compose `core` e teste de integração](./10-imagem-compose-e-integracao.md)      | 02            | done            |
 | 11  | [Fechamento do épico](./11-fechamento-do-epico.md)                                               | 01–10         | in-review       |
-| 12  | [Achados da review do PR do épico](./12-achados-da-review-do-pr.md)                              | 11            | in-review       |
+| 12  | [Achados da review do PR do épico](./12-achados-da-review-do-pr.md)                              | 11            | done            |
 
 ## Dependências
 

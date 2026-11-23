@@ -10,7 +10,7 @@ Cada critério abaixo traz o cenário que falha hoje e o teste de regressão que
 
 **Bloqueado por:** 11
 
-**Status:** in-review
+**Status:** done
 
 ## Decisões a confirmar antes do ticket
 
