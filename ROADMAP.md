@@ -28,7 +28,7 @@
 | #   | Épico                            | Marco                       | Status       |
 | --- | -------------------------------- | --------------------------- | ------------ |
 | E0  | Fundação do monorepo             | M1 — Fundação               | Concluído    |
-| E1  | Provedor mock                    | M1 — Fundação               | Não iniciado |
+| E1  | Provedor mock                    | M1 — Fundação               | Concluído    |
 | E2  | Tenants, chaves e autenticação   | M2 — Gateway básico         | Não iniciado |
 | E3  | Chat completions síncrono        | M2 — Gateway básico         | Não iniciado |
 | E4  | Aliases, preços e custo          | M2 — Gateway básico         | Não iniciado |

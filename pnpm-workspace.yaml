@@ -9,3 +9,7 @@ allowBuilds:
   ssh2: false
 
 engineStrict: true
+injectWorkspacePackages: true
+
+overrides:
+  '@types/node': 26.6.6

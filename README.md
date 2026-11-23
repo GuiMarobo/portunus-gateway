@@ -2,7 +2,7 @@
 
 Gateway compatível com a API da OpenAI que fica entre as aplicações e os provedores de LLM, concentrando num único ponto o controle de custo, cache, limites, resiliência, observabilidade e avaliação de qualidade. É um projeto de aprendizado: o objetivo é construir, passo a passo e com cada decisão registrada, o tipo de sistema que um dev pleno encontra em produção. O porquê está em [CONTEXT.md](./CONTEXT.md), o como em [ARQUITETURA.md](./ARQUITETURA.md) e o andamento em [ROADMAP.md](./ROADMAP.md).
 
-> **Estado atual (E0 concluído):** monorepo, ferramental de qualidade, CI e um gateway que responde `GET /health` com logs JSON e `x-request-id`. Ainda não há rota de inferência; ela chega no E3.
+> **Estado atual (E1 concluído):** monorepo, ferramental de qualidade, CI, um gateway que responde `GET /health` com logs JSON e `x-request-id`, e o **provedor mock** ([apps/mock-provider](./apps/mock-provider/README.md)): imita a API da OpenAI com respostas determinísticas e falhas sob demanda. Ainda não há rota de inferência no gateway; ela chega no E3.
 
 ## Pré-requisitos
 
@@ -36,7 +36,16 @@ curl -i localhost:3000/health
 
 O terminal do `pnpm dev` mostra uma linha JSON `request completed` com o mesmo `request_id` devolvido no header. Envie `-H "x-request-id: meu-id"` para ver o id ecoado.
 
-- **Porta ocupada:** se 5432 ou 6379 já estiverem em uso, suba o Compose com `POSTGRES_HOST_PORT=55432` ou `REDIS_HOST_PORT=56379`.
+O perfil `core` também sobe o provedor mock na porta 3001. Para vê-lo falar com o SDK oficial da OpenAI, incluindo cada falha simulada (`429`, `500`, `503`, timeout e stream cortado):
+
+```bash
+curl -s localhost:3001/health
+pnpm --filter @portunus/mock-provider demo
+```
+
+Como forçar falhas por requisição (header `x-mock-scenario`, prefixo de caminho ou ambiente) está no [README do mock](./apps/mock-provider/README.md).
+
+- **Porta ocupada:** se 5432, 6379 ou 3001 já estiverem em uso, suba o Compose com `POSTGRES_HOST_PORT=55432`, `REDIS_HOST_PORT=56379` ou `MOCK_HOST_PORT=3101` (e passe a URL à demo: `pnpm --filter @portunus/mock-provider demo http://localhost:3101/v1`).
 - **Encerrar:** `Ctrl+C` no `pnpm dev` dispara o graceful shutdown; `docker compose -f infra/docker-compose.yml --profile core down` derruba a infra (`-v` apaga os volumes).
 
 A lista completa de comandos está na seção 2 do [CLAUDE.md](./CLAUDE.md).
