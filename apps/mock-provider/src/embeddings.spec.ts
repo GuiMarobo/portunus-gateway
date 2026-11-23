@@ -123,6 +123,9 @@ describe('POST /v1/embeddings', () => {
   it.each([
     ['missing', { model: MODEL }],
     ['an empty list', { model: MODEL, input: [] }],
+    ['a list above 2048 items', { model: MODEL, input: Array<string>(2049).fill('a') }],
+    ['an empty string', { model: MODEL, input: '' }],
+    ['a list with an empty string', { model: MODEL, input: ['a', ''] }],
   ])('answers 400 in the OpenAI format when input is %s', async (_case, body) => {
     mock = await startMock();
 
@@ -139,6 +142,19 @@ describe('POST /v1/embeddings', () => {
         },
       },
     });
+  });
+
+  it('answers one embedding per item to a list of exactly 2048 items', async () => {
+    mock = await startMock();
+
+    const response = await postEmbeddings({
+      model: MODEL,
+      input: Array<string>(2048).fill('a'),
+      dimensions: 1,
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(2048);
   });
 
   describe('scenario', () => {

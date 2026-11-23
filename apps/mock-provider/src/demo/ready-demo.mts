@@ -13,8 +13,6 @@ const FINISH_AND_USAGE_CHUNK_COUNT = 2;
 const NORM_DECIMALS = 6;
 const UNIT_NORM = 1;
 const NORM_TOLERANCE = 1e-4;
-const CUT_ERROR_NAME = 'TypeError';
-const CUT_ERROR_MESSAGE = 'terminated';
 const EXIT_FAILURE = 1;
 
 interface ExpectedApiError {
@@ -135,9 +133,11 @@ async function streamCut(client: OpenAI): Promise<DemoResult> {
     withScenario(`error=stream-cut;cut-after=${String(CUT_AFTER_CHUNKS)}`),
   );
   let chunks = 0;
+  let finishReason: string | null = null;
   try {
     for await (const chunk of stream) {
       chunks += chunk.choices.length;
+      finishReason = chunk.choices[0]?.finish_reason ?? finishReason;
     }
     return {
       name: 'stream cut',
@@ -147,12 +147,8 @@ async function streamCut(client: OpenAI): Promise<DemoResult> {
   } catch (error) {
     return {
       name: 'stream cut',
-      ok:
-        chunks === ROLE_CHUNK_COUNT + CUT_AFTER_CHUNKS &&
-        error instanceof Error &&
-        error.name === CUT_ERROR_NAME &&
-        error.message === CUT_ERROR_MESSAGE,
-      detail: `${errorName(error)} after ${String(chunks)} chunks (role + ${String(CUT_AFTER_CHUNKS)} content), no finish_reason nor [DONE]`,
+      ok: chunks === ROLE_CHUNK_COUNT + CUT_AFTER_CHUNKS && finishReason === null,
+      detail: `${errorName(error)} after ${String(chunks)} chunks (role + ${String(CUT_AFTER_CHUNKS)} content), finish_reason=${String(finishReason)}, no [DONE]`,
     };
   }
 }

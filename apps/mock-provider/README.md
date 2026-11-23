@@ -11,7 +11,7 @@ Rotas:
 | `GET /health`               | Liveness (`{"status":"ok"}`), usado pelo healthcheck do Compose |
 | `/scenarios/{cenário}/v1/…` | As mesmas rotas `/v1`, com o cenário no caminho (ver abaixo)    |
 
-Toda rota `/v1` exige `Authorization: Bearer <qualquer token não vazio>`; o valor não é validado. Sem o header, a resposta é `401 invalid_api_key`. Erros saem sempre no formato da OpenAI (`{"error":{"message","type","param","code"}}`).
+Toda rota `/v1` exige `Authorization: Bearer <qualquer token não vazio>` (o esquema aceita qualquer caixa); o valor não é validado. Sem o header, a resposta é `401 invalid_api_key`. Erros saem sempre no formato da OpenAI (`{"error":{"message","type","param","code"}}`). O corpo é só JSON, até 8 MiB (`413` acima, `415` com outro `content-type`); em embeddings, `input` aceita até 2048 itens, sem string vazia. Toda resposta traz `x-request-id` (`req_` + 32 hex).
 
 ## Como rodar
 
@@ -47,7 +47,7 @@ Validadas com Zod na subida (`loadConfig` de `@portunus/common`). Inválidas, o 
 | `HOST` / `PORT`                    | `0.0.0.0` / `3001` | Endereço de escuta. A porta difere da do gateway (`3000`) para os dois rodarem juntos          |
 | `LOG_LEVEL`                        | `info`             | Nível do pino (`silent` desliga o log por requisição em testes de carga)                       |
 | `LOG_PRETTY`                       | `false`            | Log legível no terminal; recusado em `production`                                              |
-| `MOCK_DEFAULT_SCENARIO`            | vazio              | Cenário da instância (vazio = resposta normal e imediata)                                      |
+| `MOCK_DEFAULT_SCENARIO`            | vazio              | Cenário da instância (vazio = resposta normal e imediata; `error=stream-cut` é recusado)       |
 | `MOCK_MAX_DELAY_MS`                | `30000`            | Teto de qualquer espera (`latency`, `ttfb`, `chunk-delay`) e duração do `timeout`              |
 | `MOCK_DEFAULT_COMPLETION_TOKENS`   | `16`               | Tamanho da resposta quando o cenário não traz `tokens` (o `max_tokens` da requisição só corta) |
 | `MOCK_DEFAULT_RETRY_AFTER_SECONDS` | `1`                | `Retry-After` do `429` quando o cenário não traz `retry-after`                                 |

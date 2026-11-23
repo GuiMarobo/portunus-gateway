@@ -92,6 +92,17 @@ describe('scenario sources', () => {
       expect(response.status).toBe(status);
     });
 
+    it.each(['error=stream-cut', 'error=stream-cut;error-rate=0.1'])(
+      'refuses to build the app when the default is %j, since it only applies to streaming',
+      async (defaultScenario) => {
+        const building = startMock({ MOCK_DEFAULT_SCENARIO: defaultScenario });
+
+        await expect(building).rejects.toThrow(
+          /^ {2}MOCK_DEFAULT_SCENARIO → error=stream-cut only applies per request/m,
+        );
+      },
+    );
+
     it('leaves GET /health untouched', async () => {
       mock = await startMock({ MOCK_DEFAULT_SCENARIO: 'error=503' });
 

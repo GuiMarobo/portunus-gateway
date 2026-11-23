@@ -45,38 +45,43 @@ export function registerChatCompletionsRoute(
   { defaultCompletionTokens, random, clock, scenario, shutdown }: ChatCompletionsRouteDependencies,
 ): void {
   CHAT_COMPLETIONS_PATHS.forEach((path) => {
-    server.post(path, { preHandler: scenario.apply }, async (request, reply) => {
-      const body = chatCompletionBodySchema.safeParse(request.body);
-      if (!body.success) {
-        return sendInvalidParameter(reply, body.error);
-      }
-      const completion = createChatCompletion(body.data, {
-        id: completionId(random),
-        createdAtSeconds: Math.floor(clock() / MILLISECONDS_PER_SECOND),
-        defaultCompletionTokens: scenario.completionTokensOf(request) ?? defaultCompletionTokens,
-      });
-      if (body.data.stream !== true) {
-        return completion;
-      }
-      const chunks = chatCompletionChunks(completion, {
-        includeUsage: body.data.stream_options?.include_usage === true,
-      });
-      const { cutAfterContentChunks, ...pacing } = scenario.streamPlanOf(request);
-      reply.hijack();
-      if (cutAfterContentChunks === undefined) {
-        await sendServerSentEvents(reply.raw, chunks, pacing, shutdown);
+    server.post(
+      path,
+      { preHandler: scenario.preHandler('when-requested') },
+      async (request, reply) => {
+        const body = chatCompletionBodySchema.safeParse(request.body);
+        if (!body.success) {
+          return sendInvalidParameter(reply, body.error);
+        }
+        const plan = scenario.planOf(request);
+        const completion = createChatCompletion(body.data, {
+          id: completionId(random),
+          createdAtSeconds: Math.floor(clock() / MILLISECONDS_PER_SECOND),
+          defaultCompletionTokens: plan.completionTokens ?? defaultCompletionTokens,
+        });
+        if (body.data.stream !== true) {
+          return completion;
+        }
+        const chunks = chatCompletionChunks(completion, {
+          includeUsage: body.data.stream_options?.include_usage === true,
+        });
+        const { cutAfterContentChunks, ...pacing } = plan.stream;
+        reply.hijack();
+        if (cutAfterContentChunks === undefined) {
+          await sendServerSentEvents(reply.raw, chunks, pacing, shutdown);
+          return reply;
+        }
+        const contentChunks = Math.min(cutAfterContentChunks, completion.usage.completion_tokens);
+        await sendServerSentEvents(
+          reply.raw,
+          chunks.slice(0, ROLE_CHUNK_COUNT + contentChunks),
+          pacing,
+          shutdown,
+          'cut',
+        );
         return reply;
-      }
-      const contentChunks = Math.min(cutAfterContentChunks, completion.usage.completion_tokens);
-      await sendServerSentEvents(
-        reply.raw,
-        chunks.slice(0, ROLE_CHUNK_COUNT + contentChunks),
-        pacing,
-        shutdown,
-        'cut',
-      );
-      return reply;
-    });
+      },
+    );
   });
 }
 

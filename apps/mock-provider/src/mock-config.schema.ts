@@ -34,6 +34,8 @@ const DEFAULT_SHUTDOWN_TIMEOUT_MS = 8_000;
 const MIN_SHUTDOWN_TIMEOUT_MS = 1;
 const MAX_SHUTDOWN_TIMEOUT_MS = 300_000;
 const PROBLEM_SEPARATOR = '; ';
+const STREAM_CUT_AS_DEFAULT_PROBLEM =
+  'error=stream-cut only applies per request (x-mock-scenario header or /scenarios path), since it would fail every non-streaming call';
 
 const embeddingDimensions = integerFromEnv(
   z.number().min(MIN_EMBEDDING_DIMENSIONS).max(MAX_EMBEDDING_DIMENSIONS),
@@ -81,6 +83,14 @@ export const mockConfigSchema = z
         code: 'custom',
         path: ['MOCK_DEFAULT_SCENARIO'],
         message: defaultScenario.problems.join(PROBLEM_SEPARATOR),
+      });
+      return z.NEVER;
+    }
+    if (defaultScenario.scenario.failure?.kind === 'stream-cut') {
+      context.addIssue({
+        code: 'custom',
+        path: ['MOCK_DEFAULT_SCENARIO'],
+        message: STREAM_CUT_AS_DEFAULT_PROBLEM,
       });
       return z.NEVER;
     }

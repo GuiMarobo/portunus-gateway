@@ -129,6 +129,22 @@ describe('graceful shutdown', () => {
     expect(logs.entries().filter((entry) => entry.level === WARN_LEVEL)).toEqual([]);
   });
 
+  it('serves more than 10 simultaneous simulated waits without a listener leak warning', async () => {
+    const warnings: Error[] = [];
+    const collectWarning = (warning: Error) => warnings.push(warning);
+    process.on('warning', collectWarning);
+    mock = await startMock();
+
+    const responses = await Promise.all(
+      Array.from({ length: 11 }, () => post(BASE_REQUEST, { 'x-mock-scenario': 'latency=200' })),
+    );
+    await nextTurn();
+    process.off('warning', collectWarning);
+
+    expect(responses.map((response) => response.status)).toEqual(Array<number>(11).fill(200));
+    expect(warnings.map((warning) => warning.name)).toEqual([]);
+  });
+
   it('refuses new connections once the app is closed', async () => {
     mock = await startMock();
 

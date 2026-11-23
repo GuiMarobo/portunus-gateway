@@ -7,7 +7,11 @@ import {
 import type { LogDestination } from './mock-app.factory';
 import type { MockConfig } from './mock-config';
 
-const CREDENTIAL_HEADER_PATHS = ['req.headers.authorization'];
+const CREDENTIAL_HEADER_PATHS = [
+  'req.headers.authorization',
+  'req.headers["x-api-key"]',
+  'req.headers.cookie',
+];
 const QUERY_STRING_SEPARATOR = '?';
 const COMPLETED_REQUEST_MESSAGE = 'request completed';
 const ERRORED_REQUEST_MESSAGE = 'request errored';

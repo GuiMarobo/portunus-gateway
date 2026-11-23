@@ -163,7 +163,7 @@ Um único formato, usado igual nas três origens: pares `chave=valor` separados 
 
 - **Origens e precedência:** header `x-mock-scenario` > prefixo de caminho `/scenarios/{cenário}/v1/...` > variável `MOCK_DEFAULT_SCENARIO`. A precedência é por cenário inteiro, não chave a chave, para o resultado ser fácil de prever.
 - **Cenário no caminho:** a gramática é a mesma do header. `;` e `=` podem ir crus (`/scenarios/error=429;retry-after=4/v1`): o Fastify 5 vem com `useSemicolonDelimiter: false` e não corta a URL no `;`. A forma escapada (`/scenarios/error%3D429%3Bretry-after%3D4/v1`) também funciona, porque o roteador decodifica o parâmetro. O segmento aceita até 1024 caracteres (o padrão do Fastify, 100, não comporta um cenário com todas as chaves). Cenário inválido no caminho → `400` com `error.param = "/scenarios/{scenario}"`.
-- **Cenário padrão:** `MOCK_DEFAULT_SCENARIO` é validado na subida, contra o mesmo teto `MOCK_MAX_DELAY_MS`. Inválido, o mock não sobe e o erro de configuração lista o problema sem ecoar o valor.
+- **Cenário padrão:** `MOCK_DEFAULT_SCENARIO` é validado na subida, contra o mesmo teto `MOCK_MAX_DELAY_MS`. Inválido, o mock não sobe e o erro de configuração lista o problema sem ecoar o valor. `error=stream-cut` também é recusado ali (ticket 12): como padrão da instância, ele faria falhar com `400` toda chamada sem stream e toda embedding. Por requisição (header ou caminho), continua valendo o `400` sem stream.
 - **Validação:** chave desconhecida, valor inválido, intervalo invertido ou valor acima do teto configurado → `400` no formato da OpenAI com `error.param = "x-mock-scenario"` (ou o caminho), listando o problema.
 - **Sem estado entre requisições:** nada de "falhe as 3 primeiras e depois funcione". Isso exigiria estado compartilhado e quebraria o isolamento entre testes paralelos. Se o E7 precisar, ele decide como (ver Notas).
 
@@ -191,6 +191,7 @@ Um único formato, usado igual nas três origens: pares `chave=valor` separados 
 
 - Vetor gerado por um PRNG semeado pelo hash de (`model`, texto), com componentes em [-1, 1], depois normalizado para norma 1. Geração em O(d) por entrada, sem alocação além do próprio vetor.
 - Dimensões: padrão por variável de ambiente (1536, o tamanho de `text-embedding-3-small`) e `dimensions` da requisição quando presente, com teto.
+- `input`: string ou lista de 1 a 2048 strings (`MAX_EMBEDDING_INPUTS`, o teto da OpenAI), sem string vazia; fora disso, `400` com `param: "input"`. O teto também limita o trabalho síncrono do PRNG por requisição (ticket 12).
 - `encoding_format`: `float` (lista de números) e `base64` (Float32 little-endian em base64, que é o que o SDK decodifica).
 - **Sem semântica:** paráfrases geram vetores sem relação. A decisão sobre como testar o cache semântico com significado continua em aberto para o E10.
 
@@ -204,7 +205,8 @@ Um único formato, usado igual nas três origens: pares `chave=valor` separados 
 
 ### Autenticação
 
-- Exige `Authorization: Bearer <token não vazio>`; não valida o valor. Sem header → `401` com `type: "invalid_request_error"` e `code: "invalid_api_key"`.
+- Exige `Authorization: Bearer <token não vazio>`, com o esquema sem distinção de maiúsculas; não valida o valor. Sem header → `401` com `type: "invalid_request_error"` e `code: "invalid_api_key"`.
+- Corpo: só `application/json`, até 8 MiB (`MAX_REQUEST_BODY_BYTES`). Cada recusa tem mensagem própria no formato da OpenAI: JSON inválido `400`, corpo grande demais `413`, outro `content-type` `415` (ticket 12).
 
 ### Configuração (variáveis do mock)
 
@@ -212,7 +214,7 @@ Um único formato, usado igual nas três origens: pares `chave=valor` separados 
 
 ### Logs e shutdown
 
-- Logger embutido do Fastify (pino) em JSON, com o `request_id` próprio do Fastify. Serializers sem corpo; `authorization` redigido (o mock recebe a chave de provedor que o gateway envia).
+- Logger embutido do Fastify (pino) em JSON, com o `request_id` próprio do Fastify, no formato da OpenAI (`req_` + 32 hex) e devolvido no header `x-request-id` (ticket 12). Serializers sem corpo; `authorization`, `x-api-key` e `cookie` redigidos (o mock recebe a chave de provedor que o gateway envia).
 - Shutdown: no SIGTERM/SIGINT o servidor para de aceitar conexões, **encerra os streams e timeouts simulados em andamento** (não faz sentido esperar um `timeout` de 60 s) e sai dentro de `SHUTDOWN_TIMEOUT_MS`.
 
 ### Infra
@@ -327,7 +329,7 @@ Escrito no ticket [11](./tickets/11-fechamento-do-epico.md). A saída da demo nu
 - **Embeddings** de norma 1 em O(d), `dimensions` com teto, `float` e `base64` (o padrão do SDK).
 - **Operação:** configuração validada que derruba o processo sem ecoar valores, log JSON sem corpo e com `authorization` redigido, graceful shutdown que interrompe esperas e streams simulados.
 - **Infra:** primeiro Dockerfile do repositório (multi-stage, `pnpm deploy`, Node 22 slim, usuário não root), serviço `mock-provider` no perfil `core` com healthcheck em Node e porta `MOCK_HOST_PORT`.
-- **Testes:** 262 unitários no monorepo (o mock testado pelo app escutando numa porta efêmera, com o SDK oficial e `fetch`) e um teste de integração que constrói a imagem e chama o chat pelo SDK.
+- **Testes:** unitários em `pnpm test` (o mock testado pelo app escutando numa porta efêmera, com o SDK oficial e `fetch`) e um teste de integração em `pnpm test:int` que constrói a imagem e chama o chat pelo SDK. A contagem fica no resumo do Vitest, não aqui, para não envelhecer.
 - **Demo de pronto:** `pnpm --filter @portunus/mock-provider demo` cobre os 8 casos do critério de pronto com o SDK oficial.
 
 ### O que aprendemos
@@ -337,6 +339,8 @@ Escrito no ticket [11](./tickets/11-fechamento-do-epico.md). A saída da demo nu
 - **O SDK esconde comportamento:** faz retry sozinho em `429`/`5xx` (por isso `maxRetries: 0`) e pede embeddings em `base64` sem avisar.
 - **Canonicalizar antes do hash:** sem ordenar as chaves, o determinismo seria falso; é a mesma armadilha da chave do cache exato (E9).
 - **Toda espera é um recurso:** cada `setTimeout` precisa ser cancelado no `close` e no shutdown, senão o mock acumula timers sob carga e um `timeout` segura o fechamento do processo.
+- **Achado de review é hipótese até o teste ficar vermelho:** o `MaxListenersExceededWarning` com mais de 10 esperas (review do PR, m4) não acontece, porque o Node não aplica esse aviso aos listeners de um `AbortSignal`. O teste ficou como regressão; a correção não entrou.
+- **O Fastify 5 aceita `text/plain` por padrão:** sem remover esse parser, um `content-type` errado virava um `400` de parâmetro em vez de `415`.
 - **Sorteios com `seed` precisam ser estáveis:** uma `latency` fixa não pode consumir um sorteio e deslocar o `error-rate` (achado da review 04).
 - **Genéricos + `instanceof` viram `any`:** `error instanceof APIError` estreita para `APIError<any, any, any>`; um type guard com o tipo declarado resolve sem cast.
 
@@ -365,3 +369,6 @@ Escrito no ticket [11](./tickets/11-fechamento-do-epico.md). A saída da demo nu
 - **Cenário no caminho acima de 1024 caracteres** responde `404`, não `400` (review 05 m2).
 - **`pino-pretty` como devDependency** importado sob demanda (review 01 m2): funciona porque `LOG_PRETTY` é recusado em produção; ligar `LOG_PRETTY=true` na imagem quebraria.
 - **Testes sensíveis a tempo e a timers globais** (reviews 06 e 07): candidatos a oscilar na CI.
+- **Headers `x-ratelimit-*` no `429` do mock** (review do PR, n3): vão para o E3, junto do rate limit do gateway. O `x-request-id` já entrou no ticket 12.
+- **`fastify` do gateway em `>=5.12.5`** (review do PR, m2): chega pelo `@nestjs/platform-fastify` e tem advisories `high`; o mock já subiu para `5.12.8` no ticket 12. Ticket próprio fora do E1.
+- **`413` pelo socket:** o Fastify recusa pelo `content-length` e fecha a conexão enquanto o cliente ainda envia, então um cliente HTTP pode ver `ECONNRESET` em vez do `413`. O teste do formato usa `inject`.

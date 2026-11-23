@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { sendOpenAiError } from './openai-error';
 
-const BEARER_PREFIX = 'Bearer ';
+const BEARER_WITH_TOKEN = /^bearer\s+\S/i;
 const UNAUTHORIZED_STATUS = 401;
 const MISSING_API_KEY_ERROR = {
   message: 'You did not provide an API key. Send it in the Authorization header as Bearer <key>.',
@@ -25,8 +25,5 @@ export function requireBearerAuthorization(
 }
 
 function hasBearerToken(authorization: string | undefined): boolean {
-  return (
-    authorization?.startsWith(BEARER_PREFIX) === true &&
-    authorization.slice(BEARER_PREFIX.length).trim().length > 0
-  );
+  return authorization !== undefined && BEARER_WITH_TOKEN.test(authorization);
 }

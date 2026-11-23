@@ -18,7 +18,8 @@ const SERVICE_UNAVAILABLE_STATUS = 503;
 const RETRY_AFTER_HEADER = 'retry-after';
 const NO_DELAY_MS = 0;
 const DEFAULT_CUT_AFTER_CHUNKS = 0;
-const IMMEDIATE_STREAM: StreamPlan = { ttfbMs: NO_DELAY_MS, chunkDelayMs: NO_DELAY_MS };
+const MISSING_PLAN_MESSAGE =
+  'No scenario plan for this request: register the route with the scenario pre-handler.';
 
 export interface ScenarioPreHandlerDependencies {
   readonly maxDelayMs: number;
@@ -48,11 +49,18 @@ export interface StreamPlan extends StreamPacing {
   readonly cutAfterContentChunks?: number | undefined;
 }
 
+export interface ScenarioPlan {
+  readonly stream: StreamPlan;
+  readonly completionTokens: number | undefined;
+}
+
+type StreamCutFailure = Extract<Failure, { readonly kind: 'stream-cut' }>;
+
+export type StreamingSupport = 'when-requested' | 'never';
+
 export interface ScenarioHandling {
-  readonly apply: ScenarioPreHandler;
-  readonly applyWithoutStreaming: ScenarioPreHandler;
-  streamPlanOf(request: FastifyRequest): StreamPlan;
-  completionTokensOf(request: FastifyRequest): number | undefined;
+  preHandler(streaming: StreamingSupport): ScenarioPreHandler;
+  planOf(request: FastifyRequest): ScenarioPlan;
 }
 
 export function scenarioHandling({
@@ -62,18 +70,16 @@ export function scenarioHandling({
   random,
   shutdown,
 }: ScenarioPreHandlerDependencies): ScenarioHandling {
-  const streamPlanByRequest = new WeakMap<FastifyRequest, StreamPlan>();
-  const completionTokensByRequest = new WeakMap<FastifyRequest, number>();
-  const preHandlerFor =
-    (isStreaming: (request: FastifyRequest) => boolean): ScenarioPreHandler =>
-    async (request, reply) => {
+  const planByRequest = new WeakMap<FastifyRequest, ScenarioPlan>();
+  return {
+    preHandler: (streaming) => async (request, reply) => {
       const resolved = resolveScenario(request, defaultScenario, maxDelayMs);
       if (!resolved.ok) {
         await sendInvalidScenario(reply, resolved.source, resolved.problems);
         return;
       }
       const { scenario } = resolved;
-      if (scenario.failure?.kind === 'stream-cut' && !isStreaming(request)) {
+      if (scenario.failure?.kind === 'stream-cut' && !STREAMING_CHECKS[streaming](request)) {
         await sendStreamCutWithoutStream(reply);
         return;
       }
@@ -99,23 +105,33 @@ export function scenarioHandling({
         await sendSimulatedFailure(reply, firedFailure, defaultRetryAfterSeconds);
         return;
       }
-      if (scenario.tokens !== undefined) {
-        completionTokensByRequest.set(request, scenario.tokens);
+      planByRequest.set(request, planFrom(scenario, firedFailure, draw));
+    },
+    planOf: (request) => {
+      const plan = planByRequest.get(request);
+      if (plan === undefined) {
+        throw new Error(MISSING_PLAN_MESSAGE);
       }
-      streamPlanByRequest.set(request, {
-        ttfbMs: scenario.ttfb === undefined ? NO_DELAY_MS : pickDelayMs(scenario.ttfb, draw),
-        chunkDelayMs: scenario.chunkDelayMs ?? NO_DELAY_MS,
-        cutAfterContentChunks:
-          firedFailure === undefined
-            ? undefined
-            : (firedFailure.cutAfterChunks ?? DEFAULT_CUT_AFTER_CHUNKS),
-      });
-    };
+      return plan;
+    },
+  };
+}
+
+function planFrom(
+  scenario: Scenario,
+  firedStreamCut: StreamCutFailure | undefined,
+  draw: RandomSource,
+): ScenarioPlan {
   return {
-    apply: preHandlerFor(isStreamingRequest),
-    applyWithoutStreaming: preHandlerFor(neverStreaming),
-    streamPlanOf: (request) => streamPlanByRequest.get(request) ?? IMMEDIATE_STREAM,
-    completionTokensOf: (request) => completionTokensByRequest.get(request),
+    completionTokens: scenario.tokens,
+    stream: {
+      ttfbMs: scenario.ttfb === undefined ? NO_DELAY_MS : pickDelayMs(scenario.ttfb, draw),
+      chunkDelayMs: scenario.chunkDelayMs ?? NO_DELAY_MS,
+      cutAfterContentChunks:
+        firedStreamCut === undefined
+          ? undefined
+          : (firedStreamCut.cutAfterChunks ?? DEFAULT_CUT_AFTER_CHUNKS),
+    },
   };
 }
 
@@ -201,13 +217,10 @@ async function sendSimulatedFailure(
   }
 }
 
-function neverStreaming(): boolean {
-  return false;
-}
-
-function isStreamingRequest(request: FastifyRequest): boolean {
-  return streamingBodySchema.safeParse(request.body).success;
-}
+const STREAMING_CHECKS: Readonly<Record<StreamingSupport, (request: FastifyRequest) => boolean>> = {
+  'when-requested': (request) => streamingBodySchema.safeParse(request.body).success,
+  never: () => false,
+};
 
 function sendStreamCutWithoutStream(reply: FastifyReply): FastifyReply {
   return sendOpenAiError(reply, BAD_REQUEST_STATUS, {

@@ -8,11 +8,14 @@ import { enableGracefulShutdown, type ExitProcess } from './graceful-shutdown';
 import { resolveLogDestination } from './log-destination';
 
 import { loadMockConfig, type MockConfig } from './mock-config';
+import { MAX_REQUEST_BODY_BYTES } from './mock-limits';
+import { exposeRequestId, openAiRequestId } from './request-id';
 import { loggerOptions, SingleLineRequestLogController } from './request-logging';
 import { scenarioHandling } from './scenario/scenario-pre-handler';
 
 const HEALTH_PATH = '/health';
 const MAX_SCENARIO_PATH_SEGMENT_LENGTH = 1024;
+const PLAIN_TEXT_CONTENT_TYPE = 'text/plain';
 
 export type RandomSource = () => number;
 export type Clock = () => number;
@@ -46,12 +49,16 @@ export async function createMockApp({
     logger: loggerOptions(config, await resolveLogDestination(config, logDestination)),
     logController: new SingleLineRequestLogController(),
     routerOptions: { maxParamLength: MAX_SCENARIO_PATH_SEGMENT_LENGTH },
+    bodyLimit: MAX_REQUEST_BODY_BYTES,
+    genReqId: openAiRequestId,
   });
+  server.removeContentTypeParser(PLAIN_TEXT_CONTENT_TYPE);
   const shutdown = enableGracefulShutdown(server, {
     timeoutMs: config.SHUTDOWN_TIMEOUT_MS,
     exitProcess,
   });
   answerErrorsInOpenAiFormat(server);
+  exposeRequestId(server);
   requireBearerAuthorization(server, [HEALTH_PATH]);
   server.get(HEALTH_PATH, () => ({ status: 'ok' }));
   const scenario = scenarioHandling({

@@ -48,6 +48,17 @@ describe('errors in the OpenAI format', () => {
       });
     });
 
+    it.each(['bearer test-key', 'BEARER test-key'])(
+      'accepts the bearer scheme in any case (%s)',
+      async (authorization) => {
+        mock = await startMock();
+
+        const response = await post(CHAT_COMPLETIONS_PATH, { authorization }, VALID_BODY);
+
+        expect(response.status).toBe(200);
+      },
+    );
+
     it('makes the SDK throw AuthenticationError', async () => {
       mock = await startMock();
       const client = new OpenAI({
@@ -107,26 +118,61 @@ describe('errors in the OpenAI format', () => {
       expect(response.status).toBe(200);
     });
 
-    it('answers 400 in the OpenAI format to a body that is not valid JSON', async () => {
+    it.each<[string, string, string, number, string]>([
+      [
+        'a body that is not valid JSON',
+        'application/json',
+        '{"model": ',
+        400,
+        'We could not parse the JSON body of your request. Send a valid JSON object.',
+      ],
+      [
+        'a body above 8 MiB',
+        'application/json',
+        'x'.repeat(8 * 1024 * 1024 + 1),
+        413,
+        'Your request body is above the 8 MiB the mock accepts.',
+      ],
+      [
+        'a body that is not JSON',
+        'text/plain',
+        VALID_BODY,
+        415,
+        'Unsupported content-type. Send the body as JSON with content-type application/json.',
+      ],
+    ])(
+      'answers %s in the OpenAI format with its own message',
+      async (_case, contentType, body, status, message) => {
+        mock = await startMock();
+
+        const response = await mock.app.server.inject({
+          method: 'POST',
+          url: CHAT_COMPLETIONS_PATH,
+          headers: { authorization: 'Bearer test-key', 'content-type': contentType },
+          body,
+        });
+
+        expect({ status: response.statusCode, body: response.json<unknown>() }).toEqual({
+          status,
+          body: { error: { message, type: 'invalid_request_error', param: null, code: null } },
+        });
+      },
+    );
+
+    it('accepts a body above the 1 MiB Fastify default', async () => {
       mock = await startMock();
+      const twoMebibyteContent = 'a'.repeat(2 * 1024 * 1024);
 
       const response = await post(
         CHAT_COMPLETIONS_PATH,
         { authorization: 'Bearer test-key' },
-        '{"model": ',
+        JSON.stringify({
+          model: 'any-model-name',
+          messages: [{ role: 'user', content: twoMebibyteContent }],
+        }),
       );
 
-      expect(response).toEqual({
-        status: 400,
-        body: {
-          error: {
-            message: expect.any(String) as unknown,
-            type: 'invalid_request_error',
-            param: null,
-            code: null,
-          },
-        },
-      });
+      expect(response.status).toBe(200);
     });
   });
 

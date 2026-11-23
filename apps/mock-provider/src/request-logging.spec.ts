@@ -45,6 +45,19 @@ describe('request logging', () => {
     expect(logs.lines().filter((line) => line.includes('secret'))).toEqual([]);
   });
 
+  it('redacts the x-api-key and cookie headers too', async () => {
+    await fetch(`${mock.baseUrl}/health`, {
+      headers: { 'x-api-key': 'sk-api-key-secret-marker', cookie: 'session=cookie-secret-marker' },
+    });
+    await logs.waitForLine(isCompletedRequestLine);
+
+    const completed = logs.entries().find((entry) => 'req' in entry);
+    expect(completed).toMatchObject({
+      req: { headers: { 'x-api-key': REDACTED, cookie: REDACTED } },
+    });
+    expect(logs.lines().filter((line) => line.includes('secret'))).toEqual([]);
+  });
+
   it('never writes the request body to any log line', async () => {
     await fetch(`${mock.baseUrl}/health`, {
       method: 'POST',

@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@portunus/common": "workspace:*",
-    "fastify": "5.11.3",
+    "fastify": "5.12.8",
     "zod": "4.6.7"
   },
   "devDependencies": {
