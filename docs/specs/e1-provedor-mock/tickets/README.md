@@ -18,6 +18,7 @@ Tickets do épico [E1 — Provedor mock](../spec.md). Cada ticket é uma fatia v
 | 10  | [Imagem do mock, Compose `core` e teste de integração](./10-imagem-compose-e-integracao.md)      | 02            | done   |
 | 11  | [Fechamento do épico](./11-fechamento-do-epico.md)                                               | 01–10         | done   |
 | 12  | [Achados da review do PR do épico](./12-achados-da-review-do-pr.md)                              | 11            | done   |
+| 13  | [Testes de pacing do SSE estáveis](./13-testes-de-pacing-estaveis.md)                            | 12            | done   |
 
 ## Dependências
 
@@ -37,6 +38,7 @@ flowchart LR
     T09 --> T11
     T10 --> T11
     T11 --> T12[12 Achados da review do PR]
+    T12 --> T13[13 Pacing estável]
 ```
 
 O 10 pode ser feito em paralelo a partir do 02. Depois do 04, existem três trilhas independentes: **05**, **06 → 07 → 09** e **08**. A ordem numérica é a recomendada.

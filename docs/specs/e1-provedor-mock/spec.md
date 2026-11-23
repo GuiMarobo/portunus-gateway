@@ -368,7 +368,7 @@ Escrito no ticket [11](./tickets/11-fechamento-do-epico.md). A saída da demo nu
 - **Header ou segmento de cenário vazio** (review 05 m1): decidir se conta como ausente; hoje suprime o cenário de menor prioridade.
 - **Cenário no caminho acima de 1024 caracteres** responde `404`, não `400` (review 05 m2).
 - **`pino-pretty` como devDependency** importado sob demanda (review 01 m2): funciona porque `LOG_PRETTY` é recusado em produção; ligar `LOG_PRETTY=true` na imagem quebraria.
-- **Testes sensíveis a tempo e a timers globais** (reviews 06 e 07): candidatos a oscilar na CI.
+- **Testes sensíveis a tempo e a timers globais** (reviews 06 e 07): candidatos a oscilar na CI. Os dois de pacing do SSE já oscilaram e foram corrigidos no ticket 13: medem a partir de quando a requisição sai, não de quando os headers chegam. Os demais seguem candidatos.
 - **Headers `x-ratelimit-*` no `429` do mock** (review do PR, n3): vão para o E3, junto do rate limit do gateway. O `x-request-id` já entrou no ticket 12.
 - **`fastify` do gateway em `>=5.12.5`** (review do PR, m2): chega pelo `@nestjs/platform-fastify` e tem advisories `high`; o mock já subiu para `5.12.8` no ticket 12. Ticket próprio fora do E1.
 - **`413` pelo socket:** o Fastify recusa pelo `content-length` e fecha a conexão enquanto o cliente ainda envia, então um cliente HTTP pode ver `ECONNRESET` em vez do `413`. O teste do formato usa `inject`.
