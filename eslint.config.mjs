@@ -18,7 +18,7 @@ const OUTER_LAYERS_OF_DOMAIN = '(^|/)(application|infrastructure|presentation)(/
 const OUTER_LAYERS_OF_APPLICATION = '(^|/)(infrastructure|presentation)(/|$)';
 
 export default defineConfig(
-  globalIgnores(['**/dist/', '**/coverage/', '.scratch/']),
+  globalIgnores(['**/dist/', '**/coverage/']),
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   {
