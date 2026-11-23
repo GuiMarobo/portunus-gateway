@@ -23,5 +23,6 @@ tmp/
 .DS_Store
 Thumbs.db
 
-# Agent scaffolding (symlink to ../portunus-gateway-setup)
+# Agent scaffolding (portunus-gateway-setup clone and its CLAUDE.md symlink)
+.setup/
 CLAUDE.md
